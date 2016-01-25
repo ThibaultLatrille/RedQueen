@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-N = 2 * 10 ** 5  # population size
+N = 2 * 10 ** 4  # population size
 K = 10  # The initial number of alleles
 t_max = 50000  # Number of steps
 
