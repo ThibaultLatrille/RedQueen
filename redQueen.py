@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import time
 import os
 
+
 # The fitness function, given the erosion of the hotspots
 def w(y):
     return y ** 4 / (y ** 4 + 0.5 ** 4)
@@ -11,28 +12,28 @@ def w(y):
 class Simulation(object):
     def __init__(self, mutation_rate_prdm9=1.0 * 10 ** -5,
                  erosion_rate_hotspot=1.0 * 10 ** -3,
-                 population_size=2 * 10 ** 4,
-                 t_max=30000,
+                 population_size=10 ** 4,
                  neutral=False):
         initial_number_of_alleles = 10
+        self.number_of_steps = 10000  # Number of steps at which we make computations
+        self.t_max = 100 * population_size  # Number of generations
         self.mutation_rate_prdm9 = mutation_rate_prdm9  # The rate at which new allele for PRDM9 are created
         self.erosion_rate_hotspot = erosion_rate_hotspot  # The rate at which the hotspots are eroded
         self.population_size = float(population_size)  # population size
-        self.t_max = t_max  # Number of steps
         self.neutral = neutral  # If the fitness function is neutral
 
         self.prdm9_polymorphism = np.ones(initial_number_of_alleles) * self.population_size / initial_number_of_alleles
         self.hotspots_erosion = np.ones(initial_number_of_alleles)
         self.prdm9_longevity = np.zeros(initial_number_of_alleles)
 
-        self.prdm9_fequencies_mean = np.zeros(t_max)
-        self.prdm9_longevity_mean = np.zeros(t_max)
-        self.hotspots_erosion_mean = np.zeros(t_max)
+        self.prdm9_frequencies_mean = np.zeros(self.number_of_steps)
+        self.prdm9_longevity_mean = np.zeros(self.number_of_steps)
+        self.hotspots_erosion_mean = np.zeros(self.number_of_steps)
 
-        self.prdm9_fequencies_most_frequent = np.zeros(t_max)
+        self.prdm9_frequencies_most_frequent = np.zeros(self.number_of_steps)
 
-        self.prdm9_nb_alleles = np.zeros(self.t_max)
-        self.generations = np.arange(self.t_max) + 1
+        self.prdm9_nb_alleles = np.zeros(self.number_of_steps)
+        self.generations = (np.arange(self.number_of_steps) + 1) * self.t_max / self.number_of_steps
 
         self.run()
 
@@ -48,11 +49,11 @@ class Simulation(object):
                "\nThe longevity hotspots : %s" % self.prdm9_longevity
 
     def slice(self, t):
-        self.prdm9_fequencies_mean = self.prdm9_fequencies_mean[:t]
+        self.prdm9_frequencies_mean = self.prdm9_frequencies_mean[:t]
         self.prdm9_longevity_mean = self.prdm9_longevity_mean[:t]
         self.hotspots_erosion_mean = self.hotspots_erosion_mean[:t]
 
-        self.prdm9_fequencies_most_frequent = self.prdm9_fequencies_most_frequent[:t]
+        self.prdm9_frequencies_most_frequent = self.prdm9_frequencies_most_frequent[:t]
 
         self.prdm9_nb_alleles = self.prdm9_nb_alleles[:t]
         self.generations = self.generations[:t]
@@ -66,10 +67,7 @@ class Simulation(object):
 
         scaled_mutation_rate = self.population_size * self.mutation_rate_prdm9
         for t in range(self.t_max):
-            if time.time() - start_time > 120:
-                self.t_max = t
-                self.slice(t)
-                break
+
             # Randomly create new alleles of PRDM9
             new_alleles = np.random.poisson(2 * scaled_mutation_rate)
             if new_alleles > 0:
@@ -113,13 +111,22 @@ class Simulation(object):
 
             # Increase the longevity of survivors by 1
             self.prdm9_longevity += 1
-            self.prdm9_nb_alleles[t] = self.prdm9_polymorphism.size
 
-            self.prdm9_fequencies_mean[t] = np.mean(self.prdm9_polymorphism) / self.population_size
-            self.prdm9_longevity_mean[t] = np.mean(self.prdm9_longevity)
-            self.hotspots_erosion_mean[t] = 1 - np.mean(self.hotspots_erosion)
+            if self.number_of_steps * t % self.t_max == 0:
+                step = self.number_of_steps * t / self.t_max
 
-            self.prdm9_fequencies_most_frequent[t] = np.max(self.prdm9_polymorphism) / self.population_size
+                self.prdm9_nb_alleles[step] = self.prdm9_polymorphism.size
+
+                self.prdm9_frequencies_mean[step] = np.mean(self.prdm9_polymorphism) / self.population_size
+                self.prdm9_longevity_mean[step] = np.mean(self.prdm9_longevity)
+                self.hotspots_erosion_mean[step] = 1 - np.mean(self.hotspots_erosion)
+
+                self.prdm9_frequencies_most_frequent[step] = np.max(self.prdm9_polymorphism) / self.population_size
+
+                if time.time() - start_time > 360:
+                    self.t_max = t
+                    self.slice(step)
+                    break
 
     def figure(self):
         my_dpi = 96
@@ -147,8 +154,8 @@ class Simulation(object):
         plt.ylabel('population_sizeumber of alleles')
 
         plt.subplot(334)
-        plt.plot(self.generations, self.prdm9_fequencies_mean, color='blue')
-        plt.plot(self.generations, self.prdm9_fequencies_most_frequent, color='red')
+        plt.plot(self.generations, self.prdm9_frequencies_mean, color='blue')
+        plt.plot(self.generations, self.prdm9_frequencies_most_frequent, color='red')
         plt.title('Mean PRDM9 frequencies (blue) and \n Frequency of the most frequent allele (red) over time')
         plt.xlabel('Generation')
         plt.ylabel('Frequency')
@@ -191,7 +198,7 @@ class Simulation(object):
         self.figure()
         plt.show()
 
-    def savefig(self):
+    def save_figure(self):
         self.figure()
 
         filename = "u=%.1e" % self.mutation_rate_prdm9 + \
@@ -201,7 +208,7 @@ class Simulation(object):
         if self.neutral:
             filename += "neutral"
 
-        path = os.getcwd()+"/tmp"
+        path = os.getcwd() + "/tmp"
         try:
             os.makedirs(path)
         except OSError:
@@ -214,5 +221,5 @@ class Simulation(object):
         return filename
 
 
-simulation = Simulation(1.0 * 10 ** -5, 1.0 * 10 ** -6, 2 * 10 ** 4, 100000)
-simulation.savefig()
+simulation = Simulation(1.0 * 10 ** -5, 1.0 * 10 ** -6, 10 ** 4)
+simulation.save_figure()
