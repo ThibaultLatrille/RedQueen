@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import time
-
+import os
 
 # The fitness function, given the erosion of the hotspots
 def w(y):
@@ -30,10 +30,7 @@ class Simulation(object):
         self.hotspots_erosion_mean = np.zeros(t_max)
 
         self.prdm9_fequencies_most_frequent = np.zeros(t_max)
-        self.prdm9_longevity_most_frequent = np.zeros(t_max)
-        self.hotspots_erosion_most_frequent = np.zeros(t_max)
 
-        self.most_frequent_change = []
         self.prdm9_nb_alleles = np.zeros(self.t_max)
         self.generations = np.arange(self.t_max) + 1
 
@@ -56,8 +53,6 @@ class Simulation(object):
         self.hotspots_erosion_mean = self.hotspots_erosion_mean[:t]
 
         self.prdm9_fequencies_most_frequent = self.prdm9_fequencies_most_frequent[:t]
-        self.prdm9_longevity_most_frequent = self.prdm9_longevity_most_frequent[:t]
-        self.hotspots_erosion_most_frequent = self.hotspots_erosion_most_frequent[:t]
 
         self.prdm9_nb_alleles = self.prdm9_nb_alleles[:t]
         self.generations = self.generations[:t]
@@ -65,7 +60,6 @@ class Simulation(object):
     def run(self):
         start_time = time.time()
         # Initiate the vectors
-        most_frequent_index = -1
         scaled_erosion_rate = self.erosion_rate_hotspot * self.population_size
         assert scaled_erosion_rate < 0.1, "The populaton size is too large for this value of erosion rate"
         assert scaled_erosion_rate > 0.0000001, "The populaton size is too low for this value of erosion rate"
@@ -125,15 +119,7 @@ class Simulation(object):
             self.prdm9_longevity_mean[t] = np.mean(self.prdm9_longevity)
             self.hotspots_erosion_mean[t] = 1 - np.mean(self.hotspots_erosion)
 
-            if most_frequent_index != np.argmax(self.prdm9_polymorphism):
-                self.most_frequent_change.append(t)
-                most_frequent_index = np.argmax(self.prdm9_polymorphism)
-
-            self.prdm9_fequencies_most_frequent[t] = self.prdm9_polymorphism[most_frequent_index] / self.population_size
-            self.prdm9_longevity_most_frequent[t] = self.prdm9_longevity[most_frequent_index]
-            self.hotspots_erosion_most_frequent[t] = 1 - self.hotspots_erosion[most_frequent_index]
-
-        self.most_frequent_change.pop(0)
+            self.prdm9_fequencies_most_frequent[t] = np.max(self.prdm9_polymorphism) / self.population_size
 
     def figure(self):
         my_dpi = 96
@@ -163,7 +149,6 @@ class Simulation(object):
         plt.subplot(334)
         plt.plot(self.generations, self.prdm9_fequencies_mean, color='blue')
         plt.plot(self.generations, self.prdm9_fequencies_most_frequent, color='red')
-        plt.axvline(self.most_frequent_change[0])
         plt.title('Mean PRDM9 frequencies (blue) and \n Frequency of the most frequent allele (red) over time')
         plt.xlabel('Generation')
         plt.ylabel('Frequency')
@@ -171,16 +156,14 @@ class Simulation(object):
 
         plt.subplot(335)
         plt.plot(self.generations, self.hotspots_erosion_mean, color='blue')
-        plt.plot(self.generations, self.hotspots_erosion_most_frequent, color='red')
-        plt.title('Mean erosion of the hotspots (blue) and \nErosion of the most frequent allele (red) over time')
+        plt.title('Mean erosion of the hotspots (blue) over time')
         plt.xlabel('Generation')
         plt.ylabel('Erosion')
         plt.axis([1, self.t_max, 0, 1])
 
         plt.subplot(336)
         plt.plot(self.generations, self.prdm9_longevity_mean, color='blue')
-        plt.plot(self.generations, self.prdm9_longevity_most_frequent, color='red')
-        plt.title('Mean longevity of PRDM9 alleles (blue) and \n longevity of the most frequent allele (red) over time')
+        plt.title('Mean longevity of PRDM9 alleles over time')
         plt.xlabel('Generation')
         plt.ylabel('Longevity')
 
@@ -217,6 +200,15 @@ class Simulation(object):
                    "_t=%.1e" % self.t_max
         if self.neutral:
             filename += "neutral"
+
+        path = os.getcwd()+"/tmp"
+        try:
+            os.makedirs(path)
+        except OSError:
+            if not os.path.isdir(path):
+                raise
+
+        os.chdir(path)
         plt.savefig(filename + '.png')
         print filename
         return filename
