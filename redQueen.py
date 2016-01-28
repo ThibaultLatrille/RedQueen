@@ -41,6 +41,10 @@ class Simulation(object):
         self.hotspots_erosion = np.ones(initial_number_of_alleles)
         self.prdm9_longevity = np.zeros(initial_number_of_alleles)
 
+        self.prdm9_polymorphism_cum = []
+        self.hotspots_erosion_cum = []
+        self.prdm9_longevity_cum = []
+
         self.prdm9_nb_alleles = np.zeros(self.number_of_steps)
         self.prdm9_entropy_alleles = np.zeros(self.number_of_steps)
         self.hotspots_erosion_mean = np.zeros(self.number_of_steps)
@@ -138,6 +142,10 @@ class Simulation(object):
                 self.prdm9_longevity_mean[step] = n_moment(self.prdm9_longevity, prdm9_frequencies, 1)
                 self.prdm9_longevity_cv[step] = cv(self.prdm9_longevity, prdm9_frequencies)
 
+                self.prdm9_polymorphism_cum.extend(prdm9_frequencies)
+                self.hotspots_erosion_cum.extend(1 - self.hotspots_erosion)
+                self.prdm9_longevity_cum.extend(self.prdm9_longevity)
+
                 if time.time() - start_time > 360:
                     self.t_max = t
                     self.slice(step)
@@ -145,7 +153,7 @@ class Simulation(object):
 
     def statistics(self):
         return np.mean(self.prdm9_entropy_alleles), np.mean(self.hotspots_erosion_mean), np.mean(
-            self.hotspots_erosion_mean)
+                self.hotspots_erosion_mean)
 
     def figure(self):
         my_dpi = 96
@@ -193,19 +201,19 @@ class Simulation(object):
         plt.ylabel('Longevity')
 
         plt.subplot(337)
-        plt.hist(self.prdm9_polymorphism / self.population_size, color='red')
+        plt.hist(self.prdm9_polymorphism_cum, color='red')
         plt.title('PRDM9 frequencies histogram')
         plt.xlabel('PRDM9 Frequencies')
         plt.ylabel('Frequency')
 
         plt.subplot(338)
-        plt.hist(1 - self.hotspots_erosion, color='red')
+        plt.hist(self.hotspots_erosion_cum, color='red')
         plt.title('Erosion of the hotspots histogram')
         plt.xlabel('Erosion of the hotspots')
         plt.ylabel('Frequency')
 
         plt.subplot(339)
-        plt.hist(self.prdm9_longevity, color='red')
+        plt.hist(self.prdm9_longevity_cum, color='red')
         plt.title('Longevity of PRDM9 alleles histogram')
         plt.xlabel('Longevity')
         plt.ylabel('Frequency')
