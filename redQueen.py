@@ -348,7 +348,6 @@ class BatchSimulation(object):
             self.population_sizes.append(population_size_increment)
             simulation = Simulation(mutation_rate_prdm9, erosion_rate_hotspot, population_size_increment)
             simulation.save_figure()
-            simulation.save_auto_correlation()
             self.simulations.append(simulation)
             population_size_increment *= (10.0 ** 0.1)
 
