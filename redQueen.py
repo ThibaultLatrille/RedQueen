@@ -12,6 +12,21 @@ except OSError:
 os.chdir(path)
 
 
+def acf(series):
+    n = len(series)
+    data = np.asarray(series)
+    mean = np.mean(data)
+    c0 = np.sum((data - mean) ** 2) / float(n)
+
+    def r(h):
+        acf_lag = ((data[:n - h] - mean) * (data[h:] - mean)).sum() / float(n) / c0
+        return round(acf_lag, 3)
+
+    x = np.arange(n)  # Avoiding lag 0 calculation
+    acf_coeffs = map(r, x)
+    return x, acf_coeffs
+
+
 # The fitness function, given the erosion of the hotspots
 def w(y):
     return y ** 4 / (y ** 4 + 0.5 ** 4)
@@ -36,10 +51,11 @@ class Simulation(object):
     def __init__(self, mutation_rate_prdm9=1.0 * 10 ** -5,
                  erosion_rate_hotspot=1.0 * 10 ** -3,
                  population_size=10 ** 4,
-                 neutral=False):
+                 neutral=False, scaling=50):
         initial_number_of_alleles = 10
+        self.scaling = scaling
         self.number_of_steps = 10000  # Number of steps at which we make computations
-        self.t_max = int(50 * population_size)  # Number of generations
+        self.t_max = int(self.scaling * population_size)  # Number of generations
         self.mutation_rate_prdm9 = mutation_rate_prdm9  # The rate at which new allele for PRDM9 are created
         self.erosion_rate_hotspot = erosion_rate_hotspot  # The rate at which the hotspots are eroded
         self.population_size = float(population_size)  # population size
@@ -80,7 +96,7 @@ class Simulation(object):
 
     def run(self):
         start_time = time.time()
-        step = float(self.t_max) / 1000
+        step = float(self.t_max) / self.number_of_steps
         step_t = 0.
 
         scaled_erosion_rate = self.erosion_rate_hotspot * self.population_size
@@ -240,6 +256,54 @@ class Simulation(object):
 
         plt.tight_layout()
 
+    def auto_correlation(self):
+        my_dpi = 96
+        plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
+
+        plt.subplot(321)
+        plt.plot(self.generations, self.prdm9_nb_alleles, color='blue')
+        plt.plot(self.generations, self.prdm9_entropy_alleles, color='green')
+        plt.title('Number of PRDM9 alleles (blue) and \n efficient number of PRDM9 alleles (green) over time')
+        plt.xlabel('Generation')
+        plt.ylabel('Number of alleles')
+
+        plt.subplot(322)
+        plt.plot(*acf(self.prdm9_entropy_alleles))
+        plt.title('Auto-correlation of the number of alleles')
+        plt.xlabel('Lag')
+        plt.xscale('log')
+        plt.ylabel('Correlation')
+
+        plt.subplot(323)
+        plt.plot(*acf(self.hotspots_erosion_mean))
+        plt.title('Auto-correlation of the hotspot erosion mean')
+        plt.xlabel('Lag')
+        plt.xscale('log')
+        plt.ylabel('Correlation')
+
+        plt.subplot(324)
+        plt.plot(*acf(self.hotspots_erosion_cv))
+        plt.title('Auto-correlation of the hotspot erosion variance')
+        plt.xlabel('Lag')
+        plt.xscale('log')
+        plt.ylabel('Correlation')
+
+        plt.subplot(325)
+        plt.plot(*acf(self.prdm9_longevity_mean))
+        plt.title('Auto-correlation of the PRDM9 mean longevity')
+        plt.xlabel('Lag')
+        plt.xscale('log')
+        plt.ylabel('Correlation')
+
+        plt.subplot(326)
+        plt.plot(*acf(self.prdm9_longevity_cv))
+        plt.title('Auto-correlation of the PRDM9 longevity variance')
+        plt.xlabel('Lag')
+        plt.xscale('log')
+        plt.ylabel('Correlation')
+
+        plt.tight_layout()
+
     def show(self):
         self.figure()
         plt.show()
@@ -247,6 +311,18 @@ class Simulation(object):
     def save_figure(self):
         self.figure()
         filename = "u=%.1e" % self.mutation_rate_prdm9 + \
+                   "_r=%.1e" % self.erosion_rate_hotspot + \
+                   "_n=%.1e" % self.population_size + \
+                   "_t=%.1e" % self.t_max
+        if self.neutral:
+            filename += "neutral"
+        plt.savefig(filename + '.png')
+        print filename
+        return filename
+
+    def save_auto_correlation(self):
+        self.auto_correlation()
+        filename = "acf_u=%.1e" % self.mutation_rate_prdm9 + \
                    "_r=%.1e" % self.erosion_rate_hotspot + \
                    "_n=%.1e" % self.population_size + \
                    "_t=%.1e" % self.t_max
@@ -270,7 +346,10 @@ class BatchSimulation(object):
         while population_size_increment <= max_population_size:
             print "Simulating for a population size of %.1e" % population_size_increment
             self.population_sizes.append(population_size_increment)
-            self.simulations.append(Simulation(mutation_rate_prdm9, erosion_rate_hotspot, population_size_increment))
+            simulation = Simulation(mutation_rate_prdm9, erosion_rate_hotspot, population_size_increment)
+            simulation.save_figure()
+            simulation.save_auto_correlation()
+            self.simulations.append(simulation)
             population_size_increment *= (10.0 ** 0.1)
 
     def __str__(self):
@@ -358,7 +437,6 @@ class BatchSimulation(object):
         plt.show()
 
     def save_figure(self):
-        map(lambda simu: simu.save_figure(), self.simulations)
         self.figure()
         filename = "Batch_u=%.1e" % self.mutation_rate_prdm9 + \
                    "_r=%.1e" % self.erosion_rate_hotspot
@@ -367,5 +445,5 @@ class BatchSimulation(object):
         return filename
 
 
-batch_simulation = BatchSimulation(1.0 * 10 ** -5, 10 ** -6, 5*10 ** 3, 5 * 10 ** 4)
+batch_simulation = BatchSimulation(1.0 * 10 ** -5, 10 ** -6, 10 ** 3, 10 ** 5)
 batch_simulation.save_figure()
