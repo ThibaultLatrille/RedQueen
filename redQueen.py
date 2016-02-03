@@ -1,3 +1,4 @@
+from multiprocessing import Pool
 import numpy as np
 import matplotlib.pyplot as plt
 import time
@@ -10,6 +11,10 @@ except OSError:
     if not os.path.isdir(path):
         raise
 os.chdir(path)
+
+
+def execute(x):
+    return x.run()
 
 
 def acf(series):
@@ -28,8 +33,8 @@ def acf(series):
 
 
 # The fitness function, given the erosion of the hotspots
-def w(y):
-    return y ** 4 / (y ** 4 + 0.5 ** 4)
+def w(y, inflexion):
+    return y ** 4 / (y ** 4 + inflexion ** 4)
 
 
 # The shannon entropy
@@ -51,11 +56,20 @@ class Simulation(object):
     def __init__(self, mutation_rate_prdm9=1.0 * 10 ** -5,
                  erosion_rate_hotspot=1.0 * 10 ** -7,
                  population_size=10 ** 4,
-                 neutral=False, scaling=50):
+                 inflexion=0.5,
+                 neutral=False,
+                 scaling=10):
         initial_number_of_alleles = 10
         self.scaling = scaling
+        self.inflexion = inflexion
+        assert self.inflexion > 0.001, "The inflexion point must be greater than 0.001"
+        assert self.inflexion <= 1, "The inflexion point must be lower than 1"
+
         self.number_of_steps = 10000  # Number of steps at which we make computations
         self.t_max = int(self.scaling * population_size)  # Number of generations
+        assert self.t_max > self.number_of_steps, "The scaling factor is too low, there won't" \
+                                                  "be enough generation computed"
+
         self.mutation_rate_prdm9 = mutation_rate_prdm9  # The rate at which new allele for PRDM9 are created
         self.erosion_rate_hotspot = erosion_rate_hotspot  # The rate at which the hotspots are eroded
         self.population_size = float(population_size)  # population size
@@ -127,7 +141,8 @@ class Simulation(object):
                 fitness_matrix = np.empty([nb_prdm9_alleles, nb_prdm9_alleles])
                 for i in range(nb_prdm9_alleles):
                     for j in range(nb_prdm9_alleles):
-                        fitness_matrix[i, j] = w((self.hotspots_erosion[i] + self.hotspots_erosion[j]) / 2)
+                        fitness_matrix[i, j] = w((self.hotspots_erosion[i] + self.hotspots_erosion[j]) / 2,
+                                                 self.inflexion)
 
             fitness_vector = np.dot(fitness_matrix, prdm9_frequencies) * prdm9_frequencies
             fitness_vector /= np.sum(fitness_vector)
@@ -137,23 +152,25 @@ class Simulation(object):
                 step_t -= step
                 self.generations.append(t)
                 sqrt_population_size = np.sqrt(self.population_size)
+                scaled_prdm9_longevity = np.divide(self.prdm9_longevity, self.population_size)
                 self.prdm9_high_frequency += np.array(
                         map(lambda f: f > sqrt_population_size, self.prdm9_polymorphism), dtype=bool)
                 self.prdm9_nb_alleles.append(self.prdm9_polymorphism.size)
                 self.prdm9_entropy_alleles.append(entropy(prdm9_frequencies))
                 self.hotspots_erosion_mean.append(n_moment(1 - self.hotspots_erosion, prdm9_frequencies, 1))
                 self.hotspots_erosion_cv.append(cv(1 - self.hotspots_erosion, prdm9_frequencies))
-                self.prdm9_longevity_mean.append(n_moment(self.prdm9_longevity, prdm9_frequencies, 1))
-                self.prdm9_longevity_cv.append(cv(self.prdm9_longevity, prdm9_frequencies))
+                self.prdm9_longevity_mean.append(n_moment(scaled_prdm9_longevity, prdm9_frequencies, 1))
+                self.prdm9_longevity_cv.append(cv(scaled_prdm9_longevity, prdm9_frequencies))
 
                 self.prdm9_polymorphism_cum.extend(prdm9_frequencies)
                 self.hotspots_erosion_cum.extend(np.subtract(1, self.hotspots_erosion))
-                self.prdm9_longevity_cum.extend(self.prdm9_longevity)
+                self.prdm9_longevity_cum.extend(scaled_prdm9_longevity)
                 self.prdm9_fitness_cum.extend(fitness_vector)
                 self.prdm9_high_frequency_cum.extend(self.prdm9_high_frequency)
 
-                if time.time() - start_time > 900:
+                if time.time() - start_time > 720:
                     self.t_max = t
+                    print "Breaking the loop, time over 720s"
                     break
 
             # Exponential decay for hotspots erosion
@@ -176,6 +193,7 @@ class Simulation(object):
                 self.prdm9_high_frequency = self.prdm9_high_frequency[extinction]
 
         self.save_figure()
+        return self
 
     def save_figure(self):
         my_dpi = 96
@@ -187,11 +205,11 @@ class Simulation(object):
         if self.neutral:
             plt.plot(theta, np.ones(theta.size), color='red')
         else:
-            vectorized_w = np.vectorize(w)
+            vectorized_w = np.vectorize(lambda x: w(x, self.inflexion))
             plt.plot(theta, vectorized_w(theta), color='red')
         plt.title('The fitness function')
         plt.xlabel('x')
-        plt.ylabel('w(x,0)')
+        plt.ylabel('w(x)')
 
         plt.subplot(332)
         plt.plot(self.generations, self.prdm9_nb_alleles, color='blue')
@@ -260,6 +278,7 @@ class Simulation(object):
         filename = "u=%.1e" % self.mutation_rate_prdm9 + \
                    "_r=%.1e" % self.erosion_rate_hotspot + \
                    "_n=%.1e" % self.population_size + \
+                   "_p=%.1e" % self.inflexion + \
                    "_t=%.1e" % self.t_max
         if self.neutral:
             filename += "neutral"
@@ -333,50 +352,52 @@ class BatchSimulation(object):
                  mutation_rate_prdm9,
                  erosion_rate_hotspot,
                  population_size,
-                 axis,
+                 inflexion=0.5,
+                 axis="",
+                 number_of_simulations=20,
                  scale=10 ** 2,
                  neutral=False):
-        axis_hash = {"mutation": 0, "erosion": 1, "population": 2, "mutation&erosion": 3, "erosion&mutation": 3}
-        assert axis in axis_hash.keys(), "Axis must be either 'population', 'mutation', 'erosion' or 'mutation&erosion'"
+        axis_hash = {"mutation": 0, "erosion": 1, "population": 2, "fitness": 3, "mutation&erosion": 4,
+                     "erosion&mutation": 4}
+        assert axis in axis_hash.keys(), "Axis must be either 'population', 'mutation', 'erosion'," \
+                                         "'fitness' or 'mutation&erosion'"
         assert scale > 1, "The scale parameter must be greater than one"
         self.axis = axis_hash[axis]
         self.axis_str = {0: "Mutation rate of PRDM9", 1: "Erosion rate of the hotspots", 2: "The population size",
-                         3: "Scaled mutation rate and erosion rate"}[self.axis]
+                         3: "The fitness inflexion point", 4: "Scaled mutation rate and erosion rate"}[self.axis]
 
-        if self.axis == 0:
-            axis_min = mutation_rate_prdm9
-            axis_max = mutation_rate_prdm9 * scale
-        elif self.axis == 1:
-            axis_min = erosion_rate_hotspot
-            axis_max = erosion_rate_hotspot * scale
-        elif self.axis == 2:
-            axis_min = population_size
-            axis_max = population_size * scale
-        else:
-            axis_min = 1
-            axis_max = scale
+        self.inflexion = inflexion
         self.neutral = neutral  # If the fitness function is neutral
         self.mutation_rate_prdm9 = mutation_rate_prdm9  # The rate at which new allele for PRDM9 are created
         self.erosion_rate_hotspot = erosion_rate_hotspot  # The rate at which the hotspots are eroded
         self.population_size = population_size
-        self.axis_range = np.logspace(np.log10(axis_min), np.log10(axis_max), num=20)
+        parameters = [self.mutation_rate_prdm9, self.erosion_rate_hotspot, self.population_size, self.inflexion]
+
+        if self.axis == 4:
+            self.axis_range = np.logspace(0, np.log10(scale),
+                                          num=number_of_simulations)
+        elif self.axis == 3:
+            self.axis_range = np.linspace(0.01, 1, num=number_of_simulations)
+        else:
+            self.axis_range = np.logspace(np.log10(parameters[self.axis]), np.log10(parameters[self.axis] * scale),
+                                          num=number_of_simulations)
+
         self.simulations = []
 
-        parameters = [self.mutation_rate_prdm9, self.erosion_rate_hotspot, self.population_size]
         for axis_current in self.axis_range:
-            if self.axis == 3:
+            if self.axis == 4:
                 parameters[0] = self.mutation_rate_prdm9 * axis_current
                 parameters[1] = self.erosion_rate_hotspot * axis_current
             else:
                 parameters[self.axis] = axis_current
             self.simulations.append(Simulation(*parameters))
 
-    def run(self):
-        for simulation in self.simulations:
-            print "Computing simulation..."
-            simulation.run()
-            print simulation
-
+    def run(self, number_of_cpu=4):
+        if number_of_cpu > 1:
+            pool = Pool(number_of_cpu)
+            self.simulations = pool.map(execute, self.simulations)
+        else:
+            map(execute, self.simulations)
         self.save_figure()
 
     def __str__(self):
@@ -395,11 +416,16 @@ class BatchSimulation(object):
         if self.neutral:
             plt.plot(theta, np.ones(theta.size), color='red')
         else:
-            vectorized_w = np.vectorize(w)
-            plt.plot(theta, vectorized_w(theta), color='red')
+            if self.axis == 4:
+                for inflexion in self.axis_range:
+                    vectorized_w = np.vectorize(lambda x: w(x, inflexion))
+                    plt.plot(theta, vectorized_w(theta), color='red')
+            else:
+                vectorized_w = np.vectorize(lambda x: w(x, self.inflexion))
+                plt.plot(theta, vectorized_w(theta), color='red')
         plt.title('The fitness function')
         plt.xlabel('x')
-        plt.ylabel('w(x,0)')
+        plt.ylabel('w(x)')
 
         plt.subplot(322)
         plt.plot(self.axis_range, map(lambda sim: np.mean(sim.prdm9_nb_alleles), self.simulations),
@@ -424,7 +450,8 @@ class BatchSimulation(object):
         plt.title('Mean hotspot erosion \n for different %s' % self.axis_str)
         plt.xlabel(self.axis_str)
         plt.ylabel('Hotspot erosion')
-        plt.xscale('log')
+        if not self.axis == 3:
+            plt.xscale('log')
 
         plt.subplot(324)
         plt.plot(self.axis_range, map(lambda sim: np.mean(sim.hotspots_erosion_cv), self.simulations),
@@ -435,7 +462,8 @@ class BatchSimulation(object):
         plt.title('Landscape hotspot erosion \n for different %s' % self.axis_str)
         plt.xlabel('Erosion rate')
         plt.ylabel('Hotspot erosion')
-        plt.xscale('log')
+        if not self.axis == 3:
+            plt.xscale('log')
 
         plt.subplot(325)
         plt.plot(self.axis_range, map(lambda sim: np.mean(sim.prdm9_longevity_mean), self.simulations),
@@ -446,7 +474,8 @@ class BatchSimulation(object):
         plt.title('Mean PRDM9 longevity \n for different %s' % self.axis_str)
         plt.xlabel(self.axis_str)
         plt.ylabel('PRDM9 longevity')
-        plt.xscale('log')
+        if not self.axis == 3:
+            plt.xscale('log')
 
         plt.subplot(326)
         plt.plot(self.axis_range, map(lambda sim: np.mean(sim.prdm9_longevity_cv), self.simulations),
@@ -457,7 +486,8 @@ class BatchSimulation(object):
         plt.title('Variance of PRDM9 longevity \n for different %s' % self.axis_str)
         plt.xlabel(self.axis_str)
         plt.ylabel('PRDM9 longevity')
-        plt.xscale('log')
+        if not self.axis == 3:
+            plt.xscale('log')
 
         plt.tight_layout()
 
@@ -469,9 +499,15 @@ class BatchSimulation(object):
         return filename
 
 
-batch_simulation = BatchSimulation(mutation_rate_prdm9=1.0 * 10 ** -5,
-                                   erosion_rate_hotspot=5 * 10 ** -8,
-                                   population_size=10 ** 4,
-                                   axis='erosion&mutation',
-                                   scale=10**2)
-batch_simulation.run()
+if __name__ == '__main__':
+    batch_simulation = BatchSimulation(mutation_rate_prdm9=1.0 * 10 ** -9,
+                                       erosion_rate_hotspot=1.0 * 10 ** -9,
+                                       population_size=5 * 10 ** 3,
+                                       axis='population',
+                                       number_of_simulations=20,
+                                       scale=10 ** 1)
+    #  batch_simulation.run(number_of_cpu=1)
+    simulation = Simulation(mutation_rate_prdm9=1.0 * 10 ** -8,
+                            erosion_rate_hotspot=1.0 * 10 ** -9,
+                            population_size=5 * 10 ** 5)
+    simulation.run()
