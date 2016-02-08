@@ -5,6 +5,10 @@ import time
 import os
 
 
+def execute(x):
+    return x.run()
+
+
 def acf(series):
     n = len(series)
     data = np.asarray(series)
@@ -46,7 +50,7 @@ class Simulation(object):
                  population_size=10 ** 4,
                  inflexion=0.5,
                  neutral=False,
-                 scaling=10):
+                 scaling=30):
         initial_number_of_alleles = 10
         self.scaling = scaling
         self.inflexion = inflexion
@@ -117,6 +121,7 @@ class Simulation(object):
                 self.prdm9_longevity = np.append(self.prdm9_longevity, np.zeros(new_alleles))
                 self.hotspots_erosion = np.append(self.hotspots_erosion, np.ones(new_alleles))
                 self.prdm9_high_frequency = np.append(self.prdm9_high_frequency, np.zeros(new_alleles))
+                self.extinction()
 
             # Compute the PRDM9 frequencies for convenience
             prdm9_frequencies = np.divide(self.prdm9_polymorphism, self.population_size)
@@ -132,8 +137,7 @@ class Simulation(object):
                         fitness_matrix[i, j] = w((self.hotspots_erosion[i] + self.hotspots_erosion[j]) / 2,
                                                  self.inflexion)
 
-            fitness_vector = np.dot(fitness_matrix, prdm9_frequencies) * prdm9_frequencies
-            fitness_vector /= np.sum(fitness_vector)
+            fitness_vector = np.dot(fitness_matrix, prdm9_frequencies)
 
             step_t += 1
             if step_t > step and t / float(self.t_max) > 0.01:
@@ -165,22 +169,29 @@ class Simulation(object):
             self.hotspots_erosion *= (
                 1. - self.scaled_erosion_rate * prdm9_frequencies)
 
+            distribution_vector = fitness_vector * prdm9_frequencies
+
             # Randomly pick the new generation according to the fitness vector
-            self.prdm9_polymorphism = np.random.multinomial(int(self.population_size), fitness_vector)
+            self.prdm9_polymorphism = np.random.multinomial(int(self.population_size),
+                                                            np.divide(distribution_vector,
+                                                                      np.sum(distribution_vector)))
 
             # Increase the longevity of survivors by 1
             self.prdm9_longevity += 1
 
-            # Remove the extinct alleles
-            extinction = np.array(map(lambda x: x != 0, self.prdm9_polymorphism), dtype=bool)
-            if not extinction.all():
-                self.prdm9_polymorphism = self.prdm9_polymorphism[extinction]
-                self.hotspots_erosion = self.hotspots_erosion[extinction]
-                self.prdm9_longevity = self.prdm9_longevity[extinction]
-                self.prdm9_high_frequency = self.prdm9_high_frequency[extinction]
+            self.extinction()
 
         self.save_figure()
         return self
+
+    def extinction(self):
+        # Remove the extinct alleles
+        extinction = np.array(map(lambda x: x != 0, self.prdm9_polymorphism), dtype=bool)
+        if not extinction.all():
+            self.prdm9_polymorphism = self.prdm9_polymorphism[extinction]
+            self.hotspots_erosion = self.hotspots_erosion[extinction]
+            self.prdm9_longevity = self.prdm9_longevity[extinction]
+            self.prdm9_high_frequency = self.prdm9_high_frequency[extinction]
 
     def save_figure(self):
         my_dpi = 96
@@ -204,6 +215,7 @@ class Simulation(object):
         plt.title('Number of PRDM9 alleles (blue) and \n efficient number of PRDM9 alleles (green) over time')
         plt.xlabel('Generation')
         plt.ylabel('Number of alleles')
+        plt.yscale('log')
 
         plt.subplot(333)
         plt.hexbin(self.prdm9_entropy_alleles, self.hotspots_erosion_mean, self.hotspots_erosion_cv, gridsize=200,
@@ -388,9 +400,6 @@ class BatchSimulation(object):
                 raise
         os.chdir(path)
         if number_of_cpu > 1:
-            def execute(x):
-                return x.run()
-
             pool = Pool(number_of_cpu)
             self.simulations = pool.map(execute, self.simulations)
         else:
@@ -413,7 +422,7 @@ class BatchSimulation(object):
         if self.neutral:
             plt.plot(theta, np.ones(theta.size), color='red')
         else:
-            if self.axis == 4:
+            if self.axis == 3:
                 for inflexion in self.axis_range:
                     vectorized_w = np.vectorize(lambda x: w(x, inflexion))
                     plt.plot(theta, vectorized_w(theta), color='red')
@@ -436,7 +445,9 @@ class BatchSimulation(object):
                   '\n for different %s' % self.axis_str)
         plt.xlabel(self.axis_str)
         plt.ylabel('Number of alleles')
-        plt.xscale('log')
+        if not self.axis == 3:
+            plt.xscale('log')
+        plt.yscale('log')
 
         plt.subplot(323)
         plt.plot(self.axis_range, map(lambda sim: np.mean(sim.hotspots_erosion_mean), self.simulations),
@@ -494,18 +505,20 @@ class BatchSimulation(object):
         return self
 
     def filename(self):
-        return "Batch_u=%.1e" % self.mutation_rate_prdm9 + \
-               "_n=%.1e" % self.erosion_rate_hotspot
+        return self.axis_str + \
+               " u=%.1e" % self.mutation_rate_prdm9 + \
+               "_e=%.1e" % self.erosion_rate_hotspot + \
+               "_n=%.1e" % self.population_size
 
 
 if __name__ == '__main__':
-    batch_simulation = BatchSimulation(mutation_rate_prdm9=1.0 * 10 ** -8,
-                                       erosion_rate_hotspot=1.0 * 10 ** -7,
+    batch_simulation = BatchSimulation(mutation_rate_prdm9=1.0 * 10 ** -6,
+                                       erosion_rate_hotspot=1.0 * 10 ** -6,
                                        population_size=10 ** 3,
                                        axis='population',
                                        number_of_simulations=20,
                                        scale=10 ** 2)
-    batch_simulation.run(number_of_cpu=6)
+    batch_simulation.run(number_of_cpu=7)
     # simulation = Simulation(mutation_rate_prdm9=5.0 * 10 ** -6,
     #                        erosion_rate_hotspot=2.0 * 10 ** -7,
     #                       population_size=4.0*10 ** 5)
