@@ -4,18 +4,6 @@ import matplotlib.pyplot as plt
 import time
 import os
 
-path = os.getcwd() + "/tmp"
-try:
-    os.makedirs(path)
-except OSError:
-    if not os.path.isdir(path):
-        raise
-os.chdir(path)
-
-
-def execute(x):
-    return x.run()
-
 
 def acf(series):
     n = len(series)
@@ -152,19 +140,18 @@ class Simulation(object):
                 step_t -= step
                 self.generations.append(t)
                 sqrt_population_size = np.sqrt(self.population_size)
-                scaled_prdm9_longevity = np.divide(self.prdm9_longevity, self.population_size)
                 self.prdm9_high_frequency += np.array(
                         map(lambda f: f > sqrt_population_size, self.prdm9_polymorphism), dtype=bool)
                 self.prdm9_nb_alleles.append(self.prdm9_polymorphism.size)
                 self.prdm9_entropy_alleles.append(entropy(prdm9_frequencies))
                 self.hotspots_erosion_mean.append(n_moment(1 - self.hotspots_erosion, prdm9_frequencies, 1))
                 self.hotspots_erosion_cv.append(cv(1 - self.hotspots_erosion, prdm9_frequencies))
-                self.prdm9_longevity_mean.append(n_moment(scaled_prdm9_longevity, prdm9_frequencies, 1))
-                self.prdm9_longevity_cv.append(cv(scaled_prdm9_longevity, prdm9_frequencies))
+                self.prdm9_longevity_mean.append(n_moment(self.prdm9_longevity, prdm9_frequencies, 1))
+                self.prdm9_longevity_cv.append(cv(self.prdm9_longevity, prdm9_frequencies))
 
                 self.prdm9_polymorphism_cum.extend(prdm9_frequencies)
                 self.hotspots_erosion_cum.extend(np.subtract(1, self.hotspots_erosion))
-                self.prdm9_longevity_cum.extend(scaled_prdm9_longevity)
+                self.prdm9_longevity_cum.extend(self.prdm9_longevity)
                 self.prdm9_fitness_cum.extend(fitness_vector)
                 self.prdm9_high_frequency_cum.extend(self.prdm9_high_frequency)
 
@@ -393,11 +380,21 @@ class BatchSimulation(object):
             self.simulations.append(Simulation(*parameters))
 
     def run(self, number_of_cpu=4):
+        path = os.getcwd() + "/tmp/" + self.filename()
+        try:
+            os.makedirs(path)
+        except OSError:
+            if not os.path.isdir(path):
+                raise
+        os.chdir(path)
         if number_of_cpu > 1:
+            def execute(x):
+                return x.run()
+
             pool = Pool(number_of_cpu)
             self.simulations = pool.map(execute, self.simulations)
         else:
-            map(execute, self.simulations)
+            map(lambda x: x.run(), self.simulations)
         self.save_figure()
 
     def __str__(self):
@@ -491,23 +488,25 @@ class BatchSimulation(object):
 
         plt.tight_layout()
 
-        filename = "Batch_u=%.1e" % self.mutation_rate_prdm9 + \
-                   "_n=%.1e" % self.erosion_rate_hotspot
-        plt.savefig(filename + '.png')
+        plt.savefig(self.filename() + '.png')
         plt.clf()
-        print filename
-        return filename
+        print 'Simulation computed'
+        return self
+
+    def filename(self):
+        return "Batch_u=%.1e" % self.mutation_rate_prdm9 + \
+               "_n=%.1e" % self.erosion_rate_hotspot
 
 
 if __name__ == '__main__':
-    batch_simulation = BatchSimulation(mutation_rate_prdm9=1.0 * 10 ** -9,
-                                       erosion_rate_hotspot=1.0 * 10 ** -9,
-                                       population_size=5 * 10 ** 3,
+    batch_simulation = BatchSimulation(mutation_rate_prdm9=1.0 * 10 ** -8,
+                                       erosion_rate_hotspot=1.0 * 10 ** -7,
+                                       population_size=10 ** 3,
                                        axis='population',
                                        number_of_simulations=20,
-                                       scale=10 ** 1)
-    #  batch_simulation.run(number_of_cpu=1)
-    simulation = Simulation(mutation_rate_prdm9=1.0 * 10 ** -8,
-                            erosion_rate_hotspot=1.0 * 10 ** -9,
-                            population_size=5 * 10 ** 5)
-    simulation.run()
+                                       scale=10 ** 2)
+    batch_simulation.run(number_of_cpu=6)
+    # simulation = Simulation(mutation_rate_prdm9=5.0 * 10 ** -6,
+    #                        erosion_rate_hotspot=2.0 * 10 ** -7,
+    #                       population_size=4.0*10 ** 5)
+    # simulation.run()
