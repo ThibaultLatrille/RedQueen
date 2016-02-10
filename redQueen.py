@@ -9,21 +9,6 @@ def execute(x):
     return x.run()
 
 
-def acf(series):
-    n = len(series)
-    data = np.asarray(series)
-    mean = np.mean(data)
-    c0 = np.sum((data - mean) ** 2) / float(n)
-
-    def r(h):
-        acf_lag = ((data[:n - h] - mean) * (data[h:] - mean)).sum() / float(n) / c0
-        return round(acf_lag, 3)
-
-    x = np.arange(n)  # Avoiding lag 0 calculation
-    acf_coeffs = map(r, x)
-    return x, acf_coeffs
-
-
 # The fitness function, given the erosion of the hotspots
 def w(y, inflexion):
     return y ** 4 / (y ** 4 + inflexion ** 4)
@@ -278,65 +263,6 @@ class Simulation(object):
                    "_r=%.1e" % self.erosion_rate_hotspot + \
                    "_n=%.1e" % self.population_size + \
                    "_p=%.1e" % self.inflexion + \
-                   "_t=%.1e" % self.t_max
-        if self.neutral:
-            filename += "neutral"
-        plt.savefig(filename + '.png')
-        plt.clf()
-        print filename
-        return filename
-
-    def save_auto_correlation(self):
-        my_dpi = 96
-        plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
-
-        plt.subplot(321)
-        plt.plot(self.generations, self.prdm9_nb_alleles, color='blue')
-        plt.plot(self.generations, self.prdm9_entropy_alleles, color='green')
-        plt.title('Number of PRDM9 alleles (blue) and \n efficient number of PRDM9 alleles (green) over time')
-        plt.xlabel('Generation')
-        plt.ylabel('Number of alleles')
-
-        plt.subplot(322)
-        plt.plot(*acf(self.prdm9_entropy_alleles))
-        plt.title('Auto-correlation of the number of alleles')
-        plt.xlabel('Lag')
-        plt.xscale('log')
-        plt.ylabel('Correlation')
-
-        plt.subplot(323)
-        plt.plot(*acf(self.hotspots_erosion_mean))
-        plt.title('Auto-correlation of the hotspot erosion mean')
-        plt.xlabel('Lag')
-        plt.xscale('log')
-        plt.ylabel('Correlation')
-
-        plt.subplot(324)
-        plt.plot(*acf(self.hotspots_erosion_cv))
-        plt.title('Auto-correlation of the hotspot erosion variance')
-        plt.xlabel('Lag')
-        plt.xscale('log')
-        plt.ylabel('Correlation')
-
-        plt.subplot(325)
-        plt.plot(*acf(self.prdm9_longevity_mean))
-        plt.title('Auto-correlation of the PRDM9 mean longevity')
-        plt.xlabel('Lag')
-        plt.xscale('log')
-        plt.ylabel('Correlation')
-
-        plt.subplot(326)
-        plt.plot(*acf(self.prdm9_longevity_cv))
-        plt.title('Auto-correlation of the PRDM9 longevity variance')
-        plt.xlabel('Lag')
-        plt.xscale('log')
-        plt.ylabel('Correlation')
-
-        plt.tight_layout()
-
-        filename = "acf_u=%.1e" % self.mutation_rate_prdm9 + \
-                   "_r=%.1e" % self.erosion_rate_hotspot + \
-                   "_n=%.1e" % self.population_size + \
                    "_t=%.1e" % self.t_max
         if self.neutral:
             filename += "neutral"
