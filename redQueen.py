@@ -5,6 +5,16 @@ import time
 import os
 
 
+def set_dir(path):
+    path = os.getcwd() + path
+    try:
+        os.makedirs(path)
+    except OSError:
+        if not os.path.isdir(path):
+            raise
+    os.chdir(path)
+
+
 def execute(x):
     return x.run()
 
@@ -323,13 +333,7 @@ class BatchSimulation(object):
             self.simulations.append(Simulation(*parameters))
 
     def run(self, number_of_cpu=4):
-        path = os.getcwd() + "/tmp/" + self.filename()
-        try:
-            os.makedirs(path)
-        except OSError:
-            if not os.path.isdir(path):
-                raise
-        os.chdir(path)
+        set_dir("/" + self.filename())
         if number_of_cpu > 1:
             pool = Pool(number_of_cpu)
             self.simulations = pool.map(execute, self.simulations)
@@ -443,6 +447,7 @@ class BatchSimulation(object):
 
 
 if __name__ == '__main__':
+    set_dir("/tmp")
     batch_simulation = BatchSimulation(mutation_rate_prdm9=1.0 * 10 ** -5,
                                        erosion_rate_hotspot=1.0 * 10 ** -5,
                                        population_size=10 ** 3,
