@@ -154,7 +154,7 @@ class Simulation(object):
                 self.prdm9_longevity_cv.append(cv(self.prdm9_longevity, prdm9_frequencies))
 
                 self.prdm9_polymorphism_cum.extend(prdm9_frequencies)
-                self.hotspots_erosion_cum.extend(np.subtract(1, self.hotspots_erosion))
+                self.hotspots_erosion_cum.extend(1 - self.hotspots_erosion)
                 self.prdm9_longevity_cum.extend(self.prdm9_longevity)
                 self.prdm9_fitness_cum.extend(fitness_vector)
                 self.prdm9_high_frequency_cum.extend(self.prdm9_high_frequency)
@@ -357,13 +357,14 @@ class BatchSimulation(object):
                  scale=10 ** 2,
                  neutral=False):
         axis_hash = {"mutation": 0, "erosion": 1, "population": 2, "fitness": 3, "mutation&erosion": 4,
-                     "erosion&mutation": 4}
+                     "erosion&mutation": 4, "scaling": 5}
         assert axis in axis_hash.keys(), "Axis must be either 'population', 'mutation', 'erosion'," \
-                                         "'fitness' or 'mutation&erosion'"
+                                         "'fitness', 'mutation&erosion', or 'scaling'"
         assert scale > 1, "The scale parameter must be greater than one"
         self.axis = axis_hash[axis]
         self.axis_str = {0: "Mutation rate of PRDM9", 1: "Erosion rate of the hotspots", 2: "The population size",
-                         3: "The fitness inflexion point", 4: "Scaled mutation rate and erosion rate"}[self.axis]
+                         3: "The fitness inflexion point", 4: "Scaled mutation rate and erosion rate",
+                         5: "The scaling factor"}[self.axis]
 
         self.inflexion = inflexion
         self.neutral = neutral  # If the fitness function is neutral
@@ -372,7 +373,7 @@ class BatchSimulation(object):
         self.population_size = population_size
         parameters = [self.mutation_rate_prdm9, self.erosion_rate_hotspot, self.population_size, self.inflexion]
 
-        if self.axis == 4:
+        if self.axis == 4 or self.axis == 5:
             self.axis_range = np.logspace(0, np.log10(scale),
                                           num=number_of_simulations)
         elif self.axis == 3:
@@ -387,6 +388,10 @@ class BatchSimulation(object):
             if self.axis == 4:
                 parameters[0] = self.mutation_rate_prdm9 * axis_current
                 parameters[1] = self.erosion_rate_hotspot * axis_current
+            elif self.axis == 5:
+                parameters[0] = self.mutation_rate_prdm9 / axis_current
+                parameters[1] = self.erosion_rate_hotspot / (axis_current ** 2)
+                parameters[2] = self.population_size * axis_current
             else:
                 parameters[self.axis] = axis_current
             self.simulations.append(Simulation(*parameters))
@@ -512,10 +517,10 @@ class BatchSimulation(object):
 
 
 if __name__ == '__main__':
-    batch_simulation = BatchSimulation(mutation_rate_prdm9=1.0 * 10 ** -6,
-                                       erosion_rate_hotspot=1.0 * 10 ** -6,
+    batch_simulation = BatchSimulation(mutation_rate_prdm9=1.0 * 10 ** -5,
+                                       erosion_rate_hotspot=1.0 * 10 ** -5,
                                        population_size=10 ** 3,
-                                       axis='population',
+                                       axis='scaling',
                                        number_of_simulations=20,
                                        scale=10 ** 2)
     batch_simulation.run(number_of_cpu=7)
