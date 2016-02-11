@@ -31,7 +31,10 @@ def entropy(frequencies):
 
 # The fitness function, given the erosion of the hotspots
 def n_moment(x, frequencies, n):
-    return np.sum((x ** n) * frequencies)
+    if n > 1:
+        return np.sum((x ** n) * frequencies)
+    else:
+        return np.sum(x * frequencies)
 
 
 def cv(x, frequencies):
@@ -73,11 +76,19 @@ class Simulation(object):
         self.prdm9_longevity = np.zeros(initial_number_of_alleles)
         self.prdm9_high_frequency = np.zeros(initial_number_of_alleles, dtype=bool)
 
+        self.exact_prdm9_frequencies = np.ones(initial_number_of_alleles) / initial_number_of_alleles
+        self.exact_hotspots_erosion = np.ones(initial_number_of_alleles)
+        self.exact_prdm9_longevity = np.zeros(initial_number_of_alleles)
+
         self.prdm9_polymorphism_cum = []
         self.hotspots_erosion_cum = []
         self.prdm9_fitness_cum = []
         self.prdm9_high_frequency_cum = []
         self.prdm9_longevity_cum = []
+
+        self.exact_hotspots_erosion_cum = []
+        self.exact_prdm9_frequencies_cum = []
+        self.exact_prdm9_longevity_cum = []
 
         self.prdm9_nb_alleles = []
         self.prdm9_entropy_alleles = []
@@ -85,6 +96,12 @@ class Simulation(object):
         self.hotspots_erosion_cv = []
         self.prdm9_longevity_mean = []
         self.prdm9_longevity_cv = []
+
+        self.exact_prdm9_entropy_alleles = []
+        self.exact_hotspots_erosion_mean = []
+        self.exact_hotspots_erosion_cv = []
+        self.exact_prdm9_longevity_mean = []
+        self.exact_prdm9_longevity_cv = []
 
         self.generations = []
 
@@ -108,6 +125,7 @@ class Simulation(object):
 
             # Randomly create new alleles of PRDM9
             new_alleles = np.random.poisson(2 * self.scaled_mutation_rate)
+
             if new_alleles > 0:
                 self.prdm9_polymorphism -= np.random.multinomial(new_alleles, np.divide(
                         self.prdm9_polymorphism, self.population_size))
@@ -116,7 +134,21 @@ class Simulation(object):
                 self.prdm9_longevity = np.append(self.prdm9_longevity, np.zeros(new_alleles))
                 self.hotspots_erosion = np.append(self.hotspots_erosion, np.ones(new_alleles))
                 self.prdm9_high_frequency = np.append(self.prdm9_high_frequency, np.zeros(new_alleles))
-                self.extinction()
+
+                self.remove_extincted()
+
+                #  we should check for selection coefficient and probability of dying immediately
+                exact_erosion_mean = np.sum(self.exact_prdm9_frequencies * self.exact_hotspots_erosion)
+                s_initial = (1 - exact_erosion_mean) / exact_erosion_mean
+                fixation_probability = (1 - np.exp(-s_initial)) / (1 - np.exp(-self.population_size * s_initial))
+                fixed = np.sum(np.array(map(lambda x: x < fixation_probability, np.random.uniform(size=new_alleles)),
+                                        dtype=bool))
+                if fixed > 0:
+                    self.exact_prdm9_frequencies *= (1 - float(fixed) / self.population_size)
+                    self.exact_prdm9_frequencies = np.append(self.exact_prdm9_frequencies,
+                                                             np.ones(fixed) / self.population_size)
+                    self.exact_hotspots_erosion = np.append(self.exact_hotspots_erosion, np.ones(fixed))
+                    self.exact_prdm9_longevity = np.append(self.exact_prdm9_longevity, np.zeros(fixed))
 
             # Compute the PRDM9 frequencies for convenience
             prdm9_frequencies = np.divide(self.prdm9_polymorphism, self.population_size)
@@ -129,8 +161,7 @@ class Simulation(object):
                 fitness_matrix = np.empty([nb_prdm9_alleles, nb_prdm9_alleles])
                 for i in range(nb_prdm9_alleles):
                     for j in range(nb_prdm9_alleles):
-                        fitness_matrix[i, j] = w((self.hotspots_erosion[i] + self.hotspots_erosion[j]) / 2,
-                                                 self.inflexion)
+                        fitness_matrix[i, j] = (self.hotspots_erosion[i] + self.hotspots_erosion[j]) / 2
 
             fitness_vector = np.dot(fitness_matrix, prdm9_frequencies)
 
@@ -143,22 +174,43 @@ class Simulation(object):
                         map(lambda f: f > sqrt_population_size, self.prdm9_polymorphism), dtype=bool)
                 self.prdm9_nb_alleles.append(self.prdm9_polymorphism.size)
                 self.prdm9_entropy_alleles.append(entropy(prdm9_frequencies))
+
                 self.hotspots_erosion_mean.append(n_moment(1 - self.hotspots_erosion, prdm9_frequencies, 1))
                 self.hotspots_erosion_cv.append(cv(1 - self.hotspots_erosion, prdm9_frequencies))
                 self.prdm9_longevity_mean.append(n_moment(self.prdm9_longevity, prdm9_frequencies, 1))
                 self.prdm9_longevity_cv.append(cv(self.prdm9_longevity, prdm9_frequencies))
-
                 self.prdm9_polymorphism_cum.extend(prdm9_frequencies)
                 self.hotspots_erosion_cum.extend(1 - self.hotspots_erosion)
                 self.prdm9_longevity_cum.extend(self.prdm9_longevity)
                 self.prdm9_fitness_cum.extend(fitness_vector)
                 self.prdm9_high_frequency_cum.extend(self.prdm9_high_frequency)
 
+                self.exact_prdm9_entropy_alleles.append(entropy(self.exact_prdm9_frequencies))
+                self.exact_hotspots_erosion_mean.append(
+                    n_moment(1 - self.exact_hotspots_erosion, self.exact_prdm9_frequencies, 1))
+                self.exact_hotspots_erosion_cv.append(cv(1 - self.exact_hotspots_erosion, self.exact_prdm9_frequencies))
+                self.exact_prdm9_longevity_mean.append(
+                    n_moment(self.exact_prdm9_longevity, self.exact_prdm9_frequencies, 1))
+                self.exact_prdm9_longevity_cv.append(cv(self.exact_prdm9_longevity, self.exact_prdm9_frequencies))
+                self.exact_prdm9_frequencies_cum.extend(self.exact_prdm9_frequencies)
+                self.exact_hotspots_erosion_cum.extend(1 - self.exact_hotspots_erosion)
+                self.exact_prdm9_longevity_cum.extend(self.exact_prdm9_longevity)
+
                 if time.time() - start_time > 720:
                     self.t_max = t
                     print "Breaking the loop, time over 720s"
                     break
 
+            dt = 1 / self.population_size
+            exact_erosion_mean = np.sum(self.exact_prdm9_frequencies * self.exact_hotspots_erosion)
+            euler_prdm9_frequencies = self.exact_prdm9_frequencies * (
+                self.exact_hotspots_erosion - exact_erosion_mean) / (2 * exact_erosion_mean)
+
+            euler_hotspots_erosion = self.scaled_erosion_rate * (
+                self.exact_prdm9_frequencies * self.exact_hotspots_erosion)
+
+            self.exact_prdm9_frequencies += euler_prdm9_frequencies
+            self.exact_hotspots_erosion -= euler_hotspots_erosion
             # Exponential decay for hotspots erosion
             # hotspots_erosion *= np.exp( - erosion_rate_hotspot * prdm9_frequencies)
             self.hotspots_erosion *= (
@@ -173,20 +225,31 @@ class Simulation(object):
 
             # Increase the longevity of survivors by 1
             self.prdm9_longevity += 1
+            self.exact_prdm9_longevity += 1
 
-            self.extinction()
+            self.remove_extincted()
+            self.remove_exact_extincted()
 
         self.save_figure()
         return self
 
-    def extinction(self):
+    def remove_extincted(self):
         # Remove the extinct alleles
-        extinction = np.array(map(lambda x: x != 0, self.prdm9_polymorphism), dtype=bool)
-        if not extinction.all():
-            self.prdm9_polymorphism = self.prdm9_polymorphism[extinction]
-            self.hotspots_erosion = self.hotspots_erosion[extinction]
-            self.prdm9_longevity = self.prdm9_longevity[extinction]
-            self.prdm9_high_frequency = self.prdm9_high_frequency[extinction]
+        remove_extincted = np.array(map(lambda x: x != 0, self.prdm9_polymorphism), dtype=bool)
+        if not remove_extincted.all():
+            self.prdm9_polymorphism = self.prdm9_polymorphism[remove_extincted]
+            self.hotspots_erosion = self.hotspots_erosion[remove_extincted]
+            self.prdm9_longevity = self.prdm9_longevity[remove_extincted]
+            self.prdm9_high_frequency = self.prdm9_high_frequency[remove_extincted]
+
+    def remove_exact_extincted(self):
+        # Remove the extinct alleles
+        cut_off = float(1) / self.population_size
+        remove_extincted = np.array(map(lambda x: x > cut_off, self.exact_prdm9_frequencies), dtype=bool)
+        if not remove_extincted.all():
+            self.exact_prdm9_frequencies = self.exact_prdm9_frequencies[remove_extincted]
+            self.exact_hotspots_erosion = self.exact_hotspots_erosion[remove_extincted]
+            self.exact_prdm9_longevity = self.exact_prdm9_longevity[remove_extincted]
 
     def save_figure(self):
         my_dpi = 96
@@ -205,32 +268,32 @@ class Simulation(object):
         plt.ylabel('w(x)')
 
         plt.subplot(332)
-        plt.plot(self.generations, self.prdm9_nb_alleles, color='blue')
+        plt.plot(self.generations, self.exact_prdm9_entropy_alleles, color='blue')
         plt.plot(self.generations, self.prdm9_entropy_alleles, color='green')
-        plt.title('Number of PRDM9 alleles (blue) and \n efficient number of PRDM9 alleles (green) over time')
+        plt.title('Efficient number of PRDM9 alleles over time \n Stochastic : green | Deterministic (blue)')
         plt.xlabel('Generation')
         plt.ylabel('Number of alleles')
         plt.yscale('log')
 
         plt.subplot(333)
-        plt.hexbin(self.prdm9_entropy_alleles, self.hotspots_erosion_mean, self.hotspots_erosion_cv, gridsize=200,
-                   bins='log')
-        plt.title('Erosion of the hotspots vs Number of PRDM9 alleles')
-        plt.xlabel('Number of PRDM9 alleles')
-        plt.ylabel('Erosion Variance')
-
-        plt.subplot(334)
-        plt.hexbin(self.hotspots_erosion_cum, self.prdm9_polymorphism_cum, self.prdm9_longevity_cum, gridsize=200,
-                   bins='log')
-        plt.title('PRMD9 frequency vs hotspot erosion')
-        plt.xlabel('Erosion')
-        plt.ylabel('PRMD9 frequency')
-
-        plt.subplot(335)
         plt.hexbin(self.prdm9_fitness_cum, self.prdm9_polymorphism_cum, self.prdm9_longevity_cum, gridsize=200,
                    bins='log')
         plt.title('PRMD9 frequency vs PRDM9 fitness')
         plt.xlabel('PRDM9 fitness')
+        plt.ylabel('PRMD9 frequency')
+
+        plt.subplot(334)
+        plt.hexbin(self.hotspots_erosion_cum, self.prdm9_polymorphism_cum, self.prdm9_longevity_cum, gridsize=200,
+                   bins='log')
+        plt.title('PRMD9 frequency vs hotspot erosion (Stochastic)')
+        plt.xlabel('Erosion')
+        plt.ylabel('PRMD9 frequency')
+
+        plt.subplot(335)
+        plt.hexbin(self.exact_hotspots_erosion_cum, self.exact_prdm9_frequencies_cum, self.exact_prdm9_longevity_cum, gridsize=200,
+                   bins='log')
+        plt.title('PRMD9 frequency vs hotspot erosion (Stochastic)')
+        plt.xlabel('Erosion')
         plt.ylabel('PRMD9 frequency')
 
         plt.subplot(336)
@@ -326,7 +389,7 @@ class BatchSimulation(object):
                 parameters[1] = self.erosion_rate_hotspot * axis_current
             elif self.axis == 5:
                 parameters[0] = self.mutation_rate_prdm9 / axis_current
-                parameters[1] = self.erosion_rate_hotspot / (axis_current ** 2)
+                parameters[1] = self.erosion_rate_hotspot / axis_current
                 parameters[2] = self.population_size * axis_current
             else:
                 parameters[self.axis] = axis_current
