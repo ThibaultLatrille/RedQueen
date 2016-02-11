@@ -1,3 +1,4 @@
+from scipy.stats.kde import gaussian_kde
 from multiprocessing import Pool
 import numpy as np
 import matplotlib.pyplot as plt
@@ -187,10 +188,10 @@ class Simulation(object):
 
                 self.exact_prdm9_entropy_alleles.append(entropy(self.exact_prdm9_frequencies))
                 self.exact_hotspots_erosion_mean.append(
-                    n_moment(1 - self.exact_hotspots_erosion, self.exact_prdm9_frequencies, 1))
+                        n_moment(1 - self.exact_hotspots_erosion, self.exact_prdm9_frequencies, 1))
                 self.exact_hotspots_erosion_cv.append(cv(1 - self.exact_hotspots_erosion, self.exact_prdm9_frequencies))
                 self.exact_prdm9_longevity_mean.append(
-                    n_moment(self.exact_prdm9_longevity, self.exact_prdm9_frequencies, 1))
+                        n_moment(self.exact_prdm9_longevity, self.exact_prdm9_frequencies, 1))
                 self.exact_prdm9_longevity_cv.append(cv(self.exact_prdm9_longevity, self.exact_prdm9_frequencies))
                 self.exact_prdm9_frequencies_cum.extend(self.exact_prdm9_frequencies)
                 self.exact_hotspots_erosion_cum.extend(1 - self.exact_hotspots_erosion)
@@ -268,9 +269,9 @@ class Simulation(object):
         plt.ylabel('w(x)')
 
         plt.subplot(332)
+        plt.plot(self.generations, self.prdm9_entropy_alleles, color='red')
         plt.plot(self.generations, self.exact_prdm9_entropy_alleles, color='blue')
-        plt.plot(self.generations, self.prdm9_entropy_alleles, color='green')
-        plt.title('Efficient number of PRDM9 alleles over time \n Stochastic : green | Deterministic (blue)')
+        plt.title('Efficient number of PRDM9 alleles over time \n Stochastic : red | Deterministic : blue')
         plt.xlabel('Generation')
         plt.ylabel('Number of alleles')
         plt.yscale('log')
@@ -290,7 +291,8 @@ class Simulation(object):
         plt.ylabel('PRMD9 frequency')
 
         plt.subplot(335)
-        plt.hexbin(self.exact_hotspots_erosion_cum, self.exact_prdm9_frequencies_cum, self.exact_prdm9_longevity_cum, gridsize=200,
+        plt.hexbin(self.exact_hotspots_erosion_cum, self.exact_prdm9_frequencies_cum, self.exact_prdm9_longevity_cum,
+                   gridsize=200,
                    bins='log')
         plt.title('PRMD9 frequency vs hotspot erosion (Stochastic)')
         plt.xlabel('Erosion')
@@ -304,28 +306,37 @@ class Simulation(object):
         plt.ylabel('PRDM9 fitness')
 
         plt.subplot(337)
-        cumulative = np.array(self.prdm9_polymorphism_cum)
-        high_frequencies = np.array(self.prdm9_high_frequency_cum, dtype=bool)
-        plt.hist([cumulative[high_frequencies], cumulative[np.logical_not(high_frequencies)]], stacked=True,
-                 fill=True, normed=True)
+        x = np.linspace(0, 1, 100)
+        stochastic_density = gaussian_kde(self.prdm9_polymorphism_cum)(x)
+        exact_density = gaussian_kde(self.exact_prdm9_frequencies_cum)(x)
+        plt.plot(x, stochastic_density, 'r')
+        plt.fill_between(x, stochastic_density, np.zeros(100), color='red', alpha=0.3)
+        plt.plot(x, exact_density, 'b')
+        plt.fill_between(x, exact_density, np.zeros(100), color='blue', alpha=0.3)
         plt.title('PRDM9 frequencies histogram')
         plt.xlabel('PRDM9 Frequencies')
         plt.ylabel('Frequency')
 
         plt.subplot(338)
-        cumulative = np.array(self.hotspots_erosion_cum)
-        high_frequencies = np.array(self.prdm9_high_frequency_cum, dtype=bool)
-        plt.hist([cumulative[high_frequencies], cumulative[np.logical_not(high_frequencies)]], stacked=True,
-                 fill=True, normed=True)
+        x = np.linspace(0, 1, 100)
+        stochastic_density = gaussian_kde(self.hotspots_erosion_cum)(x)
+        exact_density = gaussian_kde(self.exact_hotspots_erosion_cum)(x)
+        plt.plot(x, stochastic_density, 'r')
+        plt.fill_between(x, stochastic_density, np.zeros(100), color='red', alpha=0.3)
+        plt.plot(x, exact_density, 'b')
+        plt.fill_between(x, exact_density, np.zeros(100), color='blue', alpha=0.3)
         plt.title('Erosion of the hotspots histogram')
         plt.xlabel('Erosion of the hotspots')
         plt.ylabel('Frequency')
 
         plt.subplot(339)
-        cumulative = np.array(self.prdm9_longevity_cum)
-        high_frequencies = np.array(self.prdm9_high_frequency_cum, dtype=bool)
-        plt.hist([cumulative[high_frequencies], cumulative[np.logical_not(high_frequencies)]], stacked=True,
-                 fill=True, normed=True)
+        x = np.linspace(1, np.max(np.append(self.prdm9_longevity_cum, self.exact_prdm9_longevity_cum)), 100)
+        stochastic_density = gaussian_kde(self.prdm9_longevity_cum)(x)
+        exact_density = gaussian_kde(self.exact_prdm9_longevity_cum)(x)
+        plt.plot(x, stochastic_density, 'r')
+        plt.fill_between(x, stochastic_density, np.zeros(100), color='red', alpha=0.3)
+        plt.plot(x, exact_density, 'b')
+        plt.fill_between(x, exact_density, np.zeros(100), color='blue', alpha=0.3)
         plt.title('Longevity of PRDM9 alleles histogram')
         plt.xlabel('Longevity')
         plt.ylabel('Frequency')
