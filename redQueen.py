@@ -94,16 +94,20 @@ class SimulationStep(object):
         #  we should check for selection coefficient and probability of dying immediately
         if self.fitness_family == 0:
             fixation = float(1) / population_size
-        elif self.fitness_family == 1:
-            w_bar = np.sum(self.prdm9_polymorphism * self.hotspots_erosion)
-            s_initial = (1 - w_bar) / w_bar
-            fixation = (1 - np.exp(-s_initial)) / (1 - np.exp(-population_size * s_initial))
         else:
-            fitness_matrix = self.fitness(np.add.outer(self.hotspots_erosion, self.hotspots_erosion) / 2)
-            w_initial = self.fitness((1 + self.hotspots_erosion) / 2) * self.prdm9_polymorphism
-            w_bar = np.sum(np.dot(fitness_matrix, self.prdm9_polymorphism) * self.prdm9_polymorphism)
-            s_initial = (w_initial - w_bar) / w_bar
-            fixation = (1 - np.exp(-s_initial)) / (1 - np.exp(-population_size * s_initial))
+            if self.fitness_family == 1:
+                w_bar = np.sum(self.prdm9_polymorphism * self.hotspots_erosion)
+                s_initial = (1 - w_bar) / w_bar
+            else:
+                fitness_matrix = self.fitness(np.add.outer(self.hotspots_erosion, self.hotspots_erosion) / 2)
+                w_initial = self.fitness((1 + self.hotspots_erosion) / 2) * self.prdm9_polymorphism
+                w_bar = np.sum(np.dot(fitness_matrix, self.prdm9_polymorphism) * self.prdm9_polymorphism)
+                s_initial = (w_initial - w_bar) / w_bar
+            denominator = 1 - np.exp(-population_size * s_initial)
+            if denominator == 0.:
+                fixation = float(1) / population_size
+            else:
+                fixation = (1 - np.exp(-s_initial)) / denominator
 
         fixed = np.sum(np.array(map(lambda x: x < fixation, np.random.uniform(size=new_alleles)), dtype=bool))
         if fixed > 0:
@@ -254,8 +258,8 @@ class Simulation(object):
                    gridsize=200,
                    bins='log')
         plt.title('PRMD9 frequency vs PRDM9 fitness (With drift)')
-        plt.xlabel('PRDM9 fitness')
-        plt.ylabel('PRMD9 frequency')
+        plt.ylabel('PRDM9 fitness')
+        plt.xlabel('PRMD9 frequency')
 
         plt.subplot(334)
         plt.hexbin(self.s_data.hotspots_erosion_cum, self.s_data.prdm9_frequencies_cum, self.s_data.prdm9_longevity_cum,
