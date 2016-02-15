@@ -6,6 +6,10 @@ import time
 import os
 
 
+def execute(x):
+    return x.run()
+
+
 def set_dir(path):
     path = os.getcwd() + path
     try:
@@ -40,26 +44,28 @@ def normalized_var(x, frequencies):
 
 
 class SimulationStep(object):
-    def __init__(self, number_of_alleles, population_size):
+    def __init__(self, number_of_alleles, population_size, fitness_family, inflexion_point):
         self.prdm9_polymorphism = np.ones(number_of_alleles) * population_size / number_of_alleles
         self.hotspots_erosion = np.ones(number_of_alleles)
         self.prdm9_longevity = np.zeros(number_of_alleles)
         self.prdm9_fitness = np.ones(number_of_alleles)
+        self.fitness_family = fitness_family
+        self.inflexion_point = inflexion_point
 
-    def forward(self, erosion_rate, fitness_type, fitness, drift=False, population_size=1.):
+    def forward(self, erosion_rate, drift=False, population_size=1.):
         prdm9_frequencies = sum_to_one(self.prdm9_polymorphism)
 
         self.hotspots_erosion *= np.exp(- erosion_rate * prdm9_frequencies)
 
         # Compute the fitness for each allele
-        if fitness_type == 0:
+        if self.fitness_family == 0:
             distribution_vector = prdm9_frequencies
-        elif fitness_type == 1:
+        elif self.fitness_family == 1:
             w_bar = np.sum(prdm9_frequencies * self.hotspots_erosion)
             self.prdm9_fitness = (self.hotspots_erosion + w_bar) / (2 * w_bar)
             distribution_vector = self.prdm9_fitness * prdm9_frequencies
         else:
-            fitness_matrix = fitness(np.add.outer(self.hotspots_erosion, self.hotspots_erosion) / 2)
+            fitness_matrix = self.fitness(np.add.outer(self.hotspots_erosion, self.hotspots_erosion) / 2)
             self.prdm9_fitness = np.dot(fitness_matrix, prdm9_frequencies)
             distribution_vector = sum_to_one(self.prdm9_fitness * prdm9_frequencies)
 
@@ -84,17 +90,17 @@ class SimulationStep(object):
         self.prdm9_longevity = np.append(self.prdm9_longevity, np.zeros(new_alleles))
         self.hotspots_erosion = np.append(self.hotspots_erosion, np.ones(new_alleles))
 
-    def no_drift_new_alleles(self, new_alleles, fitness_type, fitness, population_size):
+    def no_drift_new_alleles(self, new_alleles, population_size):
         #  we should check for selection coefficient and probability of dying immediately
-        if fitness_type == 0:
+        if self.fitness_family == 0:
             fixation = float(1) / population_size
-        elif fitness_type == 1:
+        elif self.fitness_family == 1:
             w_bar = np.sum(self.prdm9_polymorphism * self.hotspots_erosion)
             s_initial = (1 - w_bar) / w_bar
             fixation = (1 - np.exp(-s_initial)) / (1 - np.exp(-population_size * s_initial))
         else:
-            fitness_matrix = fitness(np.add.outer(self.hotspots_erosion, self.hotspots_erosion) / 2)
-            w_initial = fitness((1 + self.hotspots_erosion) / 2) * self.prdm9_polymorphism
+            fitness_matrix = self.fitness(np.add.outer(self.hotspots_erosion, self.hotspots_erosion) / 2)
+            w_initial = self.fitness((1 + self.hotspots_erosion) / 2) * self.prdm9_polymorphism
             w_bar = np.sum(np.dot(fitness_matrix, self.prdm9_polymorphism) * self.prdm9_polymorphism)
             s_initial = (w_initial - w_bar) / w_bar
             fixation = (1 - np.exp(-s_initial)) / (1 - np.exp(-population_size * s_initial))
@@ -105,6 +111,16 @@ class SimulationStep(object):
             self.prdm9_polymorphism = np.append(self.prdm9_polymorphism, np.ones(fixed) / population_size)
             self.hotspots_erosion = np.append(self.hotspots_erosion, np.ones(fixed))
             self.prdm9_longevity = np.append(self.prdm9_longevity, np.zeros(fixed))
+
+    def fitness(self, x):
+        if self.fitness_family == 0:
+            return 1
+        elif self.fitness_family == 1:
+            return x
+        elif self.fitness_family == 2:
+            return x ** 2
+        else:
+            return x ** 4 / (x ** 4 + self.inflexion_point ** 4)
 
     def __repr__(self):
         return "The polymorphism of PRDM9: %s" % self.prdm9_polymorphism + \
@@ -146,19 +162,11 @@ class Simulation(object):
         initial_number_of_alleles = 10
         self.scaling = scaling
 
-        if callable(fitness):
-            self.fitness_complexity = 4
-            self.fitness = np.vectorize(fitness)
-        else:
-            fitness_hash = {"constant": 0, "linear": 1, "quadratic": 2, "sigmoid": 3}
-            assert fitness in fitness_hash.keys(), "Parameter 'fitness' must be a string:  ['linear','constant'," \
-                                                   "'quadratic','sigmoid'] or a function"
-            self.fitness_complexity = fitness_hash[fitness]
-            self.fitness = np.vectorize({0: lambda x: 1,
-                                         1: lambda x: x,
-                                         2: lambda x: x ** 2,
-                                         3: lambda x: x ** 4 / (x ** 4 + inflexion_point ** 4)}[
-                                            self.fitness_complexity])
+        fitness_hash = {"constant": 0, "linear": 1, "quadratic": 2, "sigmoid": 3}
+        assert fitness in fitness_hash.keys(), "Parameter 'fitness' must be a string:  ['linear','constant'," \
+                                               "'quadratic','sigmoid'] or a function"
+        self.fitness_family = fitness_hash[fitness]
+        self.inflexion_point = inflexion_point
 
         self.number_of_steps = 10000  # Number of steps at which we make computations
         self.t_max = max(int(self.scaling * population_size), self.number_of_steps)  # Number of generations
@@ -173,10 +181,11 @@ class Simulation(object):
 
         self.scaled_mutation_rate = self.population_size * self.mutation_rate_prdm9
 
-        self.s_step = SimulationStep(initial_number_of_alleles, self.population_size)
+        self.s_step = SimulationStep(initial_number_of_alleles, self.population_size, self.fitness_family,
+                                     inflexion_point)
         self.s_data = SimulationData()
 
-        self.d_step = SimulationStep(initial_number_of_alleles, 1)
+        self.d_step = SimulationStep(initial_number_of_alleles, 1, self.fitness_family, inflexion_point)
         self.d_data = SimulationData()
 
         self.generations = []
@@ -198,12 +207,10 @@ class Simulation(object):
             new_alleles = np.random.poisson(2 * self.scaled_mutation_rate)
             if new_alleles > 0:
                 self.s_step.drift_new_alleles(new_alleles)
-                self.d_step.no_drift_new_alleles(new_alleles, self.fitness_complexity, self.fitness,
-                                                 self.population_size)
+                self.d_step.no_drift_new_alleles(new_alleles, self.population_size)
 
-            self.s_step.forward(self.scaled_erosion_rate, self.fitness_complexity, self.fitness, True,
-                                self.population_size)
-            self.d_step.forward(self.scaled_erosion_rate, self.fitness_complexity, self.fitness)
+            self.s_step.forward(self.scaled_erosion_rate, True, self.population_size)
+            self.d_step.forward(self.scaled_erosion_rate)
 
             step_t += 1
             if step_t > step and t / float(self.t_max) > 0.01:
@@ -229,7 +236,7 @@ class Simulation(object):
         plt.subplot(331)
         plt.text(0.05, 0.98, self, fontsize=14, verticalalignment='top')
         theta = np.arange(0.0, 1.0, 0.01)
-        plt.plot(theta, self.fitness(theta), color='red')
+        plt.plot(theta, self.d_step.fitness(theta), color='red')
         plt.title('The fitness function')
         plt.xlabel('x')
         plt.ylabel('w(x)')
@@ -243,7 +250,7 @@ class Simulation(object):
         plt.yscale('log')
 
         plt.subplot(333)
-        plt.hexbin(self.s_data.prdm9_fitness_cum, self.s_data.prdm9_frequencies_cum, self.s_data.prdm9_longevity_cum,
+        plt.hexbin(self.s_data.prdm9_frequencies_cum, self.s_data.prdm9_fitness_cum, self.s_data.prdm9_longevity_cum,
                    gridsize=200,
                    bins='log')
         plt.title('PRMD9 frequency vs PRDM9 fitness (With drift)')
@@ -315,7 +322,7 @@ class Simulation(object):
         filename = "u=%.1e" % self.mutation_rate_prdm9 + \
                    "_r=%.1e" % self.erosion_rate_hotspot + \
                    "_n=%.1e" % self.population_size + \
-                   "_f=%.1e" % self.fitness_complexity + \
+                   "_f=%.1e" % self.fitness_family + \
                    "_t=%.1e" % self.t_max
         plt.savefig(filename + '.png')
         plt.clf()
@@ -377,8 +384,7 @@ class BatchSimulation(object):
     def run(self, number_of_cpu=4):
         set_dir("/" + self.filename())
         if number_of_cpu > 1:
-            def execute(x):
-                return x.run()
+
             pool = Pool(number_of_cpu)
             self.simulations = pool.map(execute, self.simulations)
         else:
@@ -412,7 +418,7 @@ class BatchSimulation(object):
         plt.text(0.05, 0.98, self, fontsize=14, verticalalignment='top')
         theta = np.arange(0.0, 1.0, 0.01)
         for simulation in self.simulations:
-            plt.plot(theta, simulation.fitness(theta), color='red')
+            plt.plot(theta, simulation.d_step.fitness(theta), color='red')
 
         plt.title('The fitness function')
         plt.xlabel('x')
@@ -457,7 +463,6 @@ class BatchSimulation(object):
                "_e=%.1e" % self.erosion_rate_hotspot + \
                "_n=%.1e" % self.population_size
 
-from functools import partial
 
 if __name__ == '__main__':
     set_dir("/tmp")
