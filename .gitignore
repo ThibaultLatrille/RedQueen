@@ -6,5 +6,9 @@
 
 *~
 /tmp
+*.aux
+*.log
+*.synctex.gz
 *.swp
+*.pdf
 .idea
