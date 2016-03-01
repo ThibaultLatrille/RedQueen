@@ -72,13 +72,13 @@ class SimulationStep(object):
         else:
             return self.alpha * 2 * self.inflexion_point ** 4 / (x * (x ** 4 + self.inflexion_point ** 4))
 
-    def continous_forward(self, mu, nu, rho, cutoff, t):
+    def continuous_forward(self, mu, nu, rho, cutoff, t):
         dt = min(1. / (max(nu * rho, self.alpha, mu * self.alpha) * 10), t / 10)
         self.t += t
         current_t = 0
         while current_t < t:
             current_t += dt
-            self.continous_new_alleles(mu, dt, cutoff)
+            self.continuous_new_alleles(mu, dt, cutoff)
             prdm9_frequencies = sum_to_one(self.prdm9_polymorphism)
             self.hotspots_erosion -= nu * rho * prdm9_frequencies * self.hotspots_erosion * dt
             # Compute the fitness for each allele
@@ -88,18 +88,21 @@ class SimulationStep(object):
                 l_bar = np.sum(prdm9_frequencies * self.hotspots_erosion)
                 self.prdm9_fitness = self.coefficient_fitness(l_bar) * (self.hotspots_erosion - l_bar)
                 distribution_vector = prdm9_frequencies + self.prdm9_fitness * prdm9_frequencies * dt
-                assert np.min(distribution_vector) >= 0. and np.max(
-                    distribution_vector) <= 1., "The function can't be linearized with this value of population size," \
-                                                "increase population size or decrease alpha_0"
+                if np.max(distribution_vector) > 1.:
+                    print "Frequencies of PRDM9 went went above in continuous forward"
+                    distribution_vector = sum_to_one(np.clip(distribution_vector, 0., 1.))
+                if np.min(distribution_vector) < 0.:
+                    print "Frequencies of PRDM9 went below zero in continuous forward"
+                    distribution_vector = sum_to_one(np.clip(distribution_vector, 0., 1.))
 
             self.prdm9_polymorphism = distribution_vector
 
         self.prdm9_longevity += t
 
-    def continous_new_alleles(self, mu, dt, initial):
+    def continuous_new_alleles(self, mu, dt, initial):
         prdm9_frequencies = sum_to_one(self.prdm9_polymorphism)
         l_bar = float(np.sum(prdm9_frequencies * self.hotspots_erosion))
-        s = self.coefficient_fitness(l_bar) * (1 - l_bar)
+        s = 2 * self.coefficient_fitness(l_bar) * (1 - l_bar)
         fixed = np.random.poisson(mu * s * dt)
         if fixed > 0:
             self.prdm9_polymorphism *= (1 - float(fixed) * initial)
@@ -113,7 +116,7 @@ class SimulationStep(object):
         self.prdm9_longevity = np.append(self.prdm9_longevity, np.zeros(new_alleles))
         self.hotspots_erosion = np.append(self.hotspots_erosion, np.ones(new_alleles))
 
-    def discret_forward(self, erosion_rate, drift=False, population_size=1., linearized=False):
+    def discrete_forward(self, erosion_rate, drift=False, population_size=1., linearized=False):
         prdm9_frequencies = sum_to_one(self.prdm9_polymorphism)
 
         self.hotspots_erosion *= np.exp(- erosion_rate * prdm9_frequencies)
@@ -126,9 +129,12 @@ class SimulationStep(object):
                 l_bar = np.sum(prdm9_frequencies * self.hotspots_erosion)
                 self.prdm9_fitness = self.coefficient_fitness(l_bar) * (self.hotspots_erosion - l_bar)
                 distribution_vector = prdm9_frequencies + self.prdm9_fitness * prdm9_frequencies
-                assert np.min(distribution_vector) >= 0. and np.max(
-                    distribution_vector) <= 1., "The function can't be linearized with this value of population size," \
-                                                "increase population size or decrease alpha_0"
+                if np.max(distribution_vector) > 1.:
+                    print "Frequencies of PRDM9 went went above in discrete forward"
+                    distribution_vector = sum_to_one(np.clip(distribution_vector, 0., 1.))
+                if np.min(distribution_vector) < 0.:
+                    print "Frequencies of PRDM9 went below zero in discrete forward"
+                    distribution_vector = sum_to_one(np.clip(distribution_vector, 0., 1.))
             else:
                 fitness_matrix = self.fitness(np.add.outer(self.hotspots_erosion, self.hotspots_erosion) / 2)
                 self.prdm9_fitness = np.dot(fitness_matrix, prdm9_frequencies)
@@ -243,17 +249,17 @@ class Simulation(object):
             new_alleles = np.random.poisson(self.scaled_mutation_rate)
             if new_alleles > 0:
                 self.s_step.drift_new_alleles(new_alleles)
-            self.s_step.discret_forward(self.scaled_erosion_rate, True, self.population_size, linearized=True)
+            self.s_step.discrete_forward(self.scaled_erosion_rate, True, self.population_size, linearized=True)
             self.s_step.remove_dead_prdm9(cut_off=0)
 
             step_t += 1
             if step_t > step and t / float(self.t_max) > 0.01:
                 step_t -= step
-                self.d_step.continous_forward(mu=self.mutation_rate_prdm9 * self.population_size,
-                                              nu=self.erosion_rate_hotspot * self.population_size,
-                                              rho=self.recombination_rate * self.population_size,
-                                              cutoff=self.cutoff,
-                                              t=100. / self.number_of_steps)
+                self.d_step.continuous_forward(mu=self.mutation_rate_prdm9 * self.population_size,
+                                               nu=self.erosion_rate_hotspot * self.population_size,
+                                               rho=self.recombination_rate * self.population_size,
+                                               cutoff=self.cutoff,
+                                               t=100. / self.number_of_steps)
                 if t % 10000 == 0:
                     print "Computation at {0}%".format(self.d_step.t)
                 self.d_step.remove_dead_prdm9(cut_off=self.cutoff * 0.99)
@@ -363,6 +369,7 @@ class Simulation(object):
                    "_r=%.1e" % self.erosion_rate_hotspot + \
                    "_n=%.1e" % self.population_size + \
                    "_f=%.1e" % self.fitness_family + \
+                   "_c=%.1e" % self.cutoff + \
                    "_t=%.1e" % self.t_max
         plt.savefig(filename + '.png')
         plt.clf()
@@ -390,7 +397,7 @@ class BatchSimulation(object):
         self.axis = axis_hash[axis]
         self.axis_str = {0: "Mutation rate of PRDM9", 1: "Erosion rate of the hotspots", 2: "The population size",
                          3: "The fitness inflexion point", 4: "Scaled mutation rate and erosion rate",
-                         5: "The scaling factor", 6: "Cut-off for continous time"}[self.axis]
+                         5: "The scaling factor", 6: "Cut-off for continuous time"}[self.axis]
 
         self.inflexion = inflexion
         self.fitness = fitness
