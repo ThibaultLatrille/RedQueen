@@ -54,7 +54,6 @@ class SimulationStep(object):
         self.alpha = alpha
         self.num_alleles = 0
         self.t = 0
-        self.k = 1
 
     def fitness(self, x):
         if self.fitness_family == 1:
@@ -74,7 +73,7 @@ class SimulationStep(object):
             return self.alpha * 2 * self.inflexion_point ** 4 / (x * (x ** 4 + self.inflexion_point ** 4))
 
     def continous_forward(self, mu, nu, rho, cutoff, t):
-        dt = min(100. / (max(nu * rho, self.alpha, mu * self.alpha)), t / 10)
+        dt = min(1. / (max(nu * rho, self.alpha, mu * self.alpha) * 10), t / 10)
         self.t += t
         current_t = 0
         while current_t < t:
@@ -187,6 +186,7 @@ class Simulation(object):
                  recombination_rate=1.0 * 10 ** -3,
                  inflexion_point=0.5,
                  fitness='linear',
+                 cutoff=0.01,
                  scaling=100):
         initial_number_of_alleles = 10
         self.scaling = scaling
@@ -196,7 +196,7 @@ class Simulation(object):
                                                "'quadratic','sigmoid'] or a function"
         self.fitness_family = fitness_hash[fitness]
         self.inflexion_point = inflexion_point
-
+        self.cutoff = cutoff
         self.number_of_steps = 1000  # Number of steps at which we make computations
         self.t_max = max(int(self.scaling * population_size), self.number_of_steps)  # Number of generations
 
@@ -252,11 +252,11 @@ class Simulation(object):
                 self.d_step.continous_forward(mu=self.mutation_rate_prdm9 * self.population_size,
                                               nu=self.erosion_rate_hotspot * self.population_size,
                                               rho=self.recombination_rate * self.population_size,
-                                              cutoff=0.1,
+                                              cutoff=self.cutoff,
                                               t=100. / self.number_of_steps)
-                if t % 1000 == 0:
+                if t % 10000 == 0:
                     print "Computation at {0}%".format(self.d_step.t)
-                self.d_step.remove_dead_prdm9(cut_off=0.099)
+                self.d_step.remove_dead_prdm9(cut_off=self.cutoff * 0.99)
 
                 self.generations.append(t)
                 self.s_data.store(self.s_step)
@@ -380,27 +380,29 @@ class BatchSimulation(object):
                  fitness='linear',
                  axis="",
                  number_of_simulations=20,
+                 cutoff=0.01,
                  scale=10 ** 2):
         axis_hash = {"mutation": 0, "erosion": 1, "population": 2, "fitness": 3, "mutation&erosion": 4,
-                     "erosion&mutation": 4, "scaling": 5}
+                     "erosion&mutation": 4, "scaling": 5, "cutoff": 6}
         assert axis in axis_hash.keys(), "Axis must be either 'population', 'mutation', 'erosion'," \
                                          "'fitness', 'mutation&erosion', or 'scaling'"
         assert scale > 1, "The scale parameter must be greater than one"
         self.axis = axis_hash[axis]
         self.axis_str = {0: "Mutation rate of PRDM9", 1: "Erosion rate of the hotspots", 2: "The population size",
                          3: "The fitness inflexion point", 4: "Scaled mutation rate and erosion rate",
-                         5: "The scaling factor"}[self.axis]
+                         5: "The scaling factor", 6: "Cut-off for continous time"}[self.axis]
 
         self.inflexion = inflexion
         self.fitness = fitness
+        self.cutoff = cutoff
         self.recombination_rate = recombination_rate
         self.mutation_rate_prdm9 = mutation_rate_prdm9  # The rate at which new allele for PRDM9 are created
         self.erosion_rate_hotspot = erosion_rate_hotspot  # The rate at which the hotspots are eroded
         self.population_size = population_size
         parameters = [self.mutation_rate_prdm9, self.erosion_rate_hotspot, self.population_size,
-                      self.recombination_rate, self.inflexion, self.fitness]
+                      self.recombination_rate, self.inflexion, self.fitness, self.cutoff]
 
-        if self.axis == 4 or self.axis == 5:
+        if self.axis == 4 or self.axis == 5 or self.axis == 6:
             self.axis_range = np.logspace(0, np.log10(scale),
                                           num=number_of_simulations)
         elif self.axis == 3:
@@ -420,6 +422,8 @@ class BatchSimulation(object):
                 parameters[1] = self.erosion_rate_hotspot / axis_current
                 parameters[2] = self.population_size * axis_current
                 parameters[3] = self.recombination_rate / axis_current
+            elif self.axis == 6:
+                parameters[6] = self.cutoff * axis_current
             else:
                 parameters[self.axis] = axis_current
             self.simulations.append(Simulation(*parameters))
@@ -512,21 +516,22 @@ class BatchSimulation(object):
 if __name__ == '__main__':
     set_dir("/tmp")
 
-    # batch_simulation = BatchSimulation(mutation_rate_prdm9=1.0 * 10 ** -3,
-    #                                    erosion_rate_hotspot=1.0 * 10 ** -2,
-    #                                    population_size=10 ** 3,
-    #                                    recombination_rate=1.0 * 10 ** -3,
-    #                                    axis='scaling',
-    #                                    fitness='sigmoid',
-    #                                    number_of_simulations=20,
-    #                                    inflexion=0.10,
-    #                                    scale=10 ** 2)
-    # batch_simulation.run(number_of_cpu=1)
-    simulation = Simulation(mutation_rate_prdm9=1.0 * 10 ** -3,
-                            erosion_rate_hotspot=1.0 * 10 ** -3,
-                            population_size=10 ** 3,
-                            recombination_rate=1.0 * 10 ** -3,
-                            inflexion_point=0.1,
-                            fitness='sigmoid',
-                            scaling=100)
-    simulation.run()
+    batch_simulation = BatchSimulation(mutation_rate_prdm9=1.0 * 10 ** -3,
+                                       erosion_rate_hotspot=1.0 * 10 ** -3,
+                                       population_size=10 ** 3,
+                                       recombination_rate=1.0 * 10 ** -3,
+                                       axis='cutoff',
+                                       fitness='sigmoid',
+                                       number_of_simulations=20,
+                                       inflexion=0.10,
+                                       cutoff=1. * 10 ** -4,
+                                       scale=10 ** 2)
+    batch_simulation.run(number_of_cpu=7)
+    # simulation = Simulation(mutation_rate_prdm9=1.0 * 10 ** -3,
+    #                         erosion_rate_hotspot=1.0 * 10 ** -3,
+    #                         population_size=10 ** 3,
+    #                         recombination_rate=1.0 * 10 ** -3,
+    #                         inflexion_point=0.1,
+    #                         fitness='sigmoid',
+    #                         scaling=100)
+    # simulation.run()
