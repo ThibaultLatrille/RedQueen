@@ -45,13 +45,74 @@ def normalized_var(x, frequencies):
 
 class SimulationStep(object):
     def __init__(self, number_of_alleles, population_size, fitness_family, inflexion_point, alpha):
-        self.prdm9_polymorphism = np.ones(number_of_alleles) * population_size / number_of_alleles
-        self.hotspots_erosion = np.ones(number_of_alleles)
+        self.prdm9_polymorphism = sum_to_one(np.random.sample(number_of_alleles)) * population_size
+        self.hotspots_erosion = np.random.sample(number_of_alleles)
         self.prdm9_longevity = np.zeros(number_of_alleles)
         self.prdm9_fitness = np.ones(number_of_alleles)
         self.fitness_family = fitness_family
         self.inflexion_point = inflexion_point
         self.alpha = alpha
+        self.num_alleles = 0
+        self.t = 0
+        self.k = 1
+
+    def fitness(self, x):
+        if self.fitness_family == 1:
+            matrix = x
+        elif self.fitness_family == 2:
+            matrix = x ** 2
+        else:
+            matrix = x ** 4 / (x ** 4 + self.inflexion_point ** 4)
+        return np.power(matrix, self.alpha)
+
+    def coefficient_fitness(self, x):
+        if self.fitness_family == 1:
+            return self.alpha * 1.0 / (2 * x)
+        elif self.fitness_family == 2:
+            return self.alpha * 1.0 / x
+        else:
+            return self.alpha * 2 * self.inflexion_point ** 4 / (x * (x ** 4 + self.inflexion_point ** 4))
+
+    def continous_forward(self, mu, nu, rho, cutoff, t):
+        dt = min(100. / (max(nu * rho, self.alpha, mu * self.alpha)), t / 10)
+        self.t += t
+        current_t = 0
+        while current_t < t:
+            current_t += dt
+            self.continous_new_alleles(mu, dt, cutoff)
+            prdm9_frequencies = sum_to_one(self.prdm9_polymorphism)
+            self.hotspots_erosion -= nu * rho * prdm9_frequencies * self.hotspots_erosion * dt
+            # Compute the fitness for each allele
+            if self.fitness_family == 0:
+                distribution_vector = prdm9_frequencies
+            else:
+                l_bar = np.sum(prdm9_frequencies * self.hotspots_erosion)
+                self.prdm9_fitness = self.coefficient_fitness(l_bar) * (self.hotspots_erosion - l_bar)
+                distribution_vector = prdm9_frequencies + self.prdm9_fitness * prdm9_frequencies * dt
+                assert np.min(distribution_vector) >= 0. and np.max(
+                    distribution_vector) <= 1., "The function can't be linearized with this value of population size," \
+                                                "increase population size or decrease alpha_0"
+
+            self.prdm9_polymorphism = distribution_vector
+
+        self.prdm9_longevity += t
+
+    def continous_new_alleles(self, mu, dt, initial):
+        prdm9_frequencies = sum_to_one(self.prdm9_polymorphism)
+        l_bar = float(np.sum(prdm9_frequencies * self.hotspots_erosion))
+        s = self.coefficient_fitness(l_bar) * (1 - l_bar)
+        fixed = np.random.poisson(mu * s * dt)
+        if fixed > 0:
+            self.prdm9_polymorphism *= (1 - float(fixed) * initial)
+            self.prdm9_polymorphism = np.append(self.prdm9_polymorphism, np.ones(fixed) * initial)
+            self.hotspots_erosion = np.append(self.hotspots_erosion, np.ones(fixed))
+            self.prdm9_longevity = np.append(self.prdm9_longevity, np.zeros(fixed))
+
+    def drift_new_alleles(self, new_alleles):
+        self.prdm9_polymorphism -= np.random.multinomial(new_alleles, sum_to_one(self.prdm9_polymorphism))
+        self.prdm9_polymorphism = np.append(self.prdm9_polymorphism, np.ones(new_alleles))
+        self.prdm9_longevity = np.append(self.prdm9_longevity, np.zeros(new_alleles))
+        self.hotspots_erosion = np.append(self.hotspots_erosion, np.ones(new_alleles))
 
     def discret_forward(self, erosion_rate, drift=False, population_size=1., linearized=False):
         prdm9_frequencies = sum_to_one(self.prdm9_polymorphism)
@@ -88,51 +149,6 @@ class SimulationStep(object):
             self.hotspots_erosion = self.hotspots_erosion[remove_extincted]
             self.prdm9_longevity = self.prdm9_longevity[remove_extincted]
             self.prdm9_fitness = self.prdm9_fitness[remove_extincted]
-
-    def drift_new_alleles(self, new_alleles):
-        self.prdm9_polymorphism -= np.random.multinomial(new_alleles, sum_to_one(self.prdm9_polymorphism))
-        self.prdm9_polymorphism = np.append(self.prdm9_polymorphism, np.ones(new_alleles))
-        self.prdm9_longevity = np.append(self.prdm9_longevity, np.zeros(new_alleles))
-        self.hotspots_erosion = np.append(self.hotspots_erosion, np.ones(new_alleles))
-
-    def no_drift_new_alleles(self, new_alleles, population_size):
-        #  we should check for selection coefficient and probability of dying immediately
-        if self.fitness_family == 0:
-            fixation = float(1) / population_size
-        else:
-            fitness_matrix = self.fitness(np.add.outer(self.hotspots_erosion, self.hotspots_erosion) / 2)
-            w_initial = np.sum(self.fitness((1 + self.hotspots_erosion) / 2) * self.prdm9_polymorphism)
-            w_bar = np.sum(np.dot(fitness_matrix, self.prdm9_polymorphism) * self.prdm9_polymorphism)
-            s_initial = (w_initial - w_bar) / w_bar
-            denominator = 1 - np.exp(-population_size * s_initial)
-            if denominator == 0.:
-                fixation = float(1) / population_size
-            else:
-                fixation = (1 - np.exp(-s_initial)) / denominator
-
-        fixed = np.sum(np.array(map(lambda x: x < fixation, np.random.uniform(size=new_alleles)), dtype=bool))
-        if fixed > 0:
-            self.prdm9_polymorphism *= (1 - float(fixed) / population_size)
-            self.prdm9_polymorphism = np.append(self.prdm9_polymorphism, np.ones(fixed) / population_size)
-            self.hotspots_erosion = np.append(self.hotspots_erosion, np.ones(fixed))
-            self.prdm9_longevity = np.append(self.prdm9_longevity, np.zeros(fixed))
-
-    def fitness(self, x):
-        if self.fitness_family == 1:
-            matrix = x
-        elif self.fitness_family == 2:
-            matrix = x ** 2
-        else:
-            matrix = x ** 4 / (x ** 4 + self.inflexion_point ** 4)
-        return np.power(matrix, self.alpha)
-
-    def coefficient_fitness(self, x):
-        if self.fitness_family == 1:
-            return self.alpha * 1.0 / (2 * x)
-        elif self.fitness_family == 2:
-            return self.alpha * 1.0 / x
-        else:
-            return self.alpha * (2 * self.inflexion_point ** 4) / (x * (x ** 4 + self.inflexion_point ** 4))
 
     def __repr__(self):
         return "The polymorphism of PRDM9: %s" % self.prdm9_polymorphism + \
@@ -181,13 +197,14 @@ class Simulation(object):
         self.fitness_family = fitness_hash[fitness]
         self.inflexion_point = inflexion_point
 
-        self.number_of_steps = 10000  # Number of steps at which we make computations
+        self.number_of_steps = 1000  # Number of steps at which we make computations
         self.t_max = max(int(self.scaling * population_size), self.number_of_steps)  # Number of generations
 
         self.mutation_rate_prdm9 = mutation_rate_prdm9  # The rate at which new allele for PRDM9 are created
         self.erosion_rate_hotspot = erosion_rate_hotspot  # The rate at which the hotspots are eroded
         self.population_size = float(population_size)  # population size
-        self.alpha = 1.0 * 10 ** 3 / self.population_size
+        self.alpha_zero = 1.0 * 10 ** 3
+        self.alpha = self.alpha_zero / self.population_size
 
         self.recombination_rate = recombination_rate
 
@@ -203,8 +220,8 @@ class Simulation(object):
                                      inflexion_point, self.alpha)
         self.s_data = SimulationData()
 
-        self.d_step = SimulationStep(initial_number_of_alleles, self.population_size, self.fitness_family,
-                                     inflexion_point, self.alpha)
+        self.d_step = SimulationStep(initial_number_of_alleles, 1.0, self.fitness_family,
+                                     inflexion_point, self.alpha_zero)
         self.d_data = SimulationData()
 
         self.generations = []
@@ -223,17 +240,24 @@ class Simulation(object):
         for t in range(self.t_max):
 
             # Randomly create new alleles of PRDM9
-            new_alleles = np.random.poisson(2 * self.scaled_mutation_rate)
+            new_alleles = np.random.poisson(self.scaled_mutation_rate)
             if new_alleles > 0:
                 self.s_step.drift_new_alleles(new_alleles)
-                self.d_step.drift_new_alleles(new_alleles)
-
-            self.s_step.discret_forward(self.scaled_erosion_rate, True, self.population_size)
-            self.d_step.discret_forward(self.scaled_erosion_rate, True, self.population_size, linearized=True)
+            self.s_step.discret_forward(self.scaled_erosion_rate, True, self.population_size, linearized=True)
+            self.s_step.remove_dead_prdm9(cut_off=0)
 
             step_t += 1
             if step_t > step and t / float(self.t_max) > 0.01:
                 step_t -= step
+                self.d_step.continous_forward(mu=self.mutation_rate_prdm9 * self.population_size,
+                                              nu=self.erosion_rate_hotspot * self.population_size,
+                                              rho=self.recombination_rate * self.population_size,
+                                              cutoff=0.1,
+                                              t=100. / self.number_of_steps)
+                if t % 1000 == 0:
+                    print "Computation at {0}%".format(self.d_step.t)
+                self.d_step.remove_dead_prdm9(cut_off=0.099)
+
                 self.generations.append(t)
                 self.s_data.store(self.s_step)
                 self.d_data.store(self.d_step)
@@ -241,9 +265,6 @@ class Simulation(object):
                     self.t_max = t
                     print "Breaking the loop, time over 720s"
                     break
-
-            self.s_step.remove_dead_prdm9(cut_off=0)
-            self.d_step.remove_dead_prdm9(cut_off=0)
 
         self.save_figure()
         return self
@@ -491,16 +512,21 @@ class BatchSimulation(object):
 if __name__ == '__main__':
     set_dir("/tmp")
 
-    batch_simulation = BatchSimulation(mutation_rate_prdm9=1.0 * 10 ** -3,
-                                       erosion_rate_hotspot=1.0 * 10 ** -7,
-                                       population_size=10 ** 2,
-                                       recombination_rate=1.0 * 10 ** -2,
-                                       axis='scaling',
-                                       fitness='quadratic',
-                                       number_of_simulations=20,
-                                       scale=10 ** 3)
-    batch_simulation.run(number_of_cpu=7)
-    # simulation = Simulation(mutation_rate_prdm9=5.0 * 10 ** -6,
-    #                        erosion_rate_hotspot=2.0 * 10 ** -7,
-    #                       population_size=4.0*10 ** 5)
-    # simulation.run()
+    # batch_simulation = BatchSimulation(mutation_rate_prdm9=1.0 * 10 ** -3,
+    #                                    erosion_rate_hotspot=1.0 * 10 ** -2,
+    #                                    population_size=10 ** 3,
+    #                                    recombination_rate=1.0 * 10 ** -3,
+    #                                    axis='scaling',
+    #                                    fitness='sigmoid',
+    #                                    number_of_simulations=20,
+    #                                    inflexion=0.10,
+    #                                    scale=10 ** 2)
+    # batch_simulation.run(number_of_cpu=1)
+    simulation = Simulation(mutation_rate_prdm9=1.0 * 10 ** -3,
+                            erosion_rate_hotspot=1.0 * 10 ** -3,
+                            population_size=10 ** 3,
+                            recombination_rate=1.0 * 10 ** -3,
+                            inflexion_point=0.1,
+                            fitness='sigmoid',
+                            scaling=100)
+    simulation.run()
