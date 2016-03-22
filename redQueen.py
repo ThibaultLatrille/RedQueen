@@ -5,10 +5,16 @@ import copy
 import matplotlib.pyplot as plt
 import time
 import os
+import uuid
+import cPickle as pickle
 
 
 def execute(x):
     return x.run()
+
+
+def id_generator(number_of_char):
+    return str(uuid.uuid4().get_hex().upper()[0:number_of_char])
 
 
 def set_dir(path):
@@ -27,11 +33,11 @@ def sum_to_one(array):
 
 
 class Model(object):
-    def __init__(self, number_of_alleles, model_params):
-        self.prdm9_polymorphism = sum_to_one(np.random.sample(number_of_alleles))
-        self.hotspots_erosion = np.random.sample(number_of_alleles)
-        self.prdm9_longevity = np.zeros(number_of_alleles)
-        self.prdm9_fitness = np.ones(number_of_alleles)
+    def __init__(self, nbr_of_alleles, model_params):
+        self.prdm9_polymorphism = sum_to_one(np.random.sample(nbr_of_alleles))
+        self.hotspots_erosion = np.random.sample(nbr_of_alleles)
+        self.prdm9_longevity = np.zeros(nbr_of_alleles)
+        self.prdm9_fitness = np.ones(nbr_of_alleles)
         self.fitness_family = model_params.fitness_family
         self.inflexion_point = model_params.inflexion_point
         self.alpha_zero = model_params.alpha_zero
@@ -72,12 +78,13 @@ class Model(object):
 
 
 class ModelDiscrete(Model):
-    def __init__(self, number_of_alleles, model_params, simu_params):
-        super(ModelDiscrete, self).__init__(number_of_alleles, model_params)
+    def __init__(self, nbr_of_alleles, model_params, simu_params):
+        super(ModelDiscrete, self).__init__(nbr_of_alleles, model_params)
         self.population_size = model_params.population_size
         self.prdm9_polymorphism *= self.population_size
         self.mutation_rate = model_params.population_size * model_params.mutation_rate_prdm9
-        self.erosion_rate = model_params.erosion_rate_hotspot * model_params.population_size * model_params.recombination_rate
+        self.erosion_rate = model_params.erosion_rate_hotspot * model_params.population_size * \
+                            model_params.recombination_rate
         assert self.erosion_rate < 0.1, "The scaled erosion rate is too large, decrease either the " \
                                         "recombination rate, the erosion rate or the population size"
         assert self.erosion_rate > 0.000000001, "The scaled erosion rate is too low, increase either the " \
@@ -130,8 +137,8 @@ class ModelDiscrete(Model):
 
 
 class ModelContinuous(Model):
-    def __init__(self, number_of_alleles, model_params, simu_params):
-        super(ModelContinuous, self).__init__(number_of_alleles, model_params)
+    def __init__(self, nbr_of_alleles, model_params, simu_params):
+        super(ModelContinuous, self).__init__(nbr_of_alleles, model_params)
 
         self.mutation_rate = model_params.population_size * model_params.mutation_rate_prdm9
         self.erosion_rate = model_params.population_size * model_params.erosion_rate_hotspot
@@ -252,6 +259,9 @@ class ModelParams(object):
         if self.fitness_family == 3:
             self.inflexion_point = inflexion_point
 
+    def efficient_nbr_alleles(self):
+        return 1 - self.mutation_rate_prdm9 / (self.erosion_rate_hotspot * self.population_size)
+
     def __str__(self):
         name = "u=%.1e" % self.mutation_rate_prdm9 + \
                "_v=%.1e" % self.erosion_rate_hotspot + \
@@ -278,7 +288,7 @@ class ModelParams(object):
 
 class SimulationParams(object):
     def __init__(self, drift=True, linearized=True, discrete=True, color="blue", scaling=100, cut_off=0.01,
-                 number_of_steps=1000):
+                 nbr_of_steps=1000):
         self.scaling = scaling
         self.drift = drift
         self.discrete = discrete
@@ -290,7 +300,7 @@ class SimulationParams(object):
             self.cut_off = 0
         self.color = color
 
-        self.number_of_steps = number_of_steps  # Number of steps at which we make computations
+        self.nbr_of_steps = nbr_of_steps  # Number of steps at which we make computations
 
     def __str__(self):
         return "scale=%.1e" % self.scaling + \
@@ -298,11 +308,11 @@ class SimulationParams(object):
                "_linear=%s" % self.linearized + \
                "_discrete=%s" % self.discrete + \
                "_color=%s" % self.color + \
-               "_n=%.1e" % self.number_of_steps
+               "_n=%.1e" % self.nbr_of_steps
 
     def caption(self):
         caption = "Simulation of %s*Ne generations " % self.scaling + \
-                  "\n  Recorded %.1e times. \n" % self.number_of_steps
+                  "\n  Recorded %.1e times. \n" % self.nbr_of_steps
         caption += self.caption_for_attr('discrete')
         caption += self.caption_for_attr('drift')
         caption += self.caption_for_attr('linearized')
@@ -335,7 +345,7 @@ class BatchParams(list):
         super(BatchParams, self).__init__()
         simu_params = SimulationParams(**kwargs)
         self.append(simu_params)
-        self.caption_str = simu_params.color + " : " + simu_params.caption()
+        self.caption_str = simu_params.color.upper() + " : " + simu_params.caption()
 
     def append_simu_params(self, switch_paremeters_dico):
         for color, params in switch_paremeters_dico.iteritems():
@@ -344,7 +354,7 @@ class BatchParams(list):
             setattr(copy_self, params, not getattr(self[0], params))
             copy_self.color = color
             self.append(copy_self)
-            self.caption_str += copy_self.color + " : " + copy_self.caption_for_attr(params)
+            self.caption_str += copy_self.color.upper() + " : " + copy_self.caption_for_attr(params)
 
     def __str__(self):
         return ", ".join(map(lambda x: x.color, self))
@@ -361,7 +371,7 @@ class Simulation(object):
         self.model_params = model_params
         self.simu_params = simu_params
         self.t_max = max(int(self.simu_params.scaling * self.model_params.population_size),
-                         self.simu_params.number_of_steps)  # Number of generations
+                         self.simu_params.nbr_of_steps)  # Number of generations
 
         if self.simu_params.discrete:
             self.model = ModelDiscrete(10, model_params, simu_params)
@@ -369,8 +379,6 @@ class Simulation(object):
             self.model = ModelContinuous(10, model_params, simu_params)
         self.data = SimulationData()
         self.generations = []
-        print self.caption()
-        print str(self)
 
     def __str__(self):
         return "tmax=%.1e_" % self.t_max + str(self.model_params) + "_" + str(self.simu_params)
@@ -382,7 +390,7 @@ class Simulation(object):
 
     def run(self):
         start_time = time.time()
-        step = float(self.t_max) / self.simu_params.number_of_steps
+        step = float(self.t_max) / self.simu_params.nbr_of_steps
         step_t = 0.
 
         for t in range(self.t_max):
@@ -395,7 +403,7 @@ class Simulation(object):
             if step_t > step and t / float(self.t_max) > 0.01:
                 step_t -= step
                 if not self.simu_params.discrete:
-                    self.model.forward(t=float(self.simu_params.scaling) / self.simu_params.number_of_steps)
+                    self.model.forward(t=float(self.simu_params.scaling) / self.simu_params.nbr_of_steps)
 
                 if int(10 * t) % self.t_max == 0:
                     print "Computation at {0}%".format(float(100 * t) / self.t_max)
@@ -409,6 +417,7 @@ class Simulation(object):
                     break
 
         self.save_figure()
+        self.pickle()
         return self
 
     def save_figure(self):
@@ -424,7 +433,7 @@ class Simulation(object):
 
         plt.subplot(332)
         plt.plot(self.generations, self.data.prdm9_entropy_alleles, color=self.simu_params.color)
-        plt.title('Efficient number of PRDM9 alleles over time. \n')
+        plt.title('Efficient nbr of PRDM9 alleles over time. \n')
         plt.xlabel('Generation')
         plt.ylabel('Number of alleles')
         plt.yscale('log')
@@ -494,13 +503,16 @@ class Simulation(object):
         print str(self)
         return str(self)
 
+    def pickle(self):
+        pickle.dump(self, open(str(self) + ".p", "wb"))
+
 
 class BatchSimulation(object):
     def __init__(self,
                  model_params,
                  batch_params,
                  axis="null",
-                 number_of_simulations=20,
+                 nbr_of_simulations=20,
                  scale=10 ** 2):
         axis_hash = {"fitness": 0, "mutation": 1, "erosion": 2, "population": 3, "recombination": 4,
                      "alpha": 5, "scaling": 6, "cut_off": 7}
@@ -515,7 +527,7 @@ class BatchSimulation(object):
         self.scale = scale
         self.axis_range = []
         range_current = 1.
-        self.number_of_simulations = number_of_simulations
+        self.nbr_of_simulations = nbr_of_simulations
         self.model_params = model_params
         self.batch_params = batch_params
 
@@ -523,8 +535,8 @@ class BatchSimulation(object):
         for simu_params in self.batch_params:
             self.simulations[simu_params.color] = []
 
-        effect = self.scale ** (1. / (self.number_of_simulations - 1))
-        for axis_current in range(self.number_of_simulations):
+        effect = self.scale ** (1. / (self.nbr_of_simulations - 1))
+        for axis_current in range(self.nbr_of_simulations):
             for simu_params in self.batch_params:
                 self.simulations[simu_params.color].append(Simulation(model_params.copy(), simu_params.copy()))
                 if self.axis == 7:
@@ -550,19 +562,23 @@ class BatchSimulation(object):
                 model_params.recombination_rate /= effect
 
     def caption(self):
-        return "Batch of %s simulations. \n" % self.number_of_simulations + self.axis_str +\
+        return "Batch of %s simulations. \n" % self.nbr_of_simulations + self.axis_str + \
                "is scaled %.1e times.\n" % self.scale + self.batch_params.caption() + self.model_params.caption()
 
-    def run(self, number_of_cpu=4):
-        set_dir("/" + self.axis_str)
+    def run(self, nbr_of_cpu=4):
+        set_dir("/" + self.axis_str + " " + id_generator(8))
         for simulations in self.simulations.itervalues():
-            if number_of_cpu > 1:
+            if nbr_of_cpu > 1:
 
-                pool = Pool(number_of_cpu)
+                pool = Pool(nbr_of_cpu)
                 self.simulations = pool.map(execute, simulations)
             else:
                 map(lambda x: x.run(), simulations)
+        self.pickle()
         self.save_figure()
+
+    def pickle(self):
+        pickle.dump(self, open(self.axis_str + ".p", "wb"))
 
     def plot_time_series(self, time_series, color, caption):
         mean = map(lambda series: np.mean(series), time_series)
@@ -602,6 +618,9 @@ class BatchSimulation(object):
             self.plot_time_series(map(lambda sim: sim.data.prdm9_entropy_alleles, simulations), simu_params.color,
                                   'Number of PRDM9 alleles')
             plt.subplot(323)
+            models_params = map(lambda sim: sim.model_params, simulations)
+            nbr_of_alleles = map(lambda model_param: model_param.efficient_nbr_alleles(), models_params)
+            plt.plot(self.axis_range, nbr_of_alleles, color='black')
             self.plot_time_series(map(lambda sim: sim.data.hotspots_erosion_mean, simulations), simu_params.color,
                                   'Mean Hotspot Erosion')
             plt.subplot(324)
@@ -632,8 +651,8 @@ if __name__ == '__main__':
                                    fitness='sigmoid',
                                    alpha_zero=1. * 10 ** 3)
     batch_parameters = BatchParams(drift=True, linearized=False, discrete=True, color="blue", scaling=10,
-                                   cut_off=0.01, number_of_steps=1000)
+                                   cut_off=0.01, nbr_of_steps=1000)
     batch_parameters.append_simu_params(dict(red="linearized", green="drift"))
     batch_simulation = BatchSimulation(model_parameters, batch_parameters, axis="erosion",
-                                       number_of_simulations=5, scale=10 ** 4)
-    batch_simulation.run(number_of_cpu=1)
+                                       nbr_of_simulations=5, scale=10 ** 4)
+    batch_simulation.run(nbr_of_cpu=1)
