@@ -1,0 +1,911 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 10.4' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     33214,        903]
+NotebookOptionsPosition[     31633,        845]
+NotebookOutlinePosition[     31974,        860]
+CellTagsIndexPosition[     31931,        857]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[
+ RowBox[{"ClearAll", "[", "\"\<Global`*\>\"", "]"}]], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"FullSimplify", "[", 
+  RowBox[{"DSolve", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{
+       RowBox[{
+        RowBox[{"x", "'"}], "[", "l", "]"}], "\[Equal]", 
+       RowBox[{
+        RowBox[{"b", "/", "a"}], 
+        RowBox[{"(", 
+         RowBox[{
+          RowBox[{"L", "/", "l"}], " ", "-", "1"}], ")"}]}]}], ",", " ", 
+      RowBox[{
+       RowBox[{"x", "[", "1", "]"}], " ", "==", " ", "x0"}]}], "}"}], ",", 
+    RowBox[{"x", "[", "l", "]"}], ",", "l"}], "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.667900404657423*^9, 3.667900438027522*^9}, {
+  3.667900494156497*^9, 3.6679005547108593`*^9}, {3.667900592744185*^9, 
+  3.6679005938459272`*^9}, {3.6684128875100718`*^9, 3.6684128928165817`*^9}, {
+  3.668489769350464*^9, 3.6684897832262087`*^9}, {3.668489817764192*^9, 
+  3.668489827775771*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"{", 
+   RowBox[{
+    RowBox[{"x", "[", "l", "]"}], "\[Rule]", 
+    FractionBox[
+     RowBox[{"b", "-", 
+      RowBox[{"b", " ", "l"}], "+", 
+      RowBox[{"a", " ", "x0"}], "+", 
+      RowBox[{"b", " ", "L", " ", 
+       RowBox[{"Log", "[", "l", "]"}]}]}], "a"]}], "}"}], "}"}]], "Output",
+ CellChangeTimes->{
+  3.6679004384006233`*^9, {3.6679005154925747`*^9, 3.66790061717443*^9}, 
+   3.667901772137656*^9, 3.667926679925035*^9, 3.668253041085081*^9, 
+   3.668256304619327*^9, 3.6684128937613573`*^9, 3.6684193841985207`*^9, 
+   3.668489783898424*^9, {3.668489820570924*^9, 3.6684898284586573`*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"FullSimplify", "[", 
+   RowBox[{"Solve", "[", 
+    RowBox[{
+     RowBox[{
+      RowBox[{
+       RowBox[{"b", "/", "a"}], 
+       RowBox[{"(", 
+        RowBox[{"1", "-", " ", "l", "+", " ", 
+         RowBox[{"L", " ", 
+          RowBox[{"Log", "[", "l", "]"}]}]}], ")"}]}], "\[Equal]", " ", "0"}],
+      ",", " ", "l"}], "]"}], "]"}], "\n"}]], "Input",
+ CellChangeTimes->{{3.667901731982369*^9, 3.667901793715331*^9}, {
+   3.6679267200619383`*^9, 3.667926741907984*^9}, 3.668253052634975*^9, {
+   3.668412541310254*^9, 3.668412582110194*^9}, {3.668412629593463*^9, 
+   3.668412630385717*^9}, {3.668412902012944*^9, 3.6684129096176443`*^9}, {
+   3.6684129484903*^9, 3.668412954721304*^9}, {3.668413440777557*^9, 
+   3.6684134586342916`*^9}, {3.668413649989077*^9, 3.668413651437076*^9}, {
+   3.668413703079928*^9, 3.668413706830564*^9}, {3.6684139926254177`*^9, 
+   3.6684139953362207`*^9}, {3.6684852420049467`*^9, 3.6684852435029*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  StyleBox[
+   RowBox[{"Solve", "::", "ifun"}], "MessageName"], 
+  RowBox[{
+  ":", " "}], "\<\"Inverse functions are being used by \
+\[NoBreak]\\!\\(\\*RowBox[{\\\"Solve\\\"}]\\)\[NoBreak], so some solutions \
+may not be found; use Reduce for complete solution information. \
+\\!\\(\\*ButtonBox[\\\"\[RightSkeleton]\\\", ButtonStyle->\\\"Link\\\", \
+ButtonFrame->None, ButtonData:>\\\"paclet:ref/message/Solve/ifun\\\", \
+ButtonNote -> \\\"Solve::ifun\\\"]\\)\"\>"}]], "Message", "MSG",
+ CellChangeTimes->{
+  3.668412584987712*^9, 3.6684126313121233`*^9, {3.668412903419765*^9, 
+   3.668412910775268*^9}, 3.668412955573845*^9, {3.668413450054679*^9, 
+   3.668413459136424*^9}, 3.6684136520329*^9, 3.66841370740372*^9, 
+   3.668419394767847*^9, 3.668485244553029*^9}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"{", 
+   RowBox[{"l", "\[Rule]", 
+    RowBox[{
+     RowBox[{"-", "L"}], " ", 
+     RowBox[{"ProductLog", "[", 
+      RowBox[{"-", 
+       FractionBox[
+        SuperscriptBox["\[ExponentialE]", 
+         RowBox[{
+          RowBox[{"-", "1"}], "/", "L"}]], "L"]}], "]"}]}]}], "}"}], 
+  "}"}]], "Output",
+ CellChangeTimes->{3.668413707404499*^9, 3.6684193948232927`*^9, 
+  3.668485244612788*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"FullSimplify", "[", 
+  RowBox[{"Solve", "[", 
+   RowBox[{
+    RowBox[{
+     RowBox[{
+      RowBox[{
+       RowBox[{"b", "/", "a"}], 
+       RowBox[{"(", 
+        RowBox[{"1", "-", " ", "l", "+", " ", 
+         RowBox[{"L", " ", 
+          RowBox[{"Log", "[", "l", "]"}]}]}], ")"}]}], " ", "+", "x0"}], " ", 
+     "\[Equal]", " ", "0"}], ",", " ", "l"}], "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.668420919739579*^9, 3.66842093340333*^9}, {
+  3.668421031459827*^9, 3.6684210418674994`*^9}, {3.6684856283426943`*^9, 
+  3.668485631527523*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  StyleBox[
+   RowBox[{"Solve", "::", "ifun"}], "MessageName"], 
+  RowBox[{
+  ":", " "}], "\<\"Inverse functions are being used by \
+\[NoBreak]\\!\\(\\*RowBox[{\\\"Solve\\\"}]\\)\[NoBreak], so some solutions \
+may not be found; use Reduce for complete solution information. \
+\\!\\(\\*ButtonBox[\\\"\[RightSkeleton]\\\", ButtonStyle->\\\"Link\\\", \
+ButtonFrame->None, ButtonData:>\\\"paclet:ref/message/Solve/ifun\\\", \
+ButtonNote -> \\\"Solve::ifun\\\"]\\)\"\>"}]], "Message", "MSG",
+ CellChangeTimes->{3.668420939584453*^9, 3.668421043069141*^9, 
+  3.66848563224627*^9}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"{", 
+   RowBox[{"l", "\[Rule]", 
+    RowBox[{
+     RowBox[{"-", "L"}], " ", 
+     RowBox[{"ProductLog", "[", 
+      RowBox[{"-", 
+       FractionBox[
+        SuperscriptBox["\[ExponentialE]", 
+         RowBox[{"-", 
+          FractionBox[
+           RowBox[{"b", "+", 
+            RowBox[{"a", " ", "x0"}]}], 
+           RowBox[{"b", " ", "L"}]]}]], "L"]}], "]"}]}]}], "}"}], 
+  "}"}]], "Output",
+ CellChangeTimes->{3.668420939648551*^9, 3.6684210431085873`*^9, 
+  3.668485632308*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"DSolve", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{
+       RowBox[{"l", "'"}], "[", "t", "]"}], "\[Equal]", " ", 
+      RowBox[{
+       RowBox[{"l", "[", "t", "]"}], 
+       RowBox[{"(", 
+        RowBox[{"C", "+", "D", "-", 
+         RowBox[{"C", " ", 
+          RowBox[{"l", "[", "t", "]"}]}], "+", 
+         RowBox[{"C", " ", "L", " ", 
+          RowBox[{"Log", "[", 
+           RowBox[{"l", "[", "t", "]"}], "]"}]}]}], ")"}]}]}], ",", " ", 
+     RowBox[{
+      RowBox[{"l", "[", "0", "]"}], " ", "\[Equal]", " ", "x0"}]}], "}"}], 
+   ",", 
+   RowBox[{"l", "[", "t", "]"}], ",", "t"}], "]"}]], "Input",
+ CellChangeTimes->{{3.668255468022442*^9, 3.668255509974783*^9}, {
+  3.6682559521063128`*^9, 3.6682559608477497`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"{", 
+   RowBox[{
+    RowBox[{"l", "[", "t", "]"}], "\[Rule]", 
+    RowBox[{
+     RowBox[{"InverseFunction", "[", 
+      RowBox[{
+       RowBox[{
+        SubsuperscriptBox["\[Integral]", "1", "#1"], 
+        RowBox[{
+         FractionBox["1", 
+          RowBox[{
+           RowBox[{"K", "[", "1", "]"}], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{"-", "C"}], "-", "D", "+", 
+             RowBox[{"C", " ", 
+              RowBox[{"K", "[", "1", "]"}]}], "-", 
+             RowBox[{"C", " ", "L", " ", 
+              RowBox[{"Log", "[", 
+               RowBox[{"K", "[", "1", "]"}], "]"}]}]}], ")"}]}]], 
+         RowBox[{"\[DifferentialD]", 
+          RowBox[{"K", "[", "1", "]"}]}]}]}], "&"}], "]"}], "[", 
+     RowBox[{
+      RowBox[{"-", "t"}], "+", 
+      RowBox[{
+       SubsuperscriptBox["\[Integral]", "1", "x0"], 
+       RowBox[{
+        FractionBox["1", 
+         RowBox[{
+          RowBox[{"K", "[", "1", "]"}], " ", 
+          RowBox[{"(", 
+           RowBox[{
+            RowBox[{"-", "C"}], "-", "D", "+", 
+            RowBox[{"C", " ", 
+             RowBox[{"K", "[", "1", "]"}]}], "-", 
+            RowBox[{"C", " ", "L", " ", 
+             RowBox[{"Log", "[", 
+              RowBox[{"K", "[", "1", "]"}], "]"}]}]}], ")"}]}]], 
+        RowBox[{"\[DifferentialD]", 
+         RowBox[{"K", "[", "1", "]"}]}]}]}]}], "]"}]}], "}"}], 
+  "}"}]], "Output",
+ CellChangeTimes->{3.668255498698454*^9, 3.6682557032475147`*^9, 
+  3.668256154304742*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Solve", "[", 
+  RowBox[{
+   RowBox[{"Eliminate", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"x", "==", 
+        RowBox[{"FullSimplify", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"Integrate", "[", 
+            RowBox[{"1", ",", " ", 
+             RowBox[{"{", 
+              RowBox[{"l", ",", "1", ",", " ", "y"}], " ", "}"}]}], "]"}], 
+           "/", " ", 
+           RowBox[{"Integrate", "[", 
+            RowBox[{
+             RowBox[{"1", "/", " ", "l"}], ",", " ", 
+             RowBox[{"{", 
+              RowBox[{"l", ",", "1", ",", " ", "y"}], " ", "}"}]}], "]"}]}], 
+          " ", ",", 
+          RowBox[{
+           RowBox[{"Re", "[", "y", "]"}], ">", "0"}]}], "]"}]}], ",", 
+       RowBox[{
+        RowBox[{"1", "-", " ", "y", "+", " ", 
+         RowBox[{"L", " ", 
+          RowBox[{"Log", "[", "y", "]"}]}]}], "\[Equal]", "0"}]}], "}"}], ",",
+      " ", "y"}], "]"}], " ", ",", " ", "x"}], "]"}]], "Input",
+ CellChangeTimes->{{3.668256476941308*^9, 3.66825648981501*^9}, {
+   3.66825654604631*^9, 3.668256557687335*^9}, {3.668414349747053*^9, 
+   3.6684144168057117`*^9}, {3.668419446986071*^9, 3.668419453219054*^9}, {
+   3.668419502468255*^9, 3.668419503015419*^9}, 3.668419573570025*^9, {
+   3.6684856412389917`*^9, 3.6684856686172447`*^9}, 3.6684865114722347`*^9, 
+   3.6684865944966927`*^9, {3.668486703187249*^9, 3.66848670673079*^9}, 
+   3.66850108279844*^9, {3.668508106659577*^9, 3.668508130700482*^9}, {
+   3.668508183028689*^9, 3.668508196566634*^9}, {3.668508453817567*^9, 
+   3.668508481443626*^9}, {3.668508519498946*^9, 3.668508580653442*^9}, {
+   3.668509304994933*^9, 3.668509312483613*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"{", 
+   RowBox[{"x", "\[Rule]", "L"}], "}"}], "}"}]], "Output",
+ CellChangeTimes->{{3.66850852029154*^9, 3.66850858155586*^9}, 
+   3.668509314396544*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"FullSimplify", "[", 
+  RowBox[{"Solve", "[", 
+   RowBox[{
+    RowBox[{"Eliminate", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"x", "==", 
+         RowBox[{"FullSimplify", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"Integrate", "[", 
+             RowBox[{"l", ",", " ", 
+              RowBox[{"{", 
+               RowBox[{"l", ",", "1", ",", " ", "y"}], " ", "}"}]}], "]"}], 
+            "/", " ", 
+            RowBox[{"Integrate", "[", 
+             RowBox[{
+              RowBox[{"1", "/", " ", "l"}], ",", " ", 
+              RowBox[{"{", 
+               RowBox[{"l", ",", "1", ",", " ", "y"}], " ", "}"}]}], "]"}]}], 
+           " ", ",", 
+           RowBox[{
+            RowBox[{"Re", "[", "y", "]"}], ">", "0"}]}], "]"}]}], ",", 
+        RowBox[{
+         RowBox[{"1", "-", " ", "y", "+", " ", 
+          RowBox[{"L", " ", 
+           RowBox[{"Log", "[", "y", "]"}]}]}], "\[Equal]", "0"}]}], "}"}], 
+      ",", " ", "y"}], "]"}], " ", ",", " ", "x"}], "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.668508313045533*^9, 3.668508330340822*^9}, {
+  3.668508361453841*^9, 3.668508373547935*^9}, {3.6685084882253447`*^9, 
+  3.668508489377715*^9}, {3.668508587558856*^9, 3.668508661765823*^9}, {
+  3.668508706630831*^9, 3.6685087260827503`*^9}, {3.6685087728762293`*^9, 
+  3.668508807977812*^9}, {3.668508840359701*^9, 3.668508841211038*^9}, {
+  3.668508933226863*^9, 3.668508972811858*^9}, {3.6685110676364117`*^9, 
+  3.668511070596537*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  StyleBox[
+   RowBox[{"Solve", "::", "ifun"}], "MessageName"], 
+  RowBox[{
+  ":", " "}], "\<\"Inverse functions are being used by \
+\[NoBreak]\\!\\(\\*RowBox[{\\\"Solve\\\"}]\\)\[NoBreak], so some solutions \
+may not be found; use Reduce for complete solution information. \
+\\!\\(\\*ButtonBox[\\\"\[RightSkeleton]\\\", ButtonStyle->\\\"Link\\\", \
+ButtonFrame->None, ButtonData:>\\\"paclet:ref/message/Solve/ifun\\\", \
+ButtonNote -> \\\"Solve::ifun\\\"]\\)\"\>"}]], "Message", "MSG",
+ CellChangeTimes->{3.668508974247752*^9, 3.668511076504545*^9}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"{", 
+   RowBox[{"x", "\[Rule]", 
+    RowBox[{
+     FractionBox["1", "2"], " ", 
+     RowBox[{"(", 
+      RowBox[{"L", "-", 
+       RowBox[{
+        SuperscriptBox["L", "2"], " ", 
+        RowBox[{"ProductLog", "[", 
+         RowBox[{"-", 
+          FractionBox[
+           SuperscriptBox["\[ExponentialE]", 
+            RowBox[{
+             RowBox[{"-", "1"}], "/", "L"}]], "L"]}], "]"}]}]}], ")"}]}]}], 
+   "}"}], "}"}]], "Output",
+ CellChangeTimes->{{3.6685083218134317`*^9, 3.668508368545661*^9}, {
+   3.668508632393938*^9, 3.668508662660754*^9}, {3.668508718679338*^9, 
+   3.668508729448715*^9}, 3.668508778366139*^9, 3.668508809151613*^9, 
+   3.668508842202009*^9, 3.668508937953409*^9, {3.668508970656941*^9, 
+   3.6685089742489977`*^9}, 3.6685110765277653`*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"FullSimplify", "[", 
+  RowBox[{"Solve", "[", 
+   RowBox[{
+    RowBox[{"Eliminate", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"x", "==", 
+         RowBox[{"FullSimplify", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"Integrate", "[", 
+             RowBox[{
+              RowBox[{"b", 
+               RowBox[{
+                RowBox[{"(", " ", 
+                 RowBox[{"1", "-", "l", "+", 
+                  RowBox[{"L", " ", 
+                   RowBox[{"Log", "[", "l", "]"}]}]}], ")"}], "/", "a"}]}], 
+              ",", " ", 
+              RowBox[{"{", 
+               RowBox[{"l", ",", "1", ",", " ", "y"}], " ", "}"}]}], "]"}], 
+            "/", " ", 
+            RowBox[{"Integrate", "[", 
+             RowBox[{
+              RowBox[{"1", "/", " ", "l"}], ",", " ", 
+              RowBox[{"{", 
+               RowBox[{"l", ",", "1", ",", " ", "y"}], " ", "}"}]}], "]"}]}], 
+           " ", ",", 
+           RowBox[{
+            RowBox[{"Re", "[", "y", "]"}], ">", "0"}]}], "]"}]}], ",", 
+        RowBox[{
+         RowBox[{"1", "-", " ", "y", "+", " ", 
+          RowBox[{"L", " ", 
+           RowBox[{"Log", "[", "y", "]"}]}]}], "\[Equal]", "0"}]}], "}"}], 
+      ",", " ", "y"}], "]"}], " ", ",", " ", "x"}], "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.668508987026176*^9, 3.668509001320318*^9}, {
+  3.668511052839456*^9, 3.668511056280272*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  StyleBox[
+   RowBox[{"Solve", "::", "ifun"}], "MessageName"], 
+  RowBox[{
+  ":", " "}], "\<\"Inverse functions are being used by \
+\[NoBreak]\\!\\(\\*RowBox[{\\\"Solve\\\"}]\\)\[NoBreak], so some solutions \
+may not be found; use Reduce for complete solution information. \
+\\!\\(\\*ButtonBox[\\\"\[RightSkeleton]\\\", ButtonStyle->\\\"Link\\\", \
+ButtonFrame->None, ButtonData:>\\\"paclet:ref/message/Solve/ifun\\\", \
+ButtonNote -> \\\"Solve::ifun\\\"]\\)\"\>"}]], "Message", "MSG",
+ CellChangeTimes->{3.66850901134595*^9, 3.66851107973602*^9}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"{", 
+   RowBox[{"x", "\[Rule]", 
+    RowBox[{"-", 
+     FractionBox[
+      RowBox[{"b", " ", "L", " ", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"-", "1"}], "+", 
+         RowBox[{"2", " ", "L"}], "+", 
+         RowBox[{"L", " ", 
+          RowBox[{"ProductLog", "[", 
+           RowBox[{"-", 
+            FractionBox[
+             SuperscriptBox["\[ExponentialE]", 
+              RowBox[{
+               RowBox[{"-", "1"}], "/", "L"}]], "L"]}], "]"}]}]}], ")"}]}], 
+      RowBox[{"2", " ", "a"}]]}]}], "}"}], "}"}]], "Output",
+ CellChangeTimes->{3.668509011346917*^9, 3.668511079755115*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"FullSimplify", "[", 
+  RowBox[{
+   RowBox[{"b", 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{
+       FractionBox["1", "2"], " ", 
+       RowBox[{"(", 
+        RowBox[{"L", "-", 
+         RowBox[{
+          SuperscriptBox["L", "2"], " ", 
+          RowBox[{"ProductLog", "[", 
+           RowBox[{"-", 
+            FractionBox[
+             SuperscriptBox["\[ExponentialE]", 
+              RowBox[{
+               RowBox[{"-", "1"}], "/", "L"}]], "L"]}], "]"}]}]}], ")"}]}], 
+      "-", 
+      SuperscriptBox["L", "2"]}], ")"}]}], "-", 
+   RowBox[{"a", "*", 
+    RowBox[{"-", 
+     FractionBox[
+      RowBox[{"b", " ", "L", " ", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"-", "1"}], "+", 
+         RowBox[{"2", " ", "L"}], "+", 
+         RowBox[{"L", " ", 
+          RowBox[{"ProductLog", "[", 
+           RowBox[{"-", 
+            FractionBox[
+             SuperscriptBox["\[ExponentialE]", 
+              RowBox[{
+               RowBox[{"-", "1"}], "/", "L"}]], "L"]}], "]"}]}]}], ")"}]}], 
+      RowBox[{"2", " ", "a"}]]}]}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.668510062216434*^9, 3.668510084935067*^9}, {
+  3.668510342419297*^9, 3.668510345181017*^9}}],
+
+Cell[BoxData["0"], "Output",
+ CellChangeTimes->{3.66851008756151*^9, 3.6685103468864727`*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"FullSimplify", "[", 
+  RowBox[{"Solve", "[", 
+   RowBox[{
+    RowBox[{"Eliminate", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"x", "==", 
+         RowBox[{"FullSimplify", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"Integrate", "[", 
+             RowBox[{
+              RowBox[{"b", 
+               RowBox[{
+                RowBox[{"(", " ", 
+                 RowBox[{"1", "-", "l", "+", 
+                  RowBox[{"L", " ", 
+                   RowBox[{"Log", "[", "l", "]"}]}]}], ")"}], "/", 
+                RowBox[{"(", 
+                 RowBox[{"a", " ", "l"}], ")"}]}]}], ",", " ", 
+              RowBox[{"{", 
+               RowBox[{"l", ",", "1", ",", " ", "y"}], " ", "}"}]}], "]"}], 
+            "/", " ", 
+            RowBox[{"Integrate", "[", 
+             RowBox[{
+              RowBox[{"1", "/", " ", "l"}], ",", " ", 
+              RowBox[{"{", 
+               RowBox[{"l", ",", "1", ",", " ", "y"}], " ", "}"}]}], "]"}]}], 
+           " ", ",", 
+           RowBox[{
+            RowBox[{"Re", "[", "y", "]"}], ">", "0"}]}], "]"}]}], ",", 
+        RowBox[{
+         RowBox[{"1", "-", " ", "y", "+", " ", 
+          RowBox[{"L", " ", 
+           RowBox[{"Log", "[", "y", "]"}]}]}], "\[Equal]", "0"}]}], "}"}], 
+      ",", " ", "y"}], "]"}], " ", ",", " ", "x"}], "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.6685110021397333`*^9, 3.668511039696257*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  StyleBox[
+   RowBox[{"Solve", "::", "ifun"}], "MessageName"], 
+  RowBox[{
+  ":", " "}], "\<\"Inverse functions are being used by \
+\[NoBreak]\\!\\(\\*RowBox[{\\\"Solve\\\"}]\\)\[NoBreak], so some solutions \
+may not be found; use Reduce for complete solution information. \
+\\!\\(\\*ButtonBox[\\\"\[RightSkeleton]\\\", ButtonStyle->\\\"Link\\\", \
+ButtonFrame->None, ButtonData:>\\\"paclet:ref/message/Solve/ifun\\\", \
+ButtonNote -> \\\"Solve::ifun\\\"]\\)\"\>"}]], "Message", "MSG",
+ CellChangeTimes->{3.6685110106399727`*^9, 3.668511045139624*^9}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"{", 
+   RowBox[{"x", "\[Rule]", 
+    RowBox[{"-", 
+     FractionBox[
+      RowBox[{"b", " ", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"-", "1"}], "+", 
+         RowBox[{"2", " ", "L"}], "+", 
+         RowBox[{"L", " ", 
+          RowBox[{"ProductLog", "[", 
+           RowBox[{"-", 
+            FractionBox[
+             SuperscriptBox["\[ExponentialE]", 
+              RowBox[{
+               RowBox[{"-", "1"}], "/", "L"}]], "L"]}], "]"}]}]}], ")"}]}], 
+      RowBox[{"2", " ", "a"}]]}]}], "}"}], "}"}]], "Output",
+ CellChangeTimes->{3.668511010641306*^9, 3.668511045157401*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Manipulate", "[", 
+  RowBox[{
+   RowBox[{"GraphicsRow", "[", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"Plot", "[", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{
+          RowBox[{"b", 
+           RowBox[{
+            RowBox[{"(", " ", 
+             RowBox[{"1", "-", "l", "+", 
+              RowBox[{"L", " ", 
+               RowBox[{"Log", "[", "l", "]"}]}]}], ")"}], "/", "a"}]}], " ", 
+          ",", " ", 
+          RowBox[{"l", " ", "b", 
+           RowBox[{"(", " ", 
+            RowBox[{"l", "-", "1", "-", 
+             RowBox[{"L", " ", 
+              RowBox[{"Log", "[", "l", "]"}]}]}], ")"}]}], ",", 
+          RowBox[{
+           RowBox[{"b", "/", "a"}], 
+           RowBox[{"(", 
+            RowBox[{"1", "-", " ", "L", "+", " ", 
+             RowBox[{"L", " ", 
+              RowBox[{"Log", "[", "L", "]"}]}]}], ")"}]}]}], "}"}], ",", 
+        RowBox[{"{", 
+         RowBox[{"l", ",", "0", ",", "1"}], "}"}], ",", 
+        RowBox[{"GridLines", "\[Rule]", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", "L"}], " ", 
+              RowBox[{"ProductLog", "[", 
+               RowBox[{"-", 
+                FractionBox[
+                 SuperscriptBox["\[ExponentialE]", 
+                  RowBox[{
+                   RowBox[{"-", "1"}], "/", "L"}]], "L"]}], "]"}]}], ",", 
+             "L"}], "}"}], ",", "None"}], "}"}]}]}], "]"}], ",", 
+      RowBox[{"Module", "[", 
+       RowBox[{
+        RowBox[{"{", "sol", "}"}], ",", 
+        RowBox[{
+         RowBox[{"sol", "=", 
+          RowBox[{"NDSolve", "[", 
+           RowBox[{
+            RowBox[{"{", 
+             RowBox[{
+              RowBox[{
+               RowBox[{
+                SuperscriptBox["x", "\[Prime]",
+                 MultilineFunction->None], "[", "t", "]"}], "\[Equal]", 
+               RowBox[{"b", " ", 
+                RowBox[{"(", 
+                 RowBox[{
+                  RowBox[{"l", "[", "t", "]"}], "-", "L"}], ")"}], " ", 
+                RowBox[{"x", "[", "t", "]"}]}]}], ",", 
+              RowBox[{
+               RowBox[{
+                SuperscriptBox["l", "\[Prime]",
+                 MultilineFunction->None], "[", "t", "]"}], "\[Equal]", 
+               RowBox[{
+                RowBox[{"-", "a"}], " ", 
+                RowBox[{"l", "[", "t", "]"}], " ", 
+                RowBox[{"x", "[", "t", "]"}]}]}], ",", 
+              RowBox[{
+               RowBox[{
+                SuperscriptBox["g", "\[Prime]",
+                 MultilineFunction->None], "[", "t", "]"}], "\[Equal]", 
+               RowBox[{
+                RowBox[{"b", " ", 
+                 RowBox[{"g", "[", "t", "]"}], 
+                 RowBox[{"(", 
+                  RowBox[{
+                   RowBox[{"g", "[", "t", "]"}], "-", "1", "-", " ", 
+                   RowBox[{"L", " ", 
+                    RowBox[{"Log", "[", 
+                    RowBox[{"g", "[", "t", "]"}], "]"}]}]}], ")"}]}], " ", 
+                "-", 
+                RowBox[{"a", " ", 
+                 RowBox[{"g", "[", "t", "]"}], "x0"}]}]}], ",", 
+              RowBox[{
+               RowBox[{"x", "[", "0", "]"}], "\[Equal]", "x0"}], ",", 
+              RowBox[{
+               RowBox[{"l", "[", "0", "]"}], "\[Equal]", "1"}], ",", " ", 
+              RowBox[{
+               RowBox[{"g", "[", "0", "]"}], "\[Equal]", "1"}]}], "}"}], ",", 
+            
+            RowBox[{"{", 
+             RowBox[{"x", ",", "l", ",", " ", "g"}], "}"}], ",", 
+            RowBox[{"{", 
+             RowBox[{"t", ",", "0", ",", "15"}], "}"}]}], "]"}]}], ";", 
+         RowBox[{"Plot", "[", 
+          RowBox[{
+           RowBox[{"Evaluate", "[", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"x", "[", "t", "]"}], ",", 
+               RowBox[{"l", "[", "t", "]"}], ",", 
+               RowBox[{"g", "[", "t", "]"}], ",", 
+               RowBox[{
+                RowBox[{"b", "/", "a"}], 
+                RowBox[{"(", 
+                 RowBox[{"1", "-", " ", "L", "+", " ", 
+                  RowBox[{"L", " ", 
+                   RowBox[{"Log", "[", "L", "]"}]}]}], ")"}]}]}], "}"}], "/.",
+              "\[VeryThinSpace]", "sol"}], "]"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"t", ",", "0", ",", "15"}], "}"}], ",", 
+           RowBox[{"PlotRange", "\[Rule]", "Full"}], ",", 
+           RowBox[{"GridLines", "\[Rule]", 
+            RowBox[{"{", 
+             RowBox[{"None", ",", 
+              RowBox[{"{", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"-", "L"}], " ", 
+                 RowBox[{"ProductLog", "[", 
+                  RowBox[{"-", 
+                   FractionBox[
+                    SuperscriptBox["\[ExponentialE]", 
+                    RowBox[{
+                    RowBox[{"-", "1"}], "/", "L"}]], "L"]}], "]"}]}], ",", 
+                "L"}], "}"}]}], "}"}]}]}], "]"}]}]}], "]"}]}], "}"}], "]"}], 
+   ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"b", ",", "4"}], "}"}], ",", "0", ",", "10"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"a", ",", "1"}], "}"}], ",", "0", ",", "10"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"L", ",", "0.5"}], "}"}], ",", "0", ",", "1"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"x0", ",", "0.0001"}], "}"}], ",", "0", ",", "0.001"}], "}"}], 
+   ",", 
+   RowBox[{"Paneled", "\[Rule]", "False"}]}], "]"}]], "Input",
+ CellChangeTimes->CompressedData["
+1:eJwdyk0og3EAx/HlIhmhYfNSWE0aEhftoC3RQq1sZEusxW2Z5PVAcRjL8npZ
+7PDY2mkHLljzONjKZWrTpi1SI/Qws3lZHBT/3//w7XP5VhtMvaNZPB6vggRj
++83iN01CYWZUdXB+25VIE6cGNpKwiq/veCcKUiYq/2asIUM0hpaoAe29+Ie4
+0M9Rp/8elgV9CUWlVmWB6+PSXegplVEPJqQM3LRLnHBy8NENa5TRfdh1XHQI
+m7y/R1BoHQ5Ci601BOs5R0sxMch4qXe1dzNQeGmfgxHr2iq8yM61Qrla5ysh
+spN+qo8rD8OV8/wofJntScLIkDoNnU3eDJyOu78ho+Q0pcTuDKuDbfExA2yM
+yUfg09XXOjQv+ragvqHQBo17HXa4I3p2wYLrPDe02YIn0HPWycKwQ+KjX3VZ
+AOak/BEoaP+guljLLeRON6ifm7fCCuKrSCaC/xY02mc=
+  "]],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`a$$ = 1, $CellContext`b$$ = 
+    4, $CellContext`L$$ = 0.5, $CellContext`x0$$ = 0.00081, Typeset`show$$ = 
+    True, Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
+    Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
+    "\"untitled\"", Typeset`specs$$ = {{{
+       Hold[$CellContext`b$$], 4}, 0, 10}, {{
+       Hold[$CellContext`a$$], 1}, 0, 10}, {{
+       Hold[$CellContext`L$$], 0.5}, 0, 1}, {{
+       Hold[$CellContext`x0$$], 0.0001}, 0, 0.001}}, Typeset`size$$ = {
+    1551., {251., 258.}}, Typeset`update$$ = 0, Typeset`initDone$$, 
+    Typeset`skipInitDone$$ = True, $CellContext`b$348389$$ = 
+    0, $CellContext`a$348390$$ = 0, $CellContext`L$348391$$ = 
+    0, $CellContext`x0$348392$$ = 0}, 
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`a$$ = 1, $CellContext`b$$ = 
+        4, $CellContext`L$$ = 0.5, $CellContext`x0$$ = 0.0001}, 
+      "ControllerVariables" :> {
+        Hold[$CellContext`b$$, $CellContext`b$348389$$, 0], 
+        Hold[$CellContext`a$$, $CellContext`a$348390$$, 0], 
+        Hold[$CellContext`L$$, $CellContext`L$348391$$, 0], 
+        Hold[$CellContext`x0$$, $CellContext`x0$348392$$, 0]}, 
+      "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, "Body" :> GraphicsRow[{
+         Plot[{$CellContext`b$$ ((
+             1 - $CellContext`l + $CellContext`L$$ 
+              Log[$CellContext`l])/$CellContext`a$$), $CellContext`l \
+$CellContext`b$$ ($CellContext`l - 1 - $CellContext`L$$ 
+            Log[$CellContext`l]), ($CellContext`b$$/$CellContext`a$$) (
+            1 - $CellContext`L$$ + $CellContext`L$$ 
+             Log[$CellContext`L$$])}, {$CellContext`l, 0, 1}, 
+          GridLines -> {{(-$CellContext`L$$) 
+             ProductLog[-(
+                E^((-1)/$CellContext`L$$)/$CellContext`L$$)], \
+$CellContext`L$$}, None}], 
+         Module[{$CellContext`sol$}, $CellContext`sol$ = 
+           NDSolve[{
+             Derivative[
+               1][$CellContext`x][$CellContext`t] == $CellContext`b$$ \
+($CellContext`l[$CellContext`t] - $CellContext`L$$) \
+$CellContext`x[$CellContext`t], 
+              Derivative[
+               1][$CellContext`l][$CellContext`t] == (-$CellContext`a$$) \
+$CellContext`l[$CellContext`t] $CellContext`x[$CellContext`t], 
+              Derivative[
+               1][$CellContext`g][$CellContext`t] == $CellContext`b$$ \
+$CellContext`g[$CellContext`t] ($CellContext`g[$CellContext`t] - 
+                 1 - $CellContext`L$$ Log[
+                   $CellContext`g[$CellContext`t]]) - $CellContext`a$$ \
+$CellContext`g[$CellContext`t] $CellContext`x0$$, $CellContext`x[
+               0] == $CellContext`x0$$, $CellContext`l[0] == 
+              1, $CellContext`g[0] == 
+              1}, {$CellContext`x, $CellContext`l, $CellContext`g}, \
+{$CellContext`t, 0, 15}]; Plot[
+            Evaluate[
+             ReplaceAll[{
+               $CellContext`x[$CellContext`t], 
+               $CellContext`l[$CellContext`t], 
+               $CellContext`g[$CellContext`t], \
+($CellContext`b$$/$CellContext`a$$) (
+                1 - $CellContext`L$$ + $CellContext`L$$ 
+                 Log[$CellContext`L$$])}, $CellContext`sol$]], \
+{$CellContext`t, 0, 15}, PlotRange -> Full, 
+            GridLines -> {
+             None, {(-$CellContext`L$$) 
+               ProductLog[-(
+                  E^((-1)/$CellContext`L$$)/$CellContext`L$$)], \
+$CellContext`L$$}}]]}], 
+      "Specifications" :> {{{$CellContext`b$$, 4}, 0, 
+         10}, {{$CellContext`a$$, 1}, 0, 10}, {{$CellContext`L$$, 0.5}, 0, 
+         1}, {{$CellContext`x0$$, 0.0001}, 0, 0.001}}, 
+      "Options" :> {Paneled -> False}, "DefaultOptions" :> {}],
+     ImageSizeCache->{1571., {324., 331.}},
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    SynchronousInitialization->True,
+    UndoTrackedVariables:>{Typeset`show$$, Typeset`bookmarkMode$$},
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellChangeTimes->{
+  3.6683422869609547`*^9, {3.66834238719731*^9, 3.668342403660321*^9}, {
+   3.668342560774991*^9, 3.6683425712903547`*^9}, 3.66834261325045*^9, {
+   3.668342668496441*^9, 3.668342685862194*^9}, 3.668405434364872*^9, 
+   3.668405492169676*^9, 3.668405539038816*^9, 3.668406603845323*^9, {
+   3.668412257203336*^9, 3.668412269092276*^9}, 3.6684129724533978`*^9, 
+   3.668420973923118*^9, 3.668427040340292*^9, 3.668485195624741*^9, 
+   3.6684854020609837`*^9, {3.668485477234852*^9, 3.668485503614409*^9}, {
+   3.668485549633244*^9, 3.668485560368506*^9}, 3.668485778628244*^9, 
+   3.668486563518827*^9, 3.668487122536952*^9, 3.668487269870234*^9, 
+   3.668489914360154*^9, 3.6684901219855223`*^9, {3.668490160998509*^9, 
+   3.6684901745218*^9}, 3.6684909814834337`*^9, 3.6684910436995363`*^9, {
+   3.668491394211727*^9, 3.668491414612287*^9}, {3.6684914618761587`*^9, 
+   3.668491491181831*^9}, 3.668491569508924*^9, {3.66849159974937*^9, 
+   3.668491609158785*^9}, 3.6684918656771603`*^9, 3.6684919452194853`*^9, 
+   3.668492024122506*^9, 3.6685006824801598`*^9}]
+}, Open  ]]
+},
+WindowSize->{928, 1028},
+WindowMargins->{{-10, Automatic}, {Automatic, -10}},
+FrontEndVersion->"10.4 for Linux x86 (64-bit) (February 25, 2016)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 76, 1, 32, "Input"],
+Cell[CellGroupData[{
+Cell[659, 25, 846, 21, 32, "Input"],
+Cell[1508, 48, 641, 15, 49, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2186, 68, 970, 20, 55, "Input"],
+Cell[3159, 90, 790, 15, 41, "Message"],
+Cell[3952, 107, 431, 14, 52, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4420, 126, 568, 15, 32, "Input"],
+Cell[4991, 143, 598, 12, 41, "Message"],
+Cell[5592, 157, 524, 17, 60, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[6153, 179, 780, 22, 32, "Input"],
+Cell[6936, 203, 1522, 44, 96, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[8495, 252, 1691, 38, 99, "Input"],
+Cell[10189, 292, 193, 5, 32, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[10419, 302, 1515, 36, 121, "Input"],
+Cell[11937, 340, 574, 11, 41, "Message"],
+Cell[12514, 353, 809, 21, 53, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[13360, 379, 1427, 38, 121, "Input"],
+Cell[14790, 419, 572, 11, 41, "Message"],
+Cell[15365, 432, 645, 19, 64, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[16047, 456, 1200, 37, 78, "Input"],
+Cell[17250, 495, 93, 1, 32, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[17380, 501, 1440, 38, 121, "Input"],
+Cell[18823, 541, 576, 11, 41, "Message"],
+Cell[19402, 554, 635, 19, 64, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[20074, 578, 6069, 158, 396, "Input"],
+Cell[26146, 738, 5471, 104, 672, "Output"]
+}, Open  ]]
+}
+]
+*)
+
