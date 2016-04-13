@@ -45,6 +45,8 @@ class Model(object):
         self.alpha_zero = model_params.alpha_zero
         self.alpha = model_params.alpha_zero
         self.t = 0
+        self.id = nbr_of_alleles
+        self.ids = np.array(range(nbr_of_alleles))
 
     def fitness(self, x):
         if self.fitness_family == 3:
@@ -75,6 +77,7 @@ class Model(object):
             self.hotspots_erosion = self.hotspots_erosion[remove_extincted]
             self.prdm9_longevity = self.prdm9_longevity[remove_extincted]
             self.prdm9_fitness = self.prdm9_fitness[remove_extincted]
+            self.ids = self.ids[remove_extincted]
 
     def __repr__(self):
         return "The polymorphism of PRDM9: %s" % self.prdm9_polymorphism + \
@@ -118,7 +121,7 @@ class ModelDiscrete(Model):
                 distribution_vector = prdm9_frequencies + self.prdm9_fitness * prdm9_frequencies
                 if np.max(distribution_vector) > 1.:
                     distribution_vector = sum_to_one(np.clip(distribution_vector, 0., 1.))
-                if np.min(distribution_vector) < 0.:
+                elif np.min(distribution_vector) < 0.:
                     distribution_vector = sum_to_one(np.clip(distribution_vector, 0., 1.))
             else:
                 fitness_matrix = self.fitness(np.add.outer(self.hotspots_erosion, self.hotspots_erosion) / 2)
@@ -139,6 +142,8 @@ class ModelDiscrete(Model):
         self.prdm9_polymorphism = np.append(self.prdm9_polymorphism, np.ones(new_alleles))
         self.prdm9_longevity = np.append(self.prdm9_longevity, np.zeros(new_alleles))
         self.hotspots_erosion = np.append(self.hotspots_erosion, np.ones(new_alleles))
+        self.ids = np.append(self.ids, range(self.id, self.id + new_alleles))
+        self.id += new_alleles
 
 
 class ModelContinuous(Model):
@@ -198,6 +203,8 @@ class ModelContinuous(Model):
             self.prdm9_polymorphism = np.append(self.prdm9_polymorphism, np.ones(fixed) * 0.001)
             self.hotspots_erosion = np.append(self.hotspots_erosion, np.ones(fixed))
             self.prdm9_longevity = np.append(self.prdm9_longevity, np.zeros(fixed))
+            self.ids = np.append(self.ids, range(self.id, self.id + fixed))
+            self.id += fixed
 
 
 class SimulationData(object):
@@ -205,7 +212,7 @@ class SimulationData(object):
         self.prdm9_frequencies, self.hotspots_erosion = [], []
         self.prdm9_fitness, self.prdm9_longevity = [], []
 
-        self.nbr_prdm9 = []
+        self.nbr_prdm9, self.ids = [], []
 
     def store(self, step):
         self.prdm9_frequencies.append(sum_to_one(step.prdm9_polymorphism))
@@ -213,6 +220,7 @@ class SimulationData(object):
         self.prdm9_fitness.append(step.prdm9_fitness)
         self.prdm9_longevity.append(step.prdm9_longevity)
         self.nbr_prdm9.append(step.prdm9_polymorphism)
+        self.ids.append(step.ids)
 
     def flat_frequencies(self):
         return list(itertools.chain.from_iterable(self.prdm9_frequencies))
@@ -272,6 +280,16 @@ class SimulationData(object):
 
     def mean_erosion(self):
         return np.mean(self.hotspots_erosion_mean())
+
+    def cross_homozygosity(self, lag):
+        cross_homozygosity = []
+        for index in range(0, len(self.ids) - lag):
+            cross_homozygosity.append(0.)
+            slice_dict = dict(zip(self.ids[index], self.prdm9_frequencies[index]))
+            lag_dict = dict(zip(self.ids[index + lag], self.prdm9_frequencies[index + lag]))
+            for key in list(set(slice_dict.keys()) & set(lag_dict.keys())):
+                cross_homozygosity[index] += slice_dict[key] * lag_dict[key]
+        return np.mean(cross_homozygosity)
 
     @staticmethod
     def entropy(frequencies):
@@ -515,27 +533,24 @@ class Simulation(object):
 
         plt.subplot(334)
         plt.hexbin(self.data.flat_erosion(), self.data.flat_fitness(), self.data.flat_longevity(),
-                   gridsize=200,
-                   bins='log')
+                   gridsize=200, bins='log')
         plt.title('PRDM9 fitness vs hotspot erosion')
         plt.xlabel('hotspot erosion')
         plt.ylabel('PRMD9 fitness')
 
         plt.subplot(335)
         plt.hexbin(self.data.flat_erosion(), self.data.flat_frequencies(), self.data.flat_longevity(),
-                   gridsize=200,
-                   bins='log')
+                   gridsize=200, bins='log')
         plt.title('PRMD9 frequency vs hotspot erosion')
         plt.xlabel('hotspot erosion')
         plt.ylabel('PRMD9 frequency')
 
         plt.subplot(336)
-        plt.hexbin(self.data.flat_frequencies(), self.data.flat_fitness(), self.data.flat_longevity(),
-                   gridsize=200,
-                   bins='log')
-        plt.title('PRDM9 fitness vs PRMD9 frequency')
-        plt.xlabel('PRMD9 frequency')
-        plt.ylabel('PRDM9 fitness')
+        lags = np.arange(0, 20, 1)
+        plt.plot(lags, map(lambda lag: self.data.cross_homozygosity(lag), lags))
+        plt.title('Cross correlation of homozygosity')
+        plt.xlabel('Lag')
+        plt.ylabel('Cross correlation of homozygosity')
 
         plt.subplot(337)
         x = np.linspace(0, 1, 100)
@@ -777,7 +792,6 @@ class Batches(list):
 
 
 if __name__ == '__main__':
-    '''
     set_dir("/tmp")
     model_parameters = ModelParams(mutation_rate_prdm9=1.0 * 10 ** -8,
                                    erosion_rate_hotspot=1.0 * 10 ** -5,
@@ -792,7 +806,7 @@ if __name__ == '__main__':
     batch_parameters.append_simu_params(dict(red="linearized"))
     batch_simulation = BatchSimulation(model_parameters, batch_parameters, axis="mutation",
                                        nbr_of_simulations=14, scale=10 ** 4)
-    batch_simulation.run(nbr_of_cpu=7)
+    batch_simulation.run(nbr_of_cpu=1)
     '''
     set_dir("/tmp/ns-pickle")
     lst = os.listdir(os.getcwd())
@@ -804,3 +818,4 @@ if __name__ == '__main__':
             batches.append(batch_simulation)
 
     batches.save_figure(np.logspace(-0.5, 0.5, 5))
+    '''
