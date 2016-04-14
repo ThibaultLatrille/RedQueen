@@ -146,67 +146,6 @@ class ModelDiscrete(Model):
         self.id += new_alleles
 
 
-class ModelContinuous(Model):
-    def __init__(self, nbr_of_alleles, model_params, simu_params):
-        super(ModelContinuous, self).__init__(nbr_of_alleles, model_params)
-
-        self.mutation_rate = model_params.population_size * model_params.mutation_rate_prdm9
-        self.erosion_rate = model_params.population_size * model_params.erosion_rate_hotspot
-        self.recombination_rate = model_params.population_size * model_params.recombination_rate
-        self.alpha = model_params.alpha_zero
-
-        self.cut_off = simu_params.cut_off
-        self.drift = simu_params.drift
-
-    def forward(self, t):
-        dt = min(1. / (max(self.erosion_rate * self.recombination_rate,
-                           self.alpha, self.mutation_rate * self.alpha) * 1), t / 10)
-        self.t += t
-        current_t = 0
-        while current_t < t:
-            current_t += dt
-            self.new_alleles(dt)
-            prdm9_frequencies = sum_to_one(self.prdm9_polymorphism)
-            self.hotspots_erosion -= (self.erosion_rate * self.recombination_rate * dt) * (
-                prdm9_frequencies * self.hotspots_erosion)
-            # Compute the fitness for each allele
-            if self.fitness_family == 0:
-                distribution_vector = prdm9_frequencies
-            else:
-                l_bar = np.sum(prdm9_frequencies * self.hotspots_erosion)
-                self.prdm9_fitness = self.coefficient_fitness(l_bar) * (self.hotspots_erosion - l_bar)
-                if self.drift:
-                    brownian_matrix = np.add.outer(prdm9_frequencies, prdm9_frequencies)
-                    for index, frequency in enumerate(prdm9_frequencies):
-                        brownian_matrix[index, index] = frequency * (1 - frequency)
-                    brownian = np.random.multivariate_normal(np.zeros(prdm9_frequencies.size), brownian_matrix)
-                else:
-                    brownian = 0.
-                distribution_vector = prdm9_frequencies + (self.prdm9_fitness * prdm9_frequencies + brownian) * dt
-                if np.max(distribution_vector) > 1.:
-                    distribution_vector = sum_to_one(np.clip(distribution_vector, 0., 1.))
-                if np.min(distribution_vector) < 0.:
-                    distribution_vector = sum_to_one(np.clip(distribution_vector, 0., 1.))
-
-            self.prdm9_polymorphism = distribution_vector
-            self.remove_dead_prdm9(cut_off=self.cut_off * 0.1)
-
-        self.prdm9_longevity += t
-
-    def new_alleles(self, dt):
-        prdm9_frequencies = sum_to_one(self.prdm9_polymorphism)
-        l_bar = float(np.sum(prdm9_frequencies * self.hotspots_erosion))
-        s = 2 * self.coefficient_fitness(l_bar) * (1 - l_bar)
-        fixed = np.random.poisson(self.mutation_rate * s * dt)
-        if fixed > 0:
-            self.prdm9_polymorphism *= (1 - float(fixed) * self.cut_off)
-            self.prdm9_polymorphism = np.append(self.prdm9_polymorphism, np.ones(fixed) * 0.001)
-            self.hotspots_erosion = np.append(self.hotspots_erosion, np.ones(fixed))
-            self.prdm9_longevity = np.append(self.prdm9_longevity, np.zeros(fixed))
-            self.ids = np.append(self.ids, range(self.id, self.id + fixed))
-            self.id += fixed
-
-
 class SimulationData(object):
     def __init__(self):
         self.prdm9_frequencies, self.hotspots_erosion = [], []
