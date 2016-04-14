@@ -302,26 +302,20 @@ class ModelParams(object):
 
 
 class SimulationParams(object):
-    def __init__(self, drift=True, linearized=True, color="blue", scaling=10,
-                 nbr_of_steps=1000):
+    def __init__(self, drift=True, linearized=True, color="blue", scaling=10):
         self.scaling = scaling
         self.drift = drift
         self.linearized = linearized
         self.color = color
 
-        self.nbr_of_steps = nbr_of_steps  # Number of steps at which we make computations
-
     def __str__(self):
         return "scale=%.1e" % self.scaling + \
                "_drift=%s" % self.drift + \
                "_linear=%s" % self.linearized + \
-               "_color=%s" % self.color + \
-               "_n=%.1e" % self.nbr_of_steps
+               "_color=%s" % self.color
 
     def caption(self):
-        caption = "Simulation of %s*Ne generations " % self.scaling + \
-                  "\n  Recorded %.1e times. \n" % self.nbr_of_steps
-        caption += self.caption_for_attr('drift')
+        caption = self.caption_for_attr('drift')
         caption += self.caption_for_attr('linearized')
         return caption
 
@@ -371,9 +365,8 @@ class Simulation(object):
     def __init__(self, model_params, simu_params):
         self.model_params = model_params
         self.simu_params = simu_params
-        self.t_max = max(int(self.simu_params.scaling * self.model_params.population_size),
-                         self.simu_params.nbr_of_steps)  # Number of generations
-
+        self.t_max = 0
+        self.nbr_of_steps = 0.
         self.model = ModelDiscrete(10, model_params, simu_params)
         self.data = SimulationData()
         self.generations = []
@@ -393,7 +386,8 @@ class Simulation(object):
         while len(initial_variants & set(self.model.ids)) > 0:
             self.model.forward()
             t += 1
-        self.t_max = max(int(self.simu_params.scaling * t), self.simu_params.nbr_of_steps)
+        self.nbr_of_steps = 10000 / len(self.model.ids)
+        self.t_max = 10 * (int(max(int(self.simu_params.scaling * t), self.nbr_of_steps)) / 10 + 1)
         print "Burn-in Completed"
 
     def run(self):
@@ -401,7 +395,7 @@ class Simulation(object):
 
         step_t = 0.
 
-        step = float(self.t_max) / self.simu_params.nbr_of_steps
+        step = float(self.t_max) / self.nbr_of_steps
         for t in range(self.t_max):
             self.model.forward()
 
@@ -409,11 +403,11 @@ class Simulation(object):
             if step_t > step:
                 step_t -= step
 
-                if int(10 * t) % self.t_max == 0:
-                    print "Computation at {0}%".format(float(100 * t) / self.t_max)
-
                 self.generations.append(t)
                 self.data.store(self.model)
+
+            if int(10 * t) % self.t_max == 0:
+                print "Computation at {0}%".format(float(100 * t) / self.t_max)
 
         self.save_figure()
         return self
@@ -469,10 +463,14 @@ class Simulation(object):
         plt.ylabel('PRMD9 frequency')
 
         plt.subplot(336)
-        lags = np.arange(0, 20, 1)
-        plt.plot(lags, map(lambda lag: self.data.cross_homozygosity(lag), lags))
+        num = 30
+        max_longevity = int(self.t_max/10)
+        lag_max = next((j for j, x in enumerate(self.generations) if x > max_longevity), None)
+        longevities = np.linspace(0, max_longevity, num)
+        lags = np.linspace(0, lag_max, num)
+        plt.plot(longevities, map(lambda lag: self.data.cross_homozygosity(int(lag)), lags))
         plt.title('Cross correlation of homozygosity')
-        plt.xlabel('Lag')
+        plt.xlabel('Generations')
         plt.ylabel('Cross correlation of homozygosity')
 
         plt.subplot(337)
@@ -716,13 +714,13 @@ if __name__ == '__main__':
     set_dir("/tmp")
     model_parameters = ModelParams(mutation_rate_prdm9=1.0 * 10 ** -8,
                                    erosion_rate_hotspot=1.0 * 10 ** -5,
-                                   population_size=10 ** 4,
+                                   population_size=10 ** 5,
                                    recombination_rate=1.0 * 10 ** -2,
                                    fitness_param=0.1,
                                    fitness='polynomial',
                                    scaled=False,
                                    alpha_zero=1.)
-    batch_parameters = BatchParams(drift=True, linearized=False, color="blue", scaling=10, nbr_of_steps=1000)
+    batch_parameters = BatchParams(drift=True, linearized=False, color="blue", scaling=10)
     batch_parameters.append_simu_params(dict(red="linearized"))
     batch_simulation = BatchSimulation(model_parameters, batch_parameters, axis="mutation",
                                        nbr_of_simulations=14, scale=10 ** 4)
