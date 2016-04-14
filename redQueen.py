@@ -260,20 +260,32 @@ class ModelParams(object):
         if self.fitness_family == 1:
             self.fitness_param = 1.
 
-    def unbound_mean_erosion(self, balance):
+    def unbound_mean_erosion(self, balance=1):
         rate_out = np.power(self.erosion_rate_hotspot * self.recombination_rate, 1)
         rate_in = np.power(self.fitness_param * self.mutation_rate_prdm9, 1)
         return rate_out / (balance * rate_in)
 
-    def bound_mean_erosion(self, balance):
+    def bound_mean_erosion(self, balance=1):
         rate_out = np.power(self.erosion_rate_hotspot * self.recombination_rate, 1)
         rate_in = np.power(self.fitness_param * self.mutation_rate_prdm9, 1)
         return rate_in / (rate_in + balance * rate_out)
 
+    @staticmethod
+    def erosion_limit(mean_erosion):
+        return -1 * mean_erosion * np.real(lambertw(-np.exp(- 1. / mean_erosion) / mean_erosion))
+
     def estimated_simpson(self, mean_erosion):
-        denom = 1 - 2 * mean_erosion - mean_erosion * np.real(lambertw(-np.exp(- 1. / mean_erosion) / mean_erosion))
-        return (2 * mean_erosion * self.erosion_rate_hotspot * self.recombination_rate * self.population_size) / (
+        denom = 1 - 2 * mean_erosion + self.erosion_limit(mean_erosion)
+        simpson = (2 * mean_erosion * self.erosion_rate_hotspot * self.recombination_rate * self.population_size) / (
             self.fitness_param * denom)
+        return max(1, simpson)
+
+    def frequencies_wrt_erosion(self, mean_erosion):
+        l_limit = self.erosion_limit(mean_erosion)
+        l = np.linspace(l_limit, 1)
+        x = 1 - l + mean_erosion * np.log(l)
+        x *= self.fitness_param / (2 * mean_erosion * self.erosion_rate_hotspot * self.recombination_rate * self.population_size)
+        return l, np.clip(x, 0., 1.)
 
     def __str__(self):
         name = "u=%.1e" % self.mutation_rate_prdm9 + \
@@ -423,6 +435,8 @@ class Simulation(object):
                  verticalalignment='top')
 
     def save_figure(self):
+        mean_erosion = np.mean(self.data.hotspots_erosion_mean())
+        params_mean_erosion = self.model_params.bound_mean_erosion()
         my_dpi = 96
         plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
         plt.subplot(331)
@@ -436,6 +450,10 @@ class Simulation(object):
         plt.subplot(332)
         plt.plot(self.generations, self.data.simpson_entropy_prdm9(), color=self.simu_params.color)
         plt.plot(self.generations, self.data.shannon_entropy_prdm9(), color='green')
+        simpson = self.model_params.estimated_simpson(mean_erosion)
+        params_simpson = self.model_params.estimated_simpson(params_mean_erosion)
+        plt.plot((self.generations[0], self.generations[-1]), (simpson, simpson), 'k-', color="grey")
+        plt.plot((self.generations[0], self.generations[-1]), (params_simpson, params_simpson), 'k-', color="orange")
         plt.title('Efficient nbr of PRDM9 alleles over time. \n')
         plt.xlabel('Generation')
         plt.ylabel('Number of alleles')
@@ -443,10 +461,12 @@ class Simulation(object):
 
         plt.subplot(333)
         plt.plot(self.generations, self.data.hotspots_erosion_mean(), color=self.simu_params.color)
+        plt.plot((self.generations[0], self.generations[-1]), (params_mean_erosion, params_mean_erosion), 'k-',
+                 color="orange")
         plt.title('Mean erosion of the hotspots over time. \n')
         plt.xlabel('Generation')
         plt.ylabel('Mean erosion')
-        plt.yscale('log')
+        plt.yscale('linear')
 
         plt.subplot(334)
         plt.hexbin(self.data.flat_erosion(), self.data.flat_fitness(), self.data.flat_longevity(),
@@ -458,6 +478,8 @@ class Simulation(object):
         plt.subplot(335)
         plt.hexbin(self.data.flat_erosion(), self.data.flat_frequencies(), self.data.flat_longevity(),
                    gridsize=200, bins='log')
+        plt.plot(*self.model_params.frequencies_wrt_erosion(mean_erosion), color="grey")
+        plt.plot(*self.model_params.frequencies_wrt_erosion(params_mean_erosion), color="orange")
         plt.title('PRMD9 frequency vs hotspot erosion')
         plt.xlabel('hotspot erosion')
         plt.ylabel('PRMD9 frequency')
