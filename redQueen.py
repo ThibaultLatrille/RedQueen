@@ -103,7 +103,7 @@ class ModelDiscrete(Model):
         self.linearized = simu_params.linearized
         self.drift = simu_params.drift
 
-    def forward(self, t=1):
+    def forward(self):
         new_alleles = np.random.poisson(self.mutation_rate)
         if new_alleles > 0:
             self.new_alleles(new_alleles)
@@ -134,7 +134,7 @@ class ModelDiscrete(Model):
         else:
             self.prdm9_polymorphism = distribution_vector * self.population_size
 
-        self.prdm9_longevity += 1. / self.population_size
+        self.prdm9_longevity += prdm9_frequencies
         self.remove_dead_prdm9()
 
     def new_alleles(self, new_alleles):
@@ -226,7 +226,7 @@ class SimulationData(object):
             cross_homozygosity.append(0.)
             slice_dict = dict(zip(self.ids[index], self.prdm9_frequencies[index]))
             lag_dict = dict(zip(self.ids[index + lag], self.prdm9_frequencies[index + lag]))
-            for key in list(set(slice_dict.keys()) & set(lag_dict.keys())):
+            for key in (set(slice_dict.keys()) & set(lag_dict.keys())):
                 cross_homozygosity[index] += slice_dict[key] * lag_dict[key]
         return np.mean(cross_homozygosity)
 
@@ -302,7 +302,7 @@ class ModelParams(object):
 
 
 class SimulationParams(object):
-    def __init__(self, drift=True, linearized=True, color="blue", scaling=100,
+    def __init__(self, drift=True, linearized=True, color="blue", scaling=10,
                  nbr_of_steps=1000):
         self.scaling = scaling
         self.drift = drift
@@ -386,18 +386,27 @@ class Simulation(object):
                "Model parameters : \n" + self.model_params.caption() + "\n" + \
                "Simulation parameters : \n" + self.simu_params.caption()
 
+    def burn_in(self):
+        print "Entering burn-in"
+        t = 0
+        initial_variants = set(self.model.ids)
+        while len(initial_variants & set(self.model.ids)) > 0:
+            self.model.forward()
+            t += 1
+        self.t_max = max(int(self.simu_params.scaling * t), self.simu_params.nbr_of_steps)
+        print "Burn-in Completed"
+
     def run(self):
-        start_time = time.time()
-        step = float(self.t_max) / self.simu_params.nbr_of_steps
+        self.burn_in()
+
         step_t = 0.
 
+        step = float(self.t_max) / self.simu_params.nbr_of_steps
         for t in range(self.t_max):
-            # Randomly create new alleles of PRDM9
-
             self.model.forward()
 
             step_t += 1
-            if step_t > step and t / float(self.t_max) > 0.01:
+            if step_t > step:
                 step_t -= step
 
                 if int(10 * t) % self.t_max == 0:
@@ -405,11 +414,6 @@ class Simulation(object):
 
                 self.generations.append(t)
                 self.data.store(self.model)
-
-                if time.time() - start_time > 7200:
-                    self.t_max = t
-                    print "Breaking the loop, time over 7200s"
-                    break
 
         self.save_figure()
         return self
@@ -718,7 +722,7 @@ if __name__ == '__main__':
                                    fitness='polynomial',
                                    scaled=False,
                                    alpha_zero=1.)
-    batch_parameters = BatchParams(drift=True, linearized=False, color="blue", scaling=100, nbr_of_steps=1000)
+    batch_parameters = BatchParams(drift=True, linearized=False, color="blue", scaling=10, nbr_of_steps=1000)
     batch_parameters.append_simu_params(dict(red="linearized"))
     batch_simulation = BatchSimulation(model_parameters, batch_parameters, axis="mutation",
                                        nbr_of_simulations=14, scale=10 ** 4)
