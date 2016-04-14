@@ -70,8 +70,8 @@ class Model(object):
         else:
             return self.alpha * 1.0 / (2 * x)
 
-    def remove_dead_prdm9(self, cut_off):
-        remove_extincted = np.array(map(lambda x: x > cut_off, self.prdm9_polymorphism), dtype=bool)
+    def remove_dead_prdm9(self):
+        remove_extincted = np.array(map(lambda x: x > 0, self.prdm9_polymorphism), dtype=bool)
         if not remove_extincted.all():
             self.prdm9_polymorphism = self.prdm9_polymorphism[remove_extincted]
             self.hotspots_erosion = self.hotspots_erosion[remove_extincted]
@@ -135,7 +135,7 @@ class ModelDiscrete(Model):
             self.prdm9_polymorphism = distribution_vector * self.population_size
 
         self.prdm9_longevity += 1. / self.population_size
-        self.remove_dead_prdm9(cut_off=0)
+        self.remove_dead_prdm9()
 
     def new_alleles(self, new_alleles):
         self.prdm9_polymorphism -= np.random.multinomial(new_alleles, sum_to_one(self.prdm9_polymorphism))
@@ -302,17 +302,11 @@ class ModelParams(object):
 
 
 class SimulationParams(object):
-    def __init__(self, drift=True, linearized=True, discrete=True, color="blue", scaling=100, cut_off=0.01,
+    def __init__(self, drift=True, linearized=True, color="blue", scaling=100,
                  nbr_of_steps=1000):
         self.scaling = scaling
         self.drift = drift
-        self.discrete = discrete
-        if self.discrete:
-            self.linearized = True
-            self.cut_off = cut_off
-        else:
-            self.linearized = linearized
-            self.cut_off = 0
+        self.linearized = linearized
         self.color = color
 
         self.nbr_of_steps = nbr_of_steps  # Number of steps at which we make computations
@@ -321,26 +315,18 @@ class SimulationParams(object):
         return "scale=%.1e" % self.scaling + \
                "_drift=%s" % self.drift + \
                "_linear=%s" % self.linearized + \
-               "_discrete=%s" % self.discrete + \
                "_color=%s" % self.color + \
                "_n=%.1e" % self.nbr_of_steps
 
     def caption(self):
         caption = "Simulation of %s*Ne generations " % self.scaling + \
                   "\n  Recorded %.1e times. \n" % self.nbr_of_steps
-        caption += self.caption_for_attr('discrete')
         caption += self.caption_for_attr('drift')
         caption += self.caption_for_attr('linearized')
         return caption
 
     def caption_for_attr(self, attr):
-        if attr == 'discrete':
-            if getattr(self, attr):
-                return "  The population size and time is considered DISCRETE. \n"
-            else:
-                return "  The population size and time is considered CONTINUOUS. \n" + \
-                       "  Cut-off for the death of PRDM9=%.1e. \n" % self.cut_off
-        elif attr == 'drift':
+        if attr == 'drift':
             if getattr(self, attr):
                 return "  The simulation take into account DRIFT. \n"
             else:
@@ -388,10 +374,7 @@ class Simulation(object):
         self.t_max = max(int(self.simu_params.scaling * self.model_params.population_size),
                          self.simu_params.nbr_of_steps)  # Number of generations
 
-        if self.simu_params.discrete:
-            self.model = ModelDiscrete(10, model_params, simu_params)
-        else:
-            self.model = ModelContinuous(10, model_params, simu_params)
+        self.model = ModelDiscrete(10, model_params, simu_params)
         self.data = SimulationData()
         self.generations = []
 
@@ -411,14 +394,11 @@ class Simulation(object):
         for t in range(self.t_max):
             # Randomly create new alleles of PRDM9
 
-            if self.simu_params.discrete:
-                self.model.forward(t=1)
+            self.model.forward()
 
             step_t += 1
             if step_t > step and t / float(self.t_max) > 0.01:
                 step_t -= step
-                if not self.simu_params.discrete:
-                    self.model.forward(t=float(self.simu_params.scaling) / self.simu_params.nbr_of_steps)
 
                 if int(10 * t) % self.t_max == 0:
                     print "Computation at {0}%".format(float(100 * t) / self.t_max)
@@ -534,7 +514,7 @@ class BatchSimulation(object):
                  nbr_of_simulations=20,
                  scale=10 ** 2):
         axis_hash = {"fitness": 0, "mutation": 1, "erosion": 2, "population": 3, "recombination": 4,
-                     "alpha": 5, "scaling": 6, "cut_off": 7}
+                     "alpha": 5, "scaling": 6}
         assert axis in axis_hash.keys(), "Axis must be either 'population', 'mutation', 'erosion'," \
                                          "'recombination', 'fitness', or 'scaling'"
         assert scale > 1, "The scale parameter must be greater than one"
@@ -558,8 +538,6 @@ class BatchSimulation(object):
         for axis_current in range(self.nbr_of_simulations):
             for simu_params in self.batch_params:
                 self.simulations[simu_params.color].append(Simulation(model_params.copy(), simu_params.copy()))
-                if self.axis == 7:
-                    simu_params.cut_off *= effect
             self.axis_range.append(range_current)
             range_current *= effect
             if self.axis == 0:
@@ -740,8 +718,7 @@ if __name__ == '__main__':
                                    fitness='polynomial',
                                    scaled=False,
                                    alpha_zero=1.)
-    batch_parameters = BatchParams(drift=True, linearized=False, discrete=True, color="blue", scaling=100,
-                                   cut_off=0.01, nbr_of_steps=1000)
+    batch_parameters = BatchParams(drift=True, linearized=False, color="blue", scaling=100, nbr_of_steps=1000)
     batch_parameters.append_simu_params(dict(red="linearized"))
     batch_simulation = BatchSimulation(model_parameters, batch_parameters, axis="mutation",
                                        nbr_of_simulations=14, scale=10 ** 4)
