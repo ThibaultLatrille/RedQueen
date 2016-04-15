@@ -95,9 +95,9 @@ class ModelDiscrete(Model):
                             model_params.recombination_rate
         if model_params.scaled:
             self.erosion_rate *= model_params.population_size
-        assert self.erosion_rate < 0.1, "The scaled erosion rate is too large, decrease either the " \
+        assert self.erosion_rate < 0.5, "The scaled erosion rate is too large, decrease either the " \
                                         "recombination rate, the erosion rate or the population size"
-        assert self.erosion_rate > 0.000000001, "The scaled erosion rate is too low, increase either the " \
+        assert self.erosion_rate > 0.0000000001, "The scaled erosion rate is too low, increase either the " \
                                                 "recombination rate, the erosion rate or the population size"
         self.alpha = 1.
         self.linearized = simu_params.linearized
@@ -284,7 +284,8 @@ class ModelParams(object):
         l_limit = self.erosion_limit(mean_erosion)
         l = np.linspace(l_limit, 1)
         x = 1 - l + mean_erosion * np.log(l)
-        x *= self.fitness_param / (2 * mean_erosion * self.erosion_rate_hotspot * self.recombination_rate * self.population_size)
+        x *= self.fitness_param / (
+            2 * mean_erosion * self.erosion_rate_hotspot * self.recombination_rate * self.population_size)
         return l, np.clip(x, 0., 1.)
 
     def __str__(self):
@@ -486,7 +487,7 @@ class Simulation(object):
 
         plt.subplot(336)
         num = 30
-        max_longevity = int(self.t_max/10)
+        max_longevity = int(self.t_max / 10)
         lag_max = next((j for j, x in enumerate(self.generations) if x > max_longevity), None)
         longevities = np.linspace(0, max_longevity, num)
         lags = np.linspace(0, lag_max, num)
@@ -537,19 +538,25 @@ class BatchSimulation(object):
                  axis="null",
                  nbr_of_simulations=20,
                  scale=10 ** 2):
-        axis_hash = {"fitness": 0, "mutation": 1, "erosion": 2, "population": 3, "recombination": 4,
-                     "alpha": 5, "scaling": 6}
+        axis_hash = {"fitness": "The fitness inflexion point",
+                     "mutation": "Mutation rate of PRDM9",
+                     "erosion": "Erosion rate of the hotspots",
+                     "population": "The population size",
+                     "recombination": "The recombination rate of the hotspots",
+                     "alpha": "Alpha 0",
+                     "scaling": "The scaling factor"}
         assert axis in axis_hash.keys(), "Axis must be either 'population', 'mutation', 'erosion'," \
                                          "'recombination', 'fitness', or 'scaling'"
         assert scale > 1, "The scale parameter must be greater than one"
-        self.axis = axis_hash[axis]
-        self.axis_str = {0: "The fitness inflexion point", 1: "Mutation rate of PRDM9",
-                         2: "Erosion rate of the hotspots", 3: "The population size",
-                         4: "The recombination rate", 5: "Alpha 0",
-                         6: "The scaling factor", 7: "Cut-off"}[self.axis]
+        variable_hash = {"fitness": "fitness_param",
+                         "mutation": "mutation_rate_prdm9",
+                         "erosion": "erosion_rate_hotspot",
+                         "population": "population_size",
+                         "recombination": "recombination_rate",
+                         "alpha": "alpha_zero",
+                         "scaling": "scaling"}[axis]
+        self.axis_str = axis_hash[axis]
         self.scale = scale
-        self.axis_range = []
-        range_current = 1.
         self.nbr_of_simulations = nbr_of_simulations
         self.model_params = model_params.copy()
         self.batch_params = batch_params.copy()
@@ -558,45 +565,44 @@ class BatchSimulation(object):
         for simu_params in self.batch_params:
             self.simulations[simu_params.color] = []
 
-        effect = self.scale ** (1. / (self.nbr_of_simulations - 1))
-        for axis_current in range(self.nbr_of_simulations):
+        if variable_hash == "scaling":
+            self.axis_range = np.logspace(np.log10(1. / np.sqrt(scale)),
+                                          np.log10(1. * np.sqrt(scale)), nbr_of_simulations)
+        else:
+            self.axis_range = np.logspace(np.log10(float(getattr(self.model_params, variable_hash)) / np.sqrt(scale)),
+                                          np.log10(float(getattr(self.model_params, variable_hash)) * np.sqrt(scale)),
+                                          nbr_of_simulations)
+        for axis_current in self.axis_range:
             for simu_params in self.batch_params:
-                self.simulations[simu_params.color].append(Simulation(model_params.copy(), simu_params.copy()))
-            self.axis_range.append(range_current)
-            range_current *= effect
-            if self.axis == 0:
-                model_params.fitness_param *= effect
-            elif self.axis == 1:
-                model_params.mutation_rate_prdm9 *= effect
-            elif self.axis == 2:
-                model_params.erosion_rate_hotspot *= effect
-            elif self.axis == 3:
-                model_params.population_size *= effect
-            elif self.axis == 4:
-                model_params.recombination_rate *= effect
-            elif self.axis == 5:
-                model_params.alpha_zero *= effect
-            elif self.axis == 6:
-                model_params.mutation_rate_prdm9 /= effect
-                model_params.erosion_rate_hotspot /= effect
-                model_params.population_size *= effect
-                model_params.recombination_rate /= effect
+                model_params_copy = self.model_params.copy()
+                if variable_hash == "scaling":
+                    model_params_copy.mutation_rate_prdm9 /= axis_current
+                    model_params_copy.erosion_rate_hotspot /= axis_current
+                    model_params_copy.population_size *= axis_current
+                    model_params_copy.recombination_rate /= axis_current
+                else:
+                    setattr(model_params_copy, variable_hash, axis_current)
+                self.simulations[simu_params.color].append(Simulation(model_params_copy, simu_params.copy()))
 
     def caption(self):
         return "Batch of %s simulations. \n" % self.nbr_of_simulations + self.axis_str + \
                "is scaled %.1e times.\n" % self.scale + self.batch_params.caption() + self.model_params.caption()
 
-    def run(self, nbr_of_cpu=4):
-        set_dir("/" + self.axis_str + " " + id_generator(8))
+    def run(self, nbr_of_cpu=4, directory_id=None):
+        if directory_id is None:
+            directory_id = id_generator(8)
+        set_dir("/" + directory_id + " " + self.axis_str)
         for key, simulations in self.simulations.iteritems():
             if nbr_of_cpu > 1:
 
                 pool = Pool(nbr_of_cpu)
                 self.simulations[key] = pool.map(execute, simulations)
+                pool.close()
             else:
                 map(lambda x: x.run(), simulations)
         self.pickle()
-        self.save_figure()
+        os.chdir('..')
+        print 'Simulation computed'
 
     def pickle(self):
         pickle.dump(self, open(self.axis_str + ".p", "wb"))
@@ -614,7 +620,7 @@ class BatchSimulation(object):
         plt.ylabel(caption)
         plt.xscale('log')
 
-    def save_figure(self, k=1):
+    def save_figure(self, k=1, directory_id=None):
         my_dpi = 96
         plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
 
@@ -669,18 +675,23 @@ class BatchSimulation(object):
 
         plt.tight_layout()
 
+        if directory_id is None:
+            directory_id = id_generator(8)
+        set_dir("/" + directory_id + " " + self.axis_str)
         plt.savefig(self.axis_str + str(k) + '.png')
         plt.clf()
-        print 'Simulation computed'
+        os.chdir('..')
         return self
 
 
 class Batches(list):
-    def save_figure(self, k_range=np.logspace(-1, 1, 5)):
-        self.save_erosion(k_range)
-        self.save_simpson()
+    def save_figure(self, k_range=np.logspace(-1, 1, 5), directory_id=None):
+        if directory_id is None:
+            directory_id = id_generator(8)
+        self.save_erosion(directory_id, k_range)
+        self.save_simpson(directory_id)
 
-    def save_erosion(self, k_range=np.logspace(-1, 1, 5)):
+    def save_erosion(self, directory_id, k_range=np.logspace(-1, 1, 5)):
         my_dpi = 96
         plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
 
@@ -702,12 +713,12 @@ class Batches(list):
 
         plt.tight_layout()
 
-        plt.savefig('erosion.png')
+        plt.savefig(directory_id + 'erosion.png')
         plt.clf()
         print 'Figure computed'
         return self
 
-    def save_simpson(self):
+    def save_simpson(self, directory_id):
         my_dpi = 96
         plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
 
@@ -726,27 +737,34 @@ class Batches(list):
 
         plt.tight_layout()
 
-        plt.savefig('simpson.png')
+        plt.savefig(directory_id + 'simpson.png')
         plt.clf()
         print 'Figure computed'
         return self
 
 
 if __name__ == '__main__':
-    set_dir("/tmp")
-    model_parameters = ModelParams(mutation_rate_prdm9=1.0 * 10 ** -8,
-                                   erosion_rate_hotspot=1.0 * 10 ** -5,
-                                   population_size=10 ** 5,
-                                   recombination_rate=1.0 * 10 ** -2,
+    dir_id = id_generator(8)
+    set_dir("/tmp/" + dir_id)
+    model_parameters = ModelParams(mutation_rate_prdm9=1.0 * 10 ** -6,
+                                   erosion_rate_hotspot=1.0 * 10 ** -4,
+                                   population_size=10 ** 4,
+                                   recombination_rate=1.0 * 10 ** -3,
                                    fitness_param=0.1,
                                    fitness='polynomial',
                                    scaled=False,
                                    alpha_zero=1.)
     batch_parameters = BatchParams(drift=True, linearized=False, color="blue", scaling=10)
     batch_parameters.append_simu_params(dict(red="linearized"))
-    batch_simulation = BatchSimulation(model_parameters, batch_parameters, axis="mutation",
-                                       nbr_of_simulations=14, scale=10 ** 4)
-    batch_simulation.run(nbr_of_cpu=1)
+    batches = Batches()
+    for axis in ["population", "erosion", "mutation", "fitness"]:
+        batches.append(BatchSimulation(model_parameters.copy(), batch_parameters.copy(), axis=axis,
+                                       nbr_of_simulations=14, scale=10 ** 4))
+    for batch_simulation in batches:
+        batch_simulation.run(nbr_of_cpu=7, directory_id=dir_id)
+    for batch_simulation in batches:
+        batch_simulation.save_figure(directory_id=dir_id)
+    batches.save_figure(np.logspace(-0.5, 0.5, 5), directory_id=dir_id)
     '''
     set_dir("/tmp/ns-pickle")
     lst = os.listdir(os.getcwd())
