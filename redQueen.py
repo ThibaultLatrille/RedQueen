@@ -317,15 +317,13 @@ class ModelParams(object):
     def turn_over_selection(self, mean_erosion):
         selection = self.coef_fitness(mean_erosion) * (1 - mean_erosion)
         fixation = (1 - np.exp(-selection)) / (1 - np.exp(-2 * self.population_size * selection))
-        return 1. / (fixation * self.population_size * self.mutation_rate_prdm9)
+        return 1. / fixation
+
+    def turn_over_derivative(self, mean_erosion):
+        return 1. / (self.coef_fitness(mean_erosion) * (mean_erosion - 1 + mean_erosion * np.log(mean_erosion)))
 
     def turn_over_max(self):
         return max(1, 1 / (self.mutation_rate_prdm9 * self.population_size))
-
-    def turn_over_derivative(self, mean_erosion):
-        selection = self.coef_fitness(mean_erosion) * (mean_erosion - 1 + mean_erosion * np.log(mean_erosion))
-        fixation = (1 - np.exp(-selection)) / (1 - np.exp(-2 * self.population_size * selection))
-        return 1. / (fixation * self.population_size * self.mutation_rate_prdm9)
 
     def coef_fitness(self, mean_erosion):
         if self.fitness_family == 3:
@@ -594,6 +592,7 @@ class Simulation(object):
     def turn_over_derivative(self):
         return self.model_params.turn_over_derivative(self.data.mean_erosion())
 
+
 class BatchSimulation(object):
     def __init__(self,
                  model_params,
@@ -601,7 +600,7 @@ class BatchSimulation(object):
                  axis="null",
                  nbr_of_simulations=20,
                  scale=10 ** 2):
-        axis_hash = {"fitness": "The fitness inflexion point",
+        axis_hash = {"fitness": "The fitness parameter",
                      "mutation": "Mutation rate of PRDM9",
                      "erosion": "Erosion rate of the hotspots",
                      "population": "The population size",
@@ -726,7 +725,7 @@ class BatchSimulation(object):
 
             plt.subplot(324)
             self.plot_series(map(lambda sim: sim.data.hotspots_erosion_var(), simulations), simu_params.color,
-                             'Hotspot landscape Erosion')
+                             'Variance Hotspot Erosion')
             params_erosion_var = map(
                 lambda model_param, l: model_param.estimated_erosion_var(l), models_params, mean_erosion)
             simu_erosion_var = map(lambda sim: sim.estimated_erosion_var(), simulations)
@@ -748,10 +747,10 @@ class BatchSimulation(object):
             plt.plot(self.axis_range, turn_over_selection, color='lightgreen')
             turn_over_derivative = map(lambda sim: sim.turn_over_selection(), simulations)
             plt.plot(self.axis_range, turn_over_derivative, color='darkgreen')
-            turn_over_neutral = map(lambda model_param: model_param.turn_over_neutral(), models_params)
-            plt.plot(self.axis_range, turn_over_neutral, color='grey')
-            turn_over_max = map(lambda model_param: model_param.turn_over_max(), models_params)
-            plt.plot(self.axis_range, turn_over_max, color='black')
+            # turn_over_neutral = map(lambda model_param: model_param.turn_over_neutral(), models_params)
+            # plt.plot(self.axis_range, turn_over_neutral, color='grey')
+            # turn_over_max = map(lambda model_param: model_param.turn_over_max(), models_params)
+            # plt.plot(self.axis_range, turn_over_max, color='black')
             plt.title('{0} for different {1}'.format('Cross-homozygosity', self.axis_str))
             plt.xlabel(self.axis_str)
             plt.ylabel('Cross-homozygosity')
@@ -774,6 +773,7 @@ class Batches(list):
         self.save_erosion(directory_id, k_range)
         self.save_simpson(directory_id)
         self.save_erosion_var(directory_id)
+        self.save_cross_homozygosity(directory_id)
 
     def save_erosion(self, directory_id, k_range=np.logspace(-1, 1, 5)):
         my_dpi = 96
@@ -797,9 +797,9 @@ class Batches(list):
 
         plt.tight_layout()
 
-        plt.savefig(directory_id + 'erosion_mean.png')
+        plt.savefig(directory_id + ' batch erosion mean.png')
         plt.clf()
-        print 'Figure computed'
+        print 'Erosion Mean computed'
         return self
 
     def save_simpson(self, directory_id):
@@ -821,9 +821,46 @@ class Batches(list):
 
         plt.tight_layout()
 
-        plt.savefig(directory_id + 'simpson.png')
+        plt.savefig(directory_id + ' batch simpson.png')
         plt.clf()
-        print 'Figure computed'
+        print 'Simpson computed'
+        return self
+
+    def save_cross_homozygosity(self, directory_id):
+        my_dpi = 96
+        plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
+
+        for j, batch in enumerate(self):
+            plt.subplot(2, 2, j + 1)
+            for simu_params in batch.batch_params:
+                simulations = batch.simulations[simu_params.color]
+
+                for percent in np.linspace(0.01, 0.1, 10):
+                    lag = map(lambda sim: sim.generations[sim.data.dichotomic_search(percent)], simulations)
+                    plt.plot(batch.axis_range, lag, color=simu_params.color, alpha=10 * percent)
+
+                simu_turn_over = map(lambda sim: sim.turn_over_selection(), simulations)
+                plt.plot(batch.axis_range, simu_turn_over, color='lightgreen')
+
+                turn_over_derivative = map(lambda sim: sim.turn_over_derivative(), simulations)
+                plt.plot(batch.axis_range, turn_over_derivative, color='darkgreen')
+                print "Min:"
+                print np.min(turn_over_derivative)
+                print "Max:"
+                print np.max(turn_over_derivative)
+                plt.yscale('linear')
+
+            plt.title('{0} for different {1}'.format('Cross-homozygosity', batch.axis_str))
+            plt.xlabel(batch.axis_str)
+            plt.ylabel('Cross-homozygosity')
+            plt.yscale('log')
+            plt.xscale('log')
+
+        plt.tight_layout()
+
+        plt.savefig(directory_id + ' batch cross homosygosity.png')
+        plt.clf()
+        print 'Cross homosygosity computed'
         return self
 
     def save_erosion_var(self, directory_id):
@@ -845,9 +882,9 @@ class Batches(list):
 
         plt.tight_layout()
 
-        plt.savefig(directory_id + 'erosion_var.png')
+        plt.savefig(directory_id + ' batch erosion var.png')
         plt.clf()
-        print 'Figure computed'
+        print 'Erosion Variance computed'
         return self
 
 
@@ -883,9 +920,9 @@ if __name__ == '__main__':
         if pickle_file[-2:] == ".p":
             batch_simulation = pickle.load(open(pickle_file, "rb"))
             batch_simulation.save_figure(directory_id=dir_id)
-            set_dir("/" + dir_id + " " + batch_simulation.axis_str)
-            for sims in batch_simulation.simulations.values():
-                map(lambda sim: sim.save_figure(), sims)
-            os.chdir('..')
+            # set_dir("/" + dir_id + " " + batch_simulation.axis_str)
+            # for sims in batch_simulation.simulations.values():
+            #     map(lambda sim: sim.save_figure(), sims)
+            # os.chdir('..')
             batches.append(batch_simulation)
     batches.save_figure(np.logspace(-0.5, 0.5, 5), directory_id=dir_id)
