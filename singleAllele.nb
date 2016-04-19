@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     39880,       1064]
-NotebookOptionsPosition[     38049,        999]
-NotebookOutlinePosition[     38390,       1014]
-CellTagsIndexPosition[     38347,       1011]
+NotebookDataLength[     32816,        930]
+NotebookOptionsPosition[     30901,        860]
+NotebookOutlinePosition[     31242,        875]
+CellTagsIndexPosition[     31199,        872]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -312,17 +312,19 @@ Cell[BoxData[
          RowBox[{"FullSimplify", "[", 
           RowBox[{
            RowBox[{
-            RowBox[{"Integrate", "[", 
-             RowBox[{"l", ",", " ", 
-              RowBox[{"{", 
-               RowBox[{"l", ",", "1", ",", " ", "y"}], " ", "}"}]}], "]"}], 
-            "/", " ", 
-            RowBox[{"Integrate", "[", 
-             RowBox[{
-              RowBox[{"1", "/", " ", "l"}], ",", " ", 
-              RowBox[{"{", 
-               RowBox[{"l", ",", "1", ",", " ", "y"}], " ", "}"}]}], "]"}]}], 
-           " ", ",", 
+            RowBox[{
+             RowBox[{"Integrate", "[", 
+              RowBox[{"l", ",", " ", 
+               RowBox[{"{", 
+                RowBox[{"l", ",", "1", ",", " ", "y"}], " ", "}"}]}], "]"}], 
+             "/", " ", 
+             RowBox[{"Integrate", "[", 
+              RowBox[{
+               RowBox[{"1", "/", " ", "l"}], ",", " ", 
+               RowBox[{"{", 
+                RowBox[{"l", ",", "1", ",", " ", "y"}], " ", "}"}]}], "]"}]}],
+             "-", 
+            RowBox[{"L", "^", "2"}]}], " ", ",", 
            RowBox[{
             RowBox[{"Re", "[", "y", "]"}], ">", "0"}]}], "]"}]}], ",", 
         RowBox[{
@@ -336,7 +338,8 @@ Cell[BoxData[
    3.668508706630831*^9, 3.6685087260827503`*^9}, {3.6685087728762293`*^9, 
    3.668508807977812*^9}, {3.668508840359701*^9, 3.668508841211038*^9}, {
    3.668508933226863*^9, 3.668508972811858*^9}, {3.6685110676364117`*^9, 
-   3.668511070596537*^9}, 3.668764904674416*^9}],
+   3.668511070596537*^9}, 3.668764904674416*^9, {3.670046076909984*^9, 
+   3.670046122123866*^9}}],
 
 Cell[BoxData[
  RowBox[{
@@ -349,18 +352,21 @@ may not be found; use Reduce for complete solution information. \
 \\!\\(\\*ButtonBox[\\\"\[RightSkeleton]\\\", ButtonStyle->\\\"Link\\\", \
 ButtonFrame->None, ButtonData:>\\\"paclet:ref/message/Solve/ifun\\\", \
 ButtonNote -> \\\"Solve::ifun\\\"]\\)\"\>"}]], "Message", "MSG",
- CellChangeTimes->{3.668508974247752*^9, 3.668511076504545*^9}],
+ CellChangeTimes->{3.668508974247752*^9, 3.668511076504545*^9, 
+  3.670045946868998*^9, 3.6700460833946247`*^9, 3.670046123242889*^9}],
 
 Cell[BoxData[
  RowBox[{"{", 
   RowBox[{"{", 
    RowBox[{"x", "\[Rule]", 
     RowBox[{
-     FractionBox["1", "2"], " ", 
+     RowBox[{"-", 
+      FractionBox["1", "2"]}], " ", "L", " ", 
      RowBox[{"(", 
-      RowBox[{"L", "-", 
-       RowBox[{
-        SuperscriptBox["L", "2"], " ", 
+      RowBox[{
+       RowBox[{"-", "1"}], "+", 
+       RowBox[{"2", " ", "L"}], "+", 
+       RowBox[{"L", " ", 
         RowBox[{"ProductLog", "[", 
          RowBox[{"-", 
           FractionBox[
@@ -372,7 +378,8 @@ Cell[BoxData[
    3.668508632393938*^9, 3.668508662660754*^9}, {3.668508718679338*^9, 
    3.668508729448715*^9}, 3.668508778366139*^9, 3.668508809151613*^9, 
    3.668508842202009*^9, 3.668508937953409*^9, {3.668508970656941*^9, 
-   3.6685089742489977`*^9}, 3.6685110765277653`*^9}]
+   3.6685089742489977`*^9}, 3.6685110765277653`*^9, 3.670045946896936*^9, 
+   3.670046083415073*^9, 3.670046123265608*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -389,128 +396,12 @@ Cell[BoxData[
          RowBox[{"FullSimplify", "[", 
           RowBox[{
            RowBox[{
-            RowBox[{"Integrate", "[", 
-             RowBox[{
-              RowBox[{"b", 
-               RowBox[{
-                RowBox[{"(", " ", 
-                 RowBox[{"1", "-", "l", "+", 
-                  RowBox[{"L", " ", 
-                   RowBox[{"Log", "[", "l", "]"}]}]}], ")"}], "/", "a"}]}], 
-              ",", " ", 
-              RowBox[{"{", 
-               RowBox[{"l", ",", "1", ",", " ", "y"}], " ", "}"}]}], "]"}], 
-            "/", " ", 
             RowBox[{"Integrate", "[", 
              RowBox[{
               RowBox[{"1", "/", " ", "l"}], ",", " ", 
               RowBox[{"{", 
-               RowBox[{"l", ",", "1", ",", " ", "y"}], " ", "}"}]}], "]"}]}], 
-           " ", ",", 
-           RowBox[{
-            RowBox[{"Re", "[", "y", "]"}], ">", "0"}]}], "]"}]}], ",", 
-        RowBox[{
-         RowBox[{"1", "-", " ", "y", "+", " ", 
-          RowBox[{"L", " ", 
-           RowBox[{"Log", "[", "y", "]"}]}]}], "\[Equal]", "0"}]}], "}"}], 
-      ",", " ", "y"}], "]"}], " ", ",", " ", "x"}], "]"}], "]"}]], "Input",
- CellChangeTimes->{{3.668508987026176*^9, 3.668509001320318*^9}, {
-  3.668511052839456*^9, 3.668511056280272*^9}}],
-
-Cell[BoxData[
- RowBox[{
-  StyleBox[
-   RowBox[{"Solve", "::", "ifun"}], "MessageName"], 
-  RowBox[{
-  ":", " "}], "\<\"Inverse functions are being used by \
-\[NoBreak]\\!\\(\\*RowBox[{\\\"Solve\\\"}]\\)\[NoBreak], so some solutions \
-may not be found; use Reduce for complete solution information. \
-\\!\\(\\*ButtonBox[\\\"\[RightSkeleton]\\\", ButtonStyle->\\\"Link\\\", \
-ButtonFrame->None, ButtonData:>\\\"paclet:ref/message/Solve/ifun\\\", \
-ButtonNote -> \\\"Solve::ifun\\\"]\\)\"\>"}]], "Message", "MSG",
- CellChangeTimes->{3.66850901134595*^9, 3.66851107973602*^9}],
-
-Cell[BoxData[
- RowBox[{"{", 
-  RowBox[{"{", 
-   RowBox[{"x", "\[Rule]", 
-    RowBox[{"-", 
-     FractionBox[
-      RowBox[{"b", " ", "L", " ", 
-       RowBox[{"(", 
-        RowBox[{
-         RowBox[{"-", "1"}], "+", 
-         RowBox[{"2", " ", "L"}], "+", 
-         RowBox[{"L", " ", 
-          RowBox[{"ProductLog", "[", 
-           RowBox[{"-", 
-            FractionBox[
-             SuperscriptBox["\[ExponentialE]", 
-              RowBox[{
-               RowBox[{"-", "1"}], "/", "L"}]], "L"]}], "]"}]}]}], ")"}]}], 
-      RowBox[{"2", " ", "a"}]]}]}], "}"}], "}"}]], "Output",
- CellChangeTimes->{3.668509011346917*^9, 3.668511079755115*^9}]
-}, Open  ]],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[
- RowBox[{"FullSimplify", "[", 
-  RowBox[{
-   RowBox[{"b", 
-    RowBox[{"(", 
-     RowBox[{
-      RowBox[{
-       FractionBox["1", "2"], " ", 
-       RowBox[{"(", 
-        RowBox[{"L", "-", 
-         RowBox[{
-          SuperscriptBox["L", "2"], " ", 
-          RowBox[{"ProductLog", "[", 
-           RowBox[{"-", 
-            FractionBox[
-             SuperscriptBox["\[ExponentialE]", 
-              RowBox[{
-               RowBox[{"-", "1"}], "/", "L"}]], "L"]}], "]"}]}]}], ")"}]}], 
-      "-", 
-      SuperscriptBox["L", "2"]}], ")"}]}], "-", 
-   RowBox[{"a", "*", 
-    RowBox[{"-", 
-     FractionBox[
-      RowBox[{"b", " ", "L", " ", 
-       RowBox[{"(", 
-        RowBox[{
-         RowBox[{"-", "1"}], "+", 
-         RowBox[{"2", " ", "L"}], "+", 
-         RowBox[{"L", " ", 
-          RowBox[{"ProductLog", "[", 
-           RowBox[{"-", 
-            FractionBox[
-             SuperscriptBox["\[ExponentialE]", 
-              RowBox[{
-               RowBox[{"-", "1"}], "/", "L"}]], "L"]}], "]"}]}]}], ")"}]}], 
-      RowBox[{"2", " ", "a"}]]}]}]}], "]"}]], "Input",
- CellChangeTimes->{{3.668510062216434*^9, 3.668510084935067*^9}, {
-  3.668510342419297*^9, 3.668510345181017*^9}}],
-
-Cell[BoxData["0"], "Output",
- CellChangeTimes->{3.66851008756151*^9, 3.6685103468864727`*^9}]
-}, Open  ]],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[
- RowBox[{"FullSimplify", "[", 
-  RowBox[{"Solve", "[", 
-   RowBox[{
-    RowBox[{"Eliminate", "[", 
-     RowBox[{
-      RowBox[{"{", 
-       RowBox[{
-        RowBox[{"x", "==", 
-         RowBox[{"FullSimplify", "[", 
-          RowBox[{
-           RowBox[{
+               RowBox[{"l", ",", "1", ",", " ", "y"}], " ", "}"}]}], "]"}], 
+            "/", 
             RowBox[{"Integrate", "[", 
              RowBox[{
               RowBox[{"b", 
@@ -520,13 +411,7 @@ Cell[BoxData[
                   RowBox[{"L", " ", 
                    RowBox[{"Log", "[", "l", "]"}]}]}], ")"}], "/", 
                 RowBox[{"(", 
-                 RowBox[{"a", " ", "l"}], ")"}]}]}], ",", " ", 
-              RowBox[{"{", 
-               RowBox[{"l", ",", "1", ",", " ", "y"}], " ", "}"}]}], "]"}], 
-            "/", " ", 
-            RowBox[{"Integrate", "[", 
-             RowBox[{
-              RowBox[{"1", "/", " ", "l"}], ",", " ", 
+                 RowBox[{"l", " ", "a"}], ")"}]}]}], ",", " ", 
               RowBox[{"{", 
                RowBox[{"l", ",", "1", ",", " ", "y"}], " ", "}"}]}], "]"}]}], 
            " ", ",", 
@@ -537,7 +422,9 @@ Cell[BoxData[
           RowBox[{"L", " ", 
            RowBox[{"Log", "[", "y", "]"}]}]}], "\[Equal]", "0"}]}], "}"}], 
       ",", " ", "y"}], "]"}], " ", ",", " ", "x"}], "]"}], "]"}]], "Input",
- CellChangeTimes->{{3.6685110021397333`*^9, 3.668511039696257*^9}}],
+ CellChangeTimes->{{3.6685110021397333`*^9, 3.668511039696257*^9}, {
+  3.6700454661253767`*^9, 3.6700454797015867`*^9}, {3.6700455367268353`*^9, 
+  3.670045542773822*^9}}],
 
 Cell[BoxData[
  RowBox[{
@@ -550,106 +437,27 @@ may not be found; use Reduce for complete solution information. \
 \\!\\(\\*ButtonBox[\\\"\[RightSkeleton]\\\", ButtonStyle->\\\"Link\\\", \
 ButtonFrame->None, ButtonData:>\\\"paclet:ref/message/Solve/ifun\\\", \
 ButtonNote -> \\\"Solve::ifun\\\"]\\)\"\>"}]], "Message", "MSG",
- CellChangeTimes->{3.6685110106399727`*^9, 3.668511045139624*^9}],
+ CellChangeTimes->{3.6685110106399727`*^9, 3.668511045139624*^9, 
+  3.67004554792527*^9}],
 
 Cell[BoxData[
  RowBox[{"{", 
   RowBox[{"{", 
    RowBox[{"x", "\[Rule]", 
-    RowBox[{"-", 
-     FractionBox[
-      RowBox[{"b", " ", 
-       RowBox[{"(", 
-        RowBox[{
-         RowBox[{"-", "1"}], "+", 
-         RowBox[{"2", " ", "L"}], "+", 
-         RowBox[{"L", " ", 
-          RowBox[{"ProductLog", "[", 
-           RowBox[{"-", 
-            FractionBox[
-             SuperscriptBox["\[ExponentialE]", 
-              RowBox[{
-               RowBox[{"-", "1"}], "/", "L"}]], "L"]}], "]"}]}]}], ")"}]}], 
-      RowBox[{"2", " ", "a"}]]}]}], "}"}], "}"}]], "Output",
- CellChangeTimes->{3.668511010641306*^9, 3.668511045157401*^9}]
-}, Open  ]],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[
- RowBox[{"FullSimplify", "[", 
-  RowBox[{"Solve", "[", 
-   RowBox[{
-    RowBox[{"Eliminate", "[", 
-     RowBox[{
-      RowBox[{"{", 
-       RowBox[{
-        RowBox[{"x", "==", 
-         RowBox[{"FullSimplify", "[", 
-          RowBox[{
+    FractionBox[
+     RowBox[{"2", " ", "a"}], 
+     RowBox[{"b", "-", 
+      RowBox[{"2", " ", "b", " ", "L"}], "-", 
+      RowBox[{"b", " ", "L", " ", 
+       RowBox[{"ProductLog", "[", 
+        RowBox[{"-", 
+         FractionBox[
+          SuperscriptBox["\[ExponentialE]", 
            RowBox[{
-            RowBox[{"Integrate", "[", 
-             RowBox[{
-              RowBox[{"1", "/", 
-               RowBox[{"(", " ", 
-                RowBox[{
-                 RowBox[{"b", "/", "a"}], 
-                 RowBox[{"(", 
-                  RowBox[{"1", "-", " ", "l", "+", " ", 
-                   RowBox[{"L", " ", 
-                    RowBox[{"Log", "[", "l", "]"}]}]}], ")"}]}], ")"}]}], ",",
-               " ", 
-              RowBox[{"{", 
-               RowBox[{"l", ",", "1", ",", " ", "y"}], " ", "}"}]}], "]"}], 
-            "/", " ", 
-            RowBox[{"Integrate", "[", 
-             RowBox[{
-              RowBox[{"1", "/", " ", "l"}], ",", " ", 
-              RowBox[{"{", 
-               RowBox[{"l", ",", "1", ",", " ", "y"}], " ", "}"}]}], "]"}]}], 
-           " ", ",", 
-           RowBox[{
-            RowBox[{"Re", "[", "y", "]"}], ">", "0"}]}], "]"}]}], ",", 
-        RowBox[{
-         RowBox[{"1", "-", " ", "y", "+", " ", 
-          RowBox[{"L", " ", 
-           RowBox[{"Log", "[", "y", "]"}]}]}], "\[Equal]", "0"}]}], "}"}], 
-      ",", " ", "y"}], "]"}], " ", ",", " ", "x"}], "]"}], "]"}]], "Input",
- CellChangeTimes->{
-  3.6687649120817003`*^9, {3.668765015402774*^9, 3.6687650456014433`*^9}, 
-   3.6687661794969*^9}],
-
-Cell[BoxData[
- RowBox[{
-  StyleBox[
-   RowBox[{"Integrate", "::", "idiv"}], "MessageName"], 
-  RowBox[{
-  ":", " "}], "\<\"Integral of \[NoBreak]\\!\\(\\*FractionBox[\\\"a\\\", \
-RowBox[{\\\"b\\\", \\\"-\\\", RowBox[{\\\"b\\\", \\\" \\\", \\\"l\\\"}], \
-\\\"+\\\", RowBox[{\\\"b\\\", \\\" \\\", \\\"L\\\", \\\" \\\", \
-RowBox[{\\\"Log\\\", \\\"[\\\", \\\"l\\\", \\\"]\\\"}]}]}]]\\)\[NoBreak] does \
-not converge on \[NoBreak]\\!\\(\\*RowBox[{\\\"{\\\", RowBox[{\\\"1\\\", \
-\\\",\\\", \\\"y\\\"}], \\\"}\\\"}]\\)\[NoBreak]. \\!\\(\\*ButtonBox[\\\"\
-\[RightSkeleton]\\\", ButtonStyle->\\\"Link\\\", ButtonFrame->None, \
-ButtonData:>\\\"paclet:ref/message/Integrate/idiv\\\", ButtonNote -> \
-\\\"Integrate::idiv\\\"]\\)\"\>"}]], "Message", "MSG",
- CellChangeTimes->{3.66876506036132*^9, 3.6687661812115097`*^9}],
-
-Cell[BoxData[
- RowBox[{
-  StyleBox[
-   RowBox[{"Eliminate", "::", "tdep"}], "MessageName"], 
-  RowBox[{
-  ":", " "}], "\<\"The equations appear to involve the variables to be solved \
-for in an essentially non-algebraic way. \\!\\(\\*ButtonBox[\\\"\
-\[RightSkeleton]\\\", ButtonStyle->\\\"Link\\\", ButtonFrame->None, \
-ButtonData:>\\\"paclet:ref/message/Eliminate/tdep\\\", ButtonNote -> \
-\\\"Eliminate::tdep\\\"]\\)\"\>"}]], "Message", "MSG",
- CellChangeTimes->{3.66876506036132*^9, 3.668766182732397*^9}],
-
-Cell[BoxData[
- RowBox[{"{", "}"}]], "Output",
- CellChangeTimes->{3.668765062610023*^9, 3.6687661827810802`*^9}]
+            RowBox[{"-", "1"}], "/", "L"}]], "L"]}], "]"}]}]}]]}], "}"}], 
+  "}"}]], "Output",
+ CellChangeTimes->{3.668511010641306*^9, 3.668511045157401*^9, 
+  3.670045547964528*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -826,7 +634,7 @@ Cell[BoxData[
        Hold[$CellContext`a$$], 1}, 0, 10}, {{
        Hold[$CellContext`L$$], 0.5}, 0, 1}, {{
        Hold[$CellContext`x0$$], 0.0001}, 0, 0.001}}, Typeset`size$$ = {
-    1344., {217., 224.}}, Typeset`update$$ = 0, Typeset`initDone$$, 
+    360., {56., 63.}}, Typeset`update$$ = 0, Typeset`initDone$$, 
     Typeset`skipInitDone$$ = True, $CellContext`b$1737$$ = 
     0, $CellContext`a$1738$$ = 0, $CellContext`L$1739$$ = 
     0, $CellContext`x0$1740$$ = 0}, 
@@ -839,97 +647,6 @@ Cell[BoxData[
         Hold[$CellContext`a$$, $CellContext`a$1738$$, 0], 
         Hold[$CellContext`L$$, $CellContext`L$1739$$, 0], 
         Hold[$CellContext`x0$$, $CellContext`x0$1740$$, 0]}, 
-      "OtherVariables" :> {
-       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
-        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
-        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
-         Typeset`skipInitDone$$}, "Body" :> GraphicsRow[{
-         Plot[{$CellContext`b$$ ((
-             1 - $CellContext`l + $CellContext`L$$ 
-              Log[$CellContext`l])/$CellContext`a$$), $CellContext`l \
-$CellContext`b$$ ($CellContext`l - 1 - $CellContext`L$$ 
-            Log[$CellContext`l]), ($CellContext`b$$/$CellContext`a$$) (
-            1 - $CellContext`L$$ + $CellContext`L$$ 
-             Log[$CellContext`L$$])}, {$CellContext`l, 0, 1}, 
-          GridLines -> {{(-$CellContext`L$$) 
-             ProductLog[-(
-                E^((-1)/$CellContext`L$$)/$CellContext`L$$)], \
-$CellContext`L$$}, None}], 
-         Module[{$CellContext`sol$}, $CellContext`sol$ = 
-           NDSolve[{
-             Derivative[
-               1][$CellContext`x][$CellContext`t] == $CellContext`b$$ \
-($CellContext`l[$CellContext`t] - $CellContext`L$$) \
-$CellContext`x[$CellContext`t], 
-              Derivative[
-               1][$CellContext`l][$CellContext`t] == (-$CellContext`a$$) \
-$CellContext`l[$CellContext`t] $CellContext`x[$CellContext`t], 
-              Derivative[
-               1][$CellContext`g][$CellContext`t] == $CellContext`b$$ \
-$CellContext`g[$CellContext`t] ($CellContext`g[$CellContext`t] - 
-                 1 - $CellContext`L$$ Log[
-                   $CellContext`g[$CellContext`t]]) - $CellContext`a$$ \
-$CellContext`g[$CellContext`t] $CellContext`x0$$, $CellContext`x[
-               0] == $CellContext`x0$$, $CellContext`l[0] == 
-              1, $CellContext`g[0] == 
-              1}, {$CellContext`x, $CellContext`l, $CellContext`g}, \
-{$CellContext`t, 0, 15}]; Plot[
-            Evaluate[
-             ReplaceAll[{
-               $CellContext`x[$CellContext`t], 
-               $CellContext`l[$CellContext`t], \
-($CellContext`b$$/$CellContext`a$$) (
-                1 - $CellContext`L$$ + $CellContext`L$$ 
-                 Log[$CellContext`L$$])}, $CellContext`sol$]], \
-{$CellContext`t, 0, 15}, PlotRange -> Full, 
-            GridLines -> {
-             None, {(-$CellContext`L$$) 
-               ProductLog[-(
-                  E^((-1)/$CellContext`L$$)/$CellContext`L$$)], \
-$CellContext`L$$}}]]}], 
-      "Specifications" :> {{{$CellContext`b$$, 4}, 0, 
-         10}, {{$CellContext`a$$, 1}, 0, 10}, {{$CellContext`L$$, 0.5}, 0, 
-         1}, {{$CellContext`x0$$, 0.0001}, 0, 0.001}}, 
-      "Options" :> {Paneled -> False}, "DefaultOptions" :> {}],
-     ImageSizeCache->{4.503599627370496*^15, {290., 297.}},
-     SingleEvaluation->True],
-    Deinitialization:>None,
-    DynamicModuleValues:>{},
-    SynchronousInitialization->True,
-    UndoTrackedVariables:>{Typeset`show$$, Typeset`bookmarkMode$$},
-    UnsavedVariables:>{Typeset`initDone$$},
-    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
-   Deployed->True,
-   StripOnInput->False],
-  Manipulate`InterpretManipulate[1]]], "Output",
- CellChangeTimes->{{3.669484932160122*^9, 3.6694849498817263`*^9}}]
-}, Open  ]],
-
-Cell[BoxData[
- TagBox[
-  StyleBox[
-   DynamicModuleBox[{$CellContext`a$$ = 1, $CellContext`b$$ = 
-    4, $CellContext`L$$ = 0.5, $CellContext`x0$$ = 0.0001, Typeset`show$$ = 
-    True, Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
-    Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
-    "\"untitled\"", Typeset`specs$$ = {{{
-       Hold[$CellContext`b$$], 4}, 0, 10}, {{
-       Hold[$CellContext`a$$], 1}, 0, 10}, {{
-       Hold[$CellContext`L$$], 0.5}, 0, 1}, {{
-       Hold[$CellContext`x0$$], 0.0001}, 0, 0.001}}, Typeset`size$$ = {
-    1648., {267., 273.}}, Typeset`update$$ = 0, Typeset`initDone$$, 
-    Typeset`skipInitDone$$ = True, $CellContext`b$916$$ = 
-    0, $CellContext`a$917$$ = 0, $CellContext`L$918$$ = 
-    0, $CellContext`x0$919$$ = 0}, 
-    DynamicBox[Manipulate`ManipulateBoxes[
-     1, StandardForm, 
-      "Variables" :> {$CellContext`a$$ = 1, $CellContext`b$$ = 
-        4, $CellContext`L$$ = 0.5, $CellContext`x0$$ = 0.0001}, 
-      "ControllerVariables" :> {
-        Hold[$CellContext`b$$, $CellContext`b$916$$, 0], 
-        Hold[$CellContext`a$$, $CellContext`a$917$$, 0], 
-        Hold[$CellContext`L$$, $CellContext`L$918$$, 0], 
-        Hold[$CellContext`x0$$, $CellContext`x0$919$$, 0]}, 
       "OtherVariables" :> {
        Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
         Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
@@ -968,8 +685,7 @@ $CellContext`g[$CellContext`t]) $CellContext`x0$$, $CellContext`x[
             Evaluate[
              ReplaceAll[{
                $CellContext`x[$CellContext`t], 
-               $CellContext`l[$CellContext`t], 
-               $CellContext`g[$CellContext`t], \
+               $CellContext`l[$CellContext`t], \
 ($CellContext`b$$/$CellContext`a$$) (
                 1 - $CellContext`L$$ + $CellContext`L$$ 
                  Log[$CellContext`L$$])}, $CellContext`sol$]], \
@@ -983,7 +699,7 @@ $CellContext`L$$}}]]}],
          10}, {{$CellContext`a$$, 1}, 0, 10}, {{$CellContext`L$$, 0.5}, 0, 
          1}, {{$CellContext`x0$$, 0.0001}, 0, 0.001}}, 
       "Options" :> {Paneled -> False}, "DefaultOptions" :> {}],
-     ImageSizeCache->{1668., {339., 346.}},
+     ImageSizeCache->{380., {129., 136.}},
      SingleEvaluation->True],
     Deinitialization:>None,
     DynamicModuleValues:>{},
@@ -993,9 +709,154 @@ $CellContext`L$$}}]]}],
     UntrackedVariables:>{Typeset`size$$}], "Manipulate",
    Deployed->True,
    StripOnInput->False],
-  Manipulate`InterpretManipulate[1]]], "Input",
- CellChangeTimes->{{3.669484390599543*^9, 3.669484410105316*^9}, {
-  3.669484446620582*^9, 3.669484455769113*^9}}]
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellChangeTimes->{{3.669484932160122*^9, 3.6694849498817263`*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"F", "[", "x", "]"}], "=", " ", 
+  RowBox[{
+   RowBox[{"x", "^", "k"}], "/", 
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{"x", "^", "k"}], " ", "+", " ", 
+     RowBox[{"a", "^", "k"}]}], ")"}]}]}]], "Input",
+ CellChangeTimes->{{3.6699705456177273`*^9, 3.669970553367173*^9}}],
+
+Cell[BoxData[
+ FractionBox[
+  SuperscriptBox["x", "k"], 
+  RowBox[{
+   SuperscriptBox["a", "k"], "+", 
+   SuperscriptBox["x", "k"]}]]], "Output",
+ CellChangeTimes->{3.669970559547245*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"FullSimplify", "[", 
+  RowBox[{
+   RowBox[{"D", "[", 
+    RowBox[{
+     RowBox[{"F", "[", "x", "]"}], ",", " ", "x"}], "]"}], "/", " ", 
+   RowBox[{"(", 
+    RowBox[{"2", 
+     RowBox[{"F", "[", "x", "]"}]}], ")"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.669970513314233*^9, 3.6699706032410717`*^9}}],
+
+Cell[BoxData[
+ FractionBox[
+  RowBox[{
+   SuperscriptBox["a", "k"], " ", "k"}], 
+  RowBox[{
+   RowBox[{"2", " ", 
+    SuperscriptBox["a", "k"], " ", "x"}], "+", 
+   RowBox[{"2", " ", 
+    SuperscriptBox["x", 
+     RowBox[{"1", "+", "k"}]]}]}]]], "Output",
+ CellChangeTimes->{3.669970604564076*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Solve", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     RowBox[{"FullSimplify", "[", 
+      RowBox[{
+       RowBox[{"D", "[", 
+        RowBox[{
+         RowBox[{"F", "[", "x", "]"}], ",", " ", "x"}], "]"}], "/", " ", 
+       RowBox[{"(", 
+        RowBox[{"2", 
+         RowBox[{"F", "[", "x", "]"}]}], ")"}]}], "]"}], " ", 
+     RowBox[{"(", 
+      RowBox[{"1", "-", "x"}], ")"}]}], " ", "\[Equal]", "c"}], " ", ",", " ",
+    "x"}], "]"}]], "Input",
+ CellChangeTimes->{{3.6699706712589827`*^9, 3.669970732278754*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  StyleBox[
+   RowBox[{"Solve", "::", "nsmet"}], "MessageName"], 
+  RowBox[{
+  ":", " "}], "\<\"This system cannot be solved with the methods available to \
+Solve. \\!\\(\\*ButtonBox[\\\"\[RightSkeleton]\\\", \
+ButtonStyle->\\\"Link\\\", ButtonFrame->None, \
+ButtonData:>\\\"paclet:ref/Solve\\\", ButtonNote -> \
+\\\"Solve::nsmet\\\"]\\)\"\>"}]], "Message", "MSG",
+ CellChangeTimes->{3.669970734209124*^9}],
+
+Cell[BoxData[
+ RowBox[{"Solve", "[", 
+  RowBox[{
+   RowBox[{
+    FractionBox[
+     RowBox[{
+      SuperscriptBox["a", "k"], " ", "k", " ", 
+      RowBox[{"(", 
+       RowBox[{"1", "-", "x"}], ")"}]}], 
+     RowBox[{
+      RowBox[{"2", " ", 
+       SuperscriptBox["a", "k"], " ", "x"}], "+", 
+      RowBox[{"2", " ", 
+       SuperscriptBox["x", 
+        RowBox[{"1", "+", "k"}]]}]}]], "\[Equal]", "c"}], ",", "x"}], 
+  "]"}]], "Output",
+ CellChangeTimes->{{3.66997070261514*^9, 3.669970734210966*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"G", "[", "x", "]"}], "=", " ", 
+  RowBox[{"x", "^", "k"}]}]], "Input",
+ CellChangeTimes->{{3.6699707605629253`*^9, 3.6699707735909147`*^9}}],
+
+Cell[BoxData[
+ SuperscriptBox["x", "k"]], "Output",
+ CellChangeTimes->{{3.66997076167133*^9, 3.6699707745201597`*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Solve", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     RowBox[{"FullSimplify", "[", 
+      RowBox[{
+       RowBox[{"D", "[", 
+        RowBox[{
+         RowBox[{"G", "[", "x", "]"}], ",", " ", "x"}], "]"}], "/", " ", 
+       RowBox[{"(", 
+        RowBox[{"2", 
+         RowBox[{"G", "[", "x", "]"}]}], ")"}]}], "]"}], " ", 
+     RowBox[{"(", 
+      RowBox[{"1", "-", "x"}], ")"}]}], " ", "\[Equal]", 
+    RowBox[{"c", " ", "/", "d"}]}], ",", " ", "x"}], "]"}]], "Input",
+ CellChangeTimes->{{3.669970769307272*^9, 3.669970771422431*^9}, {
+  3.6699708671100903`*^9, 3.669970867333417*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"{", 
+   RowBox[{"x", "\[Rule]", 
+    FractionBox[
+     RowBox[{"d", " ", "k"}], 
+     RowBox[{
+      RowBox[{"2", " ", "c"}], "+", 
+      RowBox[{"d", " ", "k"}]}]]}], "}"}], "}"}]], "Output",
+ CellChangeTimes->{3.6699707762580976`*^9, 3.669970868056858*^9}]
+}, Open  ]]
 },
 WindowSize->{928, 1028},
 WindowMargins->{{Automatic, -10}, {Automatic, -10}},
@@ -1020,52 +881,57 @@ Cell[1508, 48, 641, 15, 49, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
 Cell[2186, 68, 970, 20, 55, "Input"],
-Cell[3159, 90, 790, 15, 23, "Message"],
+Cell[3159, 90, 790, 15, 41, "Message"],
 Cell[3952, 107, 431, 14, 52, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
 Cell[4420, 126, 568, 15, 32, "Input"],
-Cell[4991, 143, 598, 12, 23, "Message"],
+Cell[4991, 143, 598, 12, 41, "Message"],
 Cell[5592, 157, 524, 17, 60, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
 Cell[6153, 179, 780, 22, 32, "Input"],
-Cell[6936, 203, 1522, 44, 52, "Output"]
+Cell[6936, 203, 1522, 44, 96, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[8495, 252, 1691, 38, 32, "Input"],
+Cell[8495, 252, 1691, 38, 99, "Input"],
 Cell[10189, 292, 193, 5, 32, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[10419, 302, 1543, 36, 121, "Input"],
-Cell[11965, 340, 574, 11, 41, "Message"],
-Cell[12542, 353, 809, 21, 53, "Output"]
+Cell[10419, 302, 1670, 39, 121, "Input"],
+Cell[12092, 343, 645, 12, 41, "Message"],
+Cell[12740, 357, 942, 24, 53, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[13388, 379, 1427, 38, 121, "Input"],
-Cell[14818, 419, 572, 11, 41, "Message"],
-Cell[15393, 432, 645, 19, 64, "Output"]
+Cell[13719, 386, 1539, 40, 143, "Input"],
+Cell[15261, 428, 600, 12, 41, "Message"],
+Cell[15864, 442, 554, 17, 64, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[16075, 456, 1200, 37, 78, "Input"],
-Cell[17278, 495, 93, 1, 32, "Output"]
+Cell[16455, 464, 6039, 158, 396, "Input"],
+Cell[22497, 624, 4396, 88, 282, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[17408, 501, 1440, 38, 121, "Input"],
-Cell[18851, 541, 576, 11, 41, "Message"],
-Cell[19430, 554, 635, 19, 64, "Output"]
+Cell[26930, 717, 308, 9, 32, "Input"],
+Cell[27241, 728, 187, 6, 56, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[20102, 578, 1520, 41, 121, "Input"],
-Cell[21625, 621, 809, 14, 51, "Message"],
-Cell[22437, 637, 508, 10, 23, "Message"],
-Cell[22948, 649, 111, 2, 32, "Output"]
+Cell[27465, 739, 326, 9, 32, "Input"],
+Cell[27794, 750, 297, 10, 56, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[23096, 656, 6039, 158, 396, "Input"],
-Cell[29138, 816, 4406, 88, 604, "Output"]
+Cell[28128, 765, 540, 16, 32, "Input"],
+Cell[28671, 783, 430, 10, 23, "Message"],
+Cell[29104, 795, 500, 16, 55, "Output"]
 }, Open  ]],
-Cell[33559, 907, 4486, 90, 702, InheritFromParent]
+Cell[CellGroupData[{
+Cell[29641, 816, 175, 4, 32, "Input"],
+Cell[29819, 822, 118, 2, 35, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[29974, 829, 610, 17, 32, "Input"],
+Cell[30587, 848, 298, 9, 50, "Output"]
+}, Open  ]]
 }
 ]
 *)
