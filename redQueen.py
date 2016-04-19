@@ -34,71 +34,24 @@ def sum_to_one(array):
 
 
 class Model(object):
-    def __init__(self, nbr_of_alleles, model_params):
+    def __init__(self, nbr_of_alleles, model_params, simu_params):
+        self.t = 0
+        self.id = nbr_of_alleles
+        self.ids = np.array(range(nbr_of_alleles))
         self.prdm9_polymorphism = sum_to_one(np.random.sample(nbr_of_alleles))
         self.hotspots_erosion = np.random.sample(nbr_of_alleles)
         self.prdm9_longevity = np.zeros(nbr_of_alleles)
         self.prdm9_fitness = np.ones(nbr_of_alleles)
-        self.fitness_family = model_params.fitness_family
-        self.fitness_param = model_params.fitness_param
-        self.alpha_zero = model_params.alpha_zero
-        self.alpha = model_params.alpha_zero
-        self.t = 0
-        self.id = nbr_of_alleles
-        self.ids = np.array(range(nbr_of_alleles))
-
-    def fitness(self, x):
-        if self.fitness_family == 3:
-            k = 4
-            matrix = np.power(x, k) / (np.power(x, k) + self.fitness_param ** k)
-        elif self.fitness_family == 2:
-            matrix = np.power(x, self.fitness_param)
-        else:
-            matrix = x
-        if self.alpha == 1.:
-            return matrix
-        else:
-            return np.power(matrix, self.alpha)
-
-    def coefficient_fitness(self, x):
-        if self.fitness_family == 3:
-            k = 4
-            return (self.alpha * k / 2) * self.fitness_param ** 4 / (x * (np.power(x, k) + self.fitness_param ** k))
-        elif self.fitness_family == 2:
-            return self.alpha * self.fitness_param * 1.0 / (2. * x)
-        else:
-            return self.alpha * 1.0 / (2 * x)
-
-    def remove_dead_prdm9(self):
-        remove_extincted = np.array(map(lambda x: x > 0, self.prdm9_polymorphism), dtype=bool)
-        if not remove_extincted.all():
-            self.prdm9_polymorphism = self.prdm9_polymorphism[remove_extincted]
-            self.hotspots_erosion = self.hotspots_erosion[remove_extincted]
-            self.prdm9_longevity = self.prdm9_longevity[remove_extincted]
-            self.prdm9_fitness = self.prdm9_fitness[remove_extincted]
-            self.ids = self.ids[remove_extincted]
-
-    def __repr__(self):
-        return "The polymorphism of PRDM9: %s" % self.prdm9_polymorphism + \
-               "\nThe strength of the hotspots : %s" % self.hotspots_erosion + \
-               "\nThe longevity hotspots : %s" % self.prdm9_longevity
-
-
-class ModelDiscrete(Model):
-    def __init__(self, nbr_of_alleles, model_params, simu_params):
-        super(ModelDiscrete, self).__init__(nbr_of_alleles, model_params)
+        self.model_params = model_params
         self.population_size = model_params.population_size
         self.prdm9_polymorphism *= self.population_size
         self.mutation_rate = model_params.population_size * model_params.mutation_rate_prdm9
         self.erosion_rate = model_params.erosion_rate_hotspot * model_params.population_size * \
                             model_params.recombination_rate
-        if model_params.scaled:
-            self.erosion_rate *= model_params.population_size
         assert self.erosion_rate < 0.5, "The scaled erosion rate is too large, decrease either the " \
                                         "recombination rate, the erosion rate or the population size"
         assert self.erosion_rate > 0.0000000001, "The scaled erosion rate is too low, increase either the " \
                                                  "recombination rate, the erosion rate or the population size"
-        self.alpha = 1.
         self.linearized = simu_params.linearized
         self.drift = simu_params.drift
 
@@ -111,19 +64,19 @@ class ModelDiscrete(Model):
         self.hotspots_erosion *= np.exp(- self.erosion_rate * prdm9_frequencies)
 
         # Compute the fitness for each allele
-        if self.fitness_family == 0:
+        if self.model_params.fitness_family == 0:
             distribution_vector = prdm9_frequencies
         else:
             if self.linearized:
                 l_bar = np.sum(prdm9_frequencies * self.hotspots_erosion)
-                self.prdm9_fitness = self.coefficient_fitness(l_bar) * (self.hotspots_erosion - l_bar)
+                self.prdm9_fitness = self.model_params.coefficient_fitness(l_bar) * (self.hotspots_erosion - l_bar)
                 distribution_vector = prdm9_frequencies + self.prdm9_fitness * prdm9_frequencies
                 if np.max(distribution_vector) > 1.:
                     distribution_vector = sum_to_one(np.clip(distribution_vector, 0., 1.))
                 elif np.min(distribution_vector) < 0.:
                     distribution_vector = sum_to_one(np.clip(distribution_vector, 0., 1.))
             else:
-                fitness_matrix = self.fitness(np.add.outer(self.hotspots_erosion, self.hotspots_erosion) / 2)
+                fitness_matrix = self.model_params.fitness(np.add.outer(self.hotspots_erosion, self.hotspots_erosion) / 2)
                 self.prdm9_fitness = np.dot(fitness_matrix, prdm9_frequencies)
                 distribution_vector = sum_to_one(self.prdm9_fitness * prdm9_frequencies)
 
@@ -143,6 +96,20 @@ class ModelDiscrete(Model):
         self.hotspots_erosion = np.append(self.hotspots_erosion, np.ones(new_alleles))
         self.ids = np.append(self.ids, range(self.id, self.id + new_alleles))
         self.id += new_alleles
+
+    def remove_dead_prdm9(self):
+        remove_extincted = np.array(map(lambda x: x > 0, self.prdm9_polymorphism), dtype=bool)
+        if not remove_extincted.all():
+            self.prdm9_polymorphism = self.prdm9_polymorphism[remove_extincted]
+            self.hotspots_erosion = self.hotspots_erosion[remove_extincted]
+            self.prdm9_longevity = self.prdm9_longevity[remove_extincted]
+            self.prdm9_fitness = self.prdm9_fitness[remove_extincted]
+            self.ids = self.ids[remove_extincted]
+
+    def __repr__(self):
+        return "The polymorphism of PRDM9: %s" % self.prdm9_polymorphism + \
+               "\nThe strength of the hotspots : %s" % self.hotspots_erosion + \
+               "\nThe longevity hotspots : %s" % self.prdm9_longevity
 
 
 class SimulationData(object):
@@ -239,11 +206,13 @@ class SimulationData(object):
             lag_dict = dict(zip(self.ids[index + lag], self.prdm9_frequencies[index + lag]))
             for key in (set(slice_dict.keys()) & set(lag_dict.keys())):
                 cross_homozygosity[index] += slice_dict[key] * lag_dict[key]
+
+        assert len(cross_homozygosity) > 0, "Cross Homozygosity is empty for lag : %.1e and len : %.1e" % (lag, len(self.ids))
         return np.mean(cross_homozygosity)
 
     def dichotomic_search(self, percent):
         lower_lag = 0
-        upper_lag = len(self.ids)
+        upper_lag = len(self.ids) - 1
         precision = 2
         ch_0 = self.cross_homozygosity(0)
         if self.cross_homozygosity(upper_lag) / ch_0 >= percent:
@@ -272,21 +241,36 @@ class SimulationData(object):
 
 class ModelParams(object):
     def __init__(self, mutation_rate_prdm9=1.0 * 10 ** -5, erosion_rate_hotspot=1.0 * 10 ** -7, population_size=10 ** 4,
-                 recombination_rate=1.0 * 10 ** -3, fitness_param=1., fitness='linear', scaled=True,
-                 alpha_zero=1.0 * 10 ** 4):
+                 recombination_rate=1.0 * 10 ** -3, fitness_param=1., fitness='linear'):
         self.mutation_rate_prdm9 = mutation_rate_prdm9  # The rate at which new allele for PRDM9 are created
         self.erosion_rate_hotspot = erosion_rate_hotspot  # The rate at which the hotspots are eroded
         self.recombination_rate = recombination_rate
         self.population_size = float(population_size)  # population size
 
-        self.scaled = scaled
-        self.alpha_zero = alpha_zero
         fitness_hash = {"linear": 1, "polynomial": 2, "sigmoid": 3}
         assert fitness in fitness_hash.keys(), "Parameter 'fitness' must be a string: ['linear','sigmoid','polynomial']"
         self.fitness_family = fitness_hash[fitness]
         self.fitness_param = fitness_param
         if self.fitness_family == 1:
             self.fitness_param = 1.
+
+    def fitness(self, x):
+        if self.fitness_family == 3:
+            k = 4
+            return np.power(x, k) / (np.power(x, k) + self.fitness_param ** k)
+        elif self.fitness_family == 2:
+            return np.power(x, self.fitness_param)
+        else:
+            return x
+
+    def coefficient_fitness(self, x):
+        if self.fitness_family == 3:
+            k = 4
+            return (k / 2) * self.fitness_param ** 4 / (x * (np.power(x, k) + self.fitness_param ** k))
+        elif self.fitness_family == 2:
+            return self.fitness_param * 1.0 / (2. * x)
+        else:
+            return 1.0 / (2 * x)
 
     def unbound_mean_erosion(self, balance=1):
         rate_out = np.power(self.erosion_rate_hotspot * self.recombination_rate, 1)
@@ -305,7 +289,7 @@ class ModelParams(object):
     def estimated_simpson(self, mean_erosion):
         denom = 1 - 2 * mean_erosion + self.erosion_limit(mean_erosion)
         simpson = (2 * self.erosion_rate_hotspot * self.recombination_rate * self.population_size) / (
-            self.coef_fitness(mean_erosion) * denom)
+            self.coefficient_fitness(mean_erosion) * denom)
         return max(1, simpson)
 
     def estimated_erosion_var(self, mean_erosion):
@@ -315,28 +299,21 @@ class ModelParams(object):
         return 1 / self.mutation_rate_prdm9
 
     def turn_over_selection(self, mean_erosion):
-        selection = self.coef_fitness(mean_erosion) * (1 - mean_erosion)
+        selection = self.coefficient_fitness(mean_erosion) * (1 - mean_erosion)
         fixation = (1 - np.exp(-selection)) / (1 - np.exp(-2 * self.population_size * selection))
         return 1. / fixation
 
     def turn_over_derivative(self, mean_erosion):
-        return 1. / (self.coef_fitness(mean_erosion) * (mean_erosion - 1 + mean_erosion * np.log(mean_erosion)))
+        return -1. / (self.coefficient_fitness(mean_erosion) * (mean_erosion - 1 + mean_erosion * np.log(mean_erosion)))
 
     def turn_over_max(self):
         return max(1, 1 / (self.mutation_rate_prdm9 * self.population_size))
-
-    def coef_fitness(self, mean_erosion):
-        if self.fitness_family == 3:
-            k = 4
-            return (k / 2) * self.fitness_param ** 4 / (mean_erosion * (mean_erosion ** k + self.fitness_param ** k))
-        else:
-            return self.fitness_param / (2. * mean_erosion)
 
     def frequencies_wrt_erosion(self, mean_erosion):
         l_limit = self.erosion_limit(mean_erosion)
         l = np.linspace(l_limit, 1)
         x = 1 - l + mean_erosion * np.log(l)
-        x *= self.coef_fitness(mean_erosion) / (
+        x *= self.coefficient_fitness(mean_erosion) / (
             self.erosion_rate_hotspot * self.recombination_rate * self.population_size)
         return l, np.clip(x, 0., 1.)
 
@@ -344,8 +321,7 @@ class ModelParams(object):
         name = "u=%.1e" % self.mutation_rate_prdm9 + \
                "_v=%.1e" % self.erosion_rate_hotspot + \
                "_r=%.1e" % self.recombination_rate + \
-               "_n=%.1e" % self.population_size + \
-               "_a=%.1e" % self.alpha_zero
+               "_n=%.1e" % self.population_size
         if self.fitness_family == 3 or self.fitness_family == 2:
             name += "_f=%.1e" % self.fitness_param
         return name
@@ -354,8 +330,7 @@ class ModelParams(object):
         caption = "Mutation rate of PRDM9: %.1e. \n" % self.mutation_rate_prdm9 + \
                   "Erosion rate of the hotspots: %.1e. \n" % self.erosion_rate_hotspot + \
                   "Recombination rate at the hotspots: %.1e. \n" % self.recombination_rate + \
-                  "Population size: %.1e. \n" % self.population_size + \
-                  "Alpha_0: %.1e. \n" % self.alpha_zero
+                  "Population size: %.1e. \n" % self.population_size
         if self.fitness_family == 3:
             caption += "Inflexion point of the fitness function PRDM9=%.1e. \n" % self.fitness_param
         if self.fitness_family == 2:
@@ -432,7 +407,7 @@ class Simulation(object):
         self.simu_params = simu_params
         self.t_max = 0
         self.nbr_of_steps = 0.
-        self.model = ModelDiscrete(10, model_params, simu_params)
+        self.model = Model(10, model_params, simu_params)
         self.data = SimulationData()
         self.generations = []
 
@@ -478,6 +453,7 @@ class Simulation(object):
         return self
 
     def plot_histogram(self, lst, x):
+        assert len(lst) > 0, "Lst is empty"
         if (not lst) or lst.count(lst[0]) == len(lst):
             plt.hist(lst, color=self.simu_params.color, alpha=0.3)
         else:
@@ -488,14 +464,14 @@ class Simulation(object):
                  verticalalignment='top')
 
     def save_figure(self):
-        mean_erosion = np.mean(self.data.hotspots_erosion_mean())
+        mean_erosion = self.data.mean_erosion()
         params_mean_erosion = self.model_params.bound_mean_erosion()
         my_dpi = 96
         plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
         plt.subplot(331)
         plt.text(0.05, 0.98, self.caption(), fontsize=10, verticalalignment='top')
         theta = np.arange(0.0, 1.0, 0.01)
-        plt.plot(theta, self.model.fitness(theta), color=self.simu_params.color)
+        plt.plot(theta, self.model_params.fitness(theta), color=self.simu_params.color)
         plt.title('The fitness function')
         plt.xlabel('x')
         plt.ylabel('w(x)')
@@ -605,7 +581,6 @@ class BatchSimulation(object):
                      "erosion": "Erosion rate of the hotspots",
                      "population": "The population size",
                      "recombination": "The recombination rate of the hotspots",
-                     "alpha": "Alpha 0",
                      "scaling": "The scaling factor"}
         assert axis in axis_hash.keys(), "Axis must be either 'population', 'mutation', 'erosion'," \
                                          "'recombination', 'fitness', or 'scaling'"
@@ -615,7 +590,6 @@ class BatchSimulation(object):
                          "erosion": "erosion_rate_hotspot",
                          "population": "population_size",
                          "recombination": "recombination_rate",
-                         "alpha": "alpha_zero",
                          "scaling": "scaling"}[axis]
         self.axis_str = axis_hash[axis]
         self.scale = scale
@@ -696,7 +670,7 @@ class BatchSimulation(object):
             plt.subplot(321)
             theta = np.arange(0.0, 1.0, 0.01)
             for simulation in simulations:
-                plt.plot(theta, simulation.model.fitness(theta), color=simu_params.color)
+                plt.plot(theta, simulation.model_params.fitness(theta), color=simu_params.color)
 
             plt.title('The fitness function')
             plt.xlabel('x')
@@ -844,10 +818,6 @@ class Batches(list):
 
                 turn_over_derivative = map(lambda sim: sim.turn_over_derivative(), simulations)
                 plt.plot(batch.axis_range, turn_over_derivative, color='darkgreen')
-                print "Min:"
-                print np.min(turn_over_derivative)
-                print "Max:"
-                print np.max(turn_over_derivative)
                 plt.yscale('linear')
 
             plt.title('{0} for different {1}'.format('Cross-homozygosity', batch.axis_str))
@@ -889,7 +859,6 @@ class Batches(list):
 
 
 if __name__ == '__main__':
-    '''
     dir_id = id_generator(8)
     set_dir("/tmp/" + dir_id)
     model_parameters = ModelParams(mutation_rate_prdm9=1.0 * 10 ** -5,
@@ -897,9 +866,7 @@ if __name__ == '__main__':
                                    population_size=10 ** 5,
                                    recombination_rate=1.0 * 10 ** -3,
                                    fitness_param=0.1,
-                                   fitness='polynomial',
-                                   scaled=False,
-                                   alpha_zero=1.)
+                                   fitness='polynomial')
     batch_parameters = BatchParams(drift=True, linearized=False, color="blue", scaling=10)
     batch_parameters.append_simu_params(dict(red="linearized"))
     batches = Batches()
@@ -926,3 +893,4 @@ if __name__ == '__main__':
             # os.chdir('..')
             batches.append(batch_simulation)
     batches.save_figure(np.logspace(-0.5, 0.5, 5), directory_id=dir_id)
+    '''
