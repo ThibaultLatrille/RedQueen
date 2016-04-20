@@ -255,11 +255,11 @@ class ModelParams(object):
         self.fitness_param = fitness_param
         if self.fitness_family == 1:
             self.fitness_param = 1.
+        self.k = 8
 
     def fitness(self, x):
         if self.fitness_family == 3:
-            k = 4
-            return np.power(x, k) / (np.power(x, k) + np.power(self.fitness_param, k))
+            return np.power(x, self.k) / (np.power(x, self.k) + np.power(self.fitness_param, self.k))
         elif self.fitness_family == 2:
             return np.power(x, self.fitness_param)
         else:
@@ -270,9 +270,8 @@ class ModelParams(object):
             return float("inf")
         else:
             if self.fitness_family == 3:
-                k = 4
-                return (k / 2) * np.power(self.fitness_param, k) / (
-                    x * (np.power(x, k) + np.power(self.fitness_param, k)))
+                return (self.k / 2) * np.power(self.fitness_param, self.k) / (
+                    x * (np.power(x, self.k) + np.power(self.fitness_param, self.k)))
             elif self.fitness_family == 2:
                 return self.fitness_param * 1.0 / (2. * x)
             else:
@@ -740,7 +739,10 @@ class BatchSimulation(object):
             plt.xlabel(self.axis_str)
             plt.ylabel('Cross-homozygosity')
             plt.yscale('log')
-            plt.xscale('log')
+            if self.axis == "fitness" and self.model_params.fitness_family == 3:
+                plt.xscale('linear')
+            else:
+                plt.xscale('log')
 
         plt.tight_layout()
 
@@ -835,7 +837,10 @@ class Batches(list):
             plt.xlabel(batch.axis_str)
             plt.ylabel('Cross-homozygosity')
             plt.yscale('log')
-            plt.xscale('log')
+            if batch.axis == "fitness" and batch.model_params.fitness_family == 3:
+                plt.xscale('linear')
+            else:
+                plt.xscale('log')
 
         plt.tight_layout()
 
