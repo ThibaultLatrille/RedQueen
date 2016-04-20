@@ -8,6 +8,7 @@ import uuid
 import cPickle as pickle
 import itertools
 from scipy.special import lambertw
+from scipy.optimize import brentq
 
 
 def execute(x):
@@ -76,7 +77,8 @@ class Model(object):
                 elif np.min(distribution_vector) < 0.:
                     distribution_vector = sum_to_one(np.clip(distribution_vector, 0., 1.))
             else:
-                fitness_matrix = self.model_params.fitness(np.add.outer(self.hotspots_erosion, self.hotspots_erosion) / 2)
+                fitness_matrix = self.model_params.fitness(
+                    np.add.outer(self.hotspots_erosion, self.hotspots_erosion) / 2)
                 self.prdm9_fitness = np.dot(fitness_matrix, prdm9_frequencies)
                 distribution_vector = sum_to_one(self.prdm9_fitness * prdm9_frequencies)
 
@@ -207,7 +209,7 @@ class SimulationData(object):
             for key in (set(slice_dict.keys()) & set(lag_dict.keys())):
                 cross_homozygosity[index] += slice_dict[key] * lag_dict[key]
 
-        assert len(cross_homozygosity) > 0, "Cross Homozygosity is empty for lag : %.1e and len : %.1e" % (lag, len(self.ids))
+        assert len(cross_homozygosity) > 0, "Cross Homozygosity is empty"
         return np.mean(cross_homozygosity)
 
     def dichotomic_search(self, percent):
@@ -257,30 +259,35 @@ class ModelParams(object):
     def fitness(self, x):
         if self.fitness_family == 3:
             k = 4
-            return np.power(x, k) / (np.power(x, k) + self.fitness_param ** k)
+            return np.power(x, k) / (np.power(x, k) + np.power(self.fitness_param, k))
         elif self.fitness_family == 2:
             return np.power(x, self.fitness_param)
         else:
             return x
 
     def coefficient_fitness(self, x):
-        if self.fitness_family == 3:
-            k = 4
-            return (k / 2) * self.fitness_param ** 4 / (x * (np.power(x, k) + self.fitness_param ** k))
-        elif self.fitness_family == 2:
-            return self.fitness_param * 1.0 / (2. * x)
+        if x == 0:
+            return float("inf")
         else:
-            return 1.0 / (2 * x)
+            if self.fitness_family == 3:
+                k = 4
+                return (k / 2) * np.power(self.fitness_param, k) / (
+                    x * (np.power(x, k) + np.power(self.fitness_param, k)))
+            elif self.fitness_family == 2:
+                return self.fitness_param * 1.0 / (2. * x)
+            else:
+                return 1.0 / (2 * x)
 
-    def unbound_mean_erosion(self, balance=1):
-        rate_out = np.power(self.erosion_rate_hotspot * self.recombination_rate, 1)
-        rate_in = np.power(self.fitness_param * self.mutation_rate_prdm9, 1)
-        return rate_out / (balance * rate_in)
+    def ratio_parameter(self, balance=2):
+        return balance * 2 * self.erosion_rate_hotspot * self.recombination_rate / self.mutation_rate_prdm9
 
     def bound_mean_erosion(self, balance=1):
-        rate_out = np.power(self.erosion_rate_hotspot * self.recombination_rate, 0.67)
-        rate_in = np.power(self.fitness_param * self.mutation_rate_prdm9, 0.67)
-        return rate_in / (rate_in + balance * rate_out)
+        if self.fitness_family == 2:
+            rate_out = np.power(self.erosion_rate_hotspot * self.recombination_rate, 0.67)
+            rate_in = np.power(balance * self.fitness_param * self.mutation_rate_prdm9, 0.67)
+            return rate_in / (rate_in + rate_out)
+        else:
+            return brentq(lambda x: self.coefficient_fitness(x) * (1 - x) - self.ratio_parameter(balance), 0, 1)
 
     @staticmethod
     def erosion_limit(mean_erosion):
@@ -591,6 +598,7 @@ class BatchSimulation(object):
                          "population": "population_size",
                          "recombination": "recombination_rate",
                          "scaling": "scaling"}[axis]
+        self.axis = axis
         self.axis_str = axis_hash[axis]
         self.scale = scale
         self.nbr_of_simulations = nbr_of_simulations
@@ -601,10 +609,10 @@ class BatchSimulation(object):
         for simu_params in self.batch_params:
             self.simulations[simu_params.color] = []
 
-        if variable_hash == "scaling":
+        if self.axis == "scaling":
             self.axis_range = np.logspace(np.log10(1. / np.sqrt(scale)),
                                           np.log10(1. * np.sqrt(scale)), nbr_of_simulations)
-        elif variable_hash == "fitness" and self.model_params.fitness_family == 3:
+        elif self.axis == "fitness" and self.model_params.fitness_family == 3:
             self.axis_range = np.linspace(0.05, 0.95, nbr_of_simulations)
         else:
             self.axis_range = np.logspace(np.log10(float(getattr(self.model_params, variable_hash)) / np.sqrt(scale)),
@@ -613,7 +621,7 @@ class BatchSimulation(object):
         for axis_current in self.axis_range:
             for simu_params in self.batch_params:
                 model_params_copy = self.model_params.copy()
-                if variable_hash == "scaling":
+                if self.axis == "scaling":
                     model_params_copy.mutation_rate_prdm9 /= axis_current
                     model_params_copy.erosion_rate_hotspot /= axis_current
                     model_params_copy.population_size *= axis_current
@@ -638,8 +646,8 @@ class BatchSimulation(object):
                 pool.close()
             else:
                 map(lambda x: x.run(), simulations)
-        self.pickle()
         os.chdir('..')
+        self.pickle()
         print 'Simulation computed'
 
     def pickle(self):
@@ -655,7 +663,10 @@ class BatchSimulation(object):
         plt.title('{0} for different {1}'.format(caption, self.axis_str))
         plt.xlabel(self.axis_str)
         plt.ylabel(caption)
-        plt.xscale('log')
+        if self.axis == "fitness" and self.model_params.fitness_family == 3:
+            plt.xscale('linear')
+        else:
+            plt.xscale('log')
 
     def save_figure(self, k=1, directory_id=None):
         my_dpi = 96
@@ -865,8 +876,8 @@ if __name__ == '__main__':
                                    erosion_rate_hotspot=1.0 * 10 ** -4,
                                    population_size=10 ** 5,
                                    recombination_rate=1.0 * 10 ** -3,
-                                   fitness_param=0.1,
-                                   fitness='polynomial')
+                                   fitness_param=0.5,
+                                   fitness='sigmoid')
     batch_parameters = BatchParams(drift=True, linearized=False, color="blue", scaling=10)
     batch_parameters.append_simu_params(dict(red="linearized"))
     batches = Batches()
