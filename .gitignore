@@ -12,5 +12,8 @@
 *.swp
 *.pdf
 *.out
+*.nav
+*.snm
+*.toc
 *.dvi
 .idea
