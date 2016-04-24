@@ -962,7 +962,6 @@ class Batches(list):
 
 
 if __name__ == '__main__':
-    '''
     dir_id = id_generator(8)
     set_dir("/tmp/" + dir_id)
     model_parameters = ModelParams(mutation_rate_prdm9=1.0 * 10 ** -6,
@@ -973,6 +972,7 @@ if __name__ == '__main__':
                                    fitness='polynomial')
     batch_parameters = BatchParams(drift=True, linearized=False, color="blue", scaling=10)
     batch_parameters.append_simu_params(dict(red="linearized"))
+    '''
     batches = Batches()
     for axis in ["population", "erosion", "mutation", "fitness"]:
         batches.append(BatchSimulation(model_parameters.copy(), batch_parameters.copy(), axis=axis,
@@ -982,6 +982,7 @@ if __name__ == '__main__':
     for batch_simulation in batches:
         batch_simulation.save_figure(directory_id=dir_id)
     batches.save_figure(np.logspace(-0.5, 0.5, 5), directory_id=dir_id)
+    '''
     phasediagram = PhaseDiagram(model_parameters, batch_parameters, "population", "mutation", nbr_of_simulations=14, scale=10 ** 2)
     phasediagram.run(nbr_of_cpu=7)
     phasediagram.save_figure(interpolation=True)
@@ -992,7 +993,6 @@ if __name__ == '__main__':
     phasediagram = pickle.load(open("PhaseDiagram.p", "rb"))
     phasediagram.save_figure(interpolation=True, num=100)
     phasediagram.save_figure(interpolation=False)
-    '''
     dir_id = "3FCA8AF6"
     set_dir("/tmp/" + dir_id)
     lst = os.listdir(os.getcwd())
