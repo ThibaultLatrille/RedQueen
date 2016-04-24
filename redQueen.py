@@ -9,6 +9,7 @@ import cPickle as pickle
 import itertools
 from scipy.special import lambertw
 from scipy.optimize import brentq
+from scipy import interpolate
 
 
 def execute(x):
@@ -255,7 +256,7 @@ class ModelParams(object):
         self.fitness_param = fitness_param
         if self.fitness_family == 1:
             self.fitness_param = 1.
-        self.k = 8
+        self.k = 2
 
     def fitness(self, x):
         if self.fitness_family == 3:
@@ -591,12 +592,6 @@ class BatchSimulation(object):
         assert axis in axis_hash.keys(), "Axis must be either 'population', 'mutation', 'erosion'," \
                                          "'recombination', 'fitness', or 'scaling'"
         assert scale > 1, "The scale parameter must be greater than one"
-        variable_hash = {"fitness": "fitness_param",
-                         "mutation": "mutation_rate_prdm9",
-                         "erosion": "erosion_rate_hotspot",
-                         "population": "population_size",
-                         "recombination": "recombination_rate",
-                         "scaling": "scaling"}[axis]
         self.axis = axis
         self.axis_str = axis_hash[axis]
         self.scale = scale
@@ -614,9 +609,10 @@ class BatchSimulation(object):
         elif self.axis == "fitness" and self.model_params.fitness_family == 3:
             self.axis_range = np.linspace(0.05, 0.95, nbr_of_simulations)
         else:
-            self.axis_range = np.logspace(np.log10(float(getattr(self.model_params, variable_hash)) / np.sqrt(scale)),
-                                          np.log10(float(getattr(self.model_params, variable_hash)) * np.sqrt(scale)),
-                                          nbr_of_simulations)
+            self.axis_range = np.logspace(
+                np.log10(float(getattr(self.model_params, self.variable_hash())) / np.sqrt(scale)),
+                np.log10(float(getattr(self.model_params, self.variable_hash())) * np.sqrt(scale)),
+                nbr_of_simulations)
         for axis_current in self.axis_range:
             for simu_params in self.batch_params:
                 model_params_copy = self.model_params.copy()
@@ -626,8 +622,16 @@ class BatchSimulation(object):
                     model_params_copy.population_size *= axis_current
                     model_params_copy.recombination_rate /= axis_current
                 else:
-                    setattr(model_params_copy, variable_hash, axis_current)
+                    setattr(model_params_copy, self.variable_hash(), axis_current)
                 self.simulations[simu_params.color].append(Simulation(model_params_copy, simu_params.copy()))
+
+    def variable_hash(self):
+        return {"fitness": "fitness_param",
+                "mutation": "mutation_rate_prdm9",
+                "erosion": "erosion_rate_hotspot",
+                "population": "population_size",
+                "recombination": "recombination_rate",
+                "scaling": "scaling"}[self.axis]
 
     def caption(self):
         return "Batch of %s simulations. \n" % self.nbr_of_simulations + self.axis_str + \
@@ -645,8 +649,8 @@ class BatchSimulation(object):
                 pool.close()
             else:
                 map(lambda x: x.run(), simulations)
-        os.chdir('..')
         self.pickle()
+        os.chdir('..')
         print 'Simulation computed'
 
     def pickle(self):
@@ -753,6 +757,89 @@ class BatchSimulation(object):
         return self
 
 
+class PhaseDiagram(object):
+    def __init__(self,
+                 model_params,
+                 batch_params,
+                 axis1="null",
+                 axis2="null",
+                 nbr_of_simulations=5,
+                 scale=10 ** 2):
+        batch = BatchSimulation(model_params, batch_params, axis1, nbr_of_simulations, scale)
+        self.axis_x = axis2
+        self.axis_y = axis1
+        self.batch_params = batch_params
+        self.axis1 = batch.axis_range
+        self.axis2 = BatchSimulation(model_params, batch_params, axis2, nbr_of_simulations, scale).axis_range
+        self.batches = []
+        for axis_current in self.axis1:
+            model_params_copy = model_params.copy()
+            setattr(model_params_copy, batch.variable_hash(), axis_current)
+            self.batches.append(BatchSimulation(model_params_copy, batch_params, axis2, nbr_of_simulations, scale))
+
+    def __str__(self):
+        return "PhaseDiagram"
+
+    def run(self, nbr_of_cpu=4, directory_id=None):
+        for batch in self.batches:
+            batch.run(nbr_of_cpu=nbr_of_cpu, directory_id=directory_id)
+        self.pickle()
+
+    def pickle(self):
+        pickle.dump(self, open(str(self) + ".p", "wb"))
+
+    def save_figure(self, interpolation, num=30):
+        self.save_pcolor(lambda sim: np.mean(sim.data.simpson_entropy_prdm9()),
+                         "Simpson entropy of PRDM9 (polymorphism)", interpolation, num)
+        self.save_pcolor(lambda sim: np.mean(sim.data.hotspots_erosion_mean()),
+                         "Mean Erosion of the hotspots", interpolation, num)
+        self.save_pcolor(lambda sim: sim.data.dichotomic_search(0.05),
+                         "Cross-homozygosity of PRDM9 (turn-over)", interpolation, num)
+
+    def save_pcolor(self, function, name, interpolation=True, num=30):
+        for simu_params in self.batch_params:
+            my_dpi = 96
+            plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
+            intensities = []
+            for batch in self.batches:
+                simulations = batch.simulations[simu_params.color]
+                intensity = map(function, simulations)
+                intensities.append(intensity)
+                # batch.save_figure()
+
+            intensities = np.array(intensities)
+            if interpolation:
+                f = interpolate.interp2d(self.axis2, self.axis1, intensities, kind='cubic')
+                axis2 = np.logspace(np.log10((np.min(self.axis2))), np.log10((np.max(self.axis2))), num)
+                axis1 = np.logspace(np.log10((np.min(self.axis1))), np.log10((np.max(self.axis1))), num)
+                intensities = f(axis2, axis1)
+                axis_x, axis_y = np.meshgrid(axis2, axis1)
+            else:
+                axis_x, axis_y = np.meshgrid(self.axis2, self.axis1)
+            plt.pcolor(axis_x, axis_y, intensities, cmap='RdBu', shading='faceted', snap=False)
+            plt.colorbar()
+            plt.xscale('log')
+            plt.xlabel(self.label(self.axis_x))
+            plt.ylabel(self.label(self.axis_y))
+            plt.yscale('log')
+            plt.title(name)
+            plt.tight_layout()
+
+            plt.savefig(str(self) + " " + name + str(interpolation) + " " + simu_params.color + '.png')
+            plt.clf()
+        print name + ' computed'
+        return self
+
+    @staticmethod
+    def label(axis):
+        return {"fitness": "The fitness parameter",
+                "mutation": "Mutation rate of PRDM9",
+                "erosion": "Erosion rate of the hotspots",
+                "population": "The population size",
+                "recombination": "The recombination rate of the hotspots",
+                "scaling": "The scaling factor"}[axis]
+
+
 class Batches(list):
     def save_figure(self, k_range=np.logspace(-1, 1, 5), directory_id=None):
         if directory_id is None:
@@ -844,9 +931,9 @@ class Batches(list):
 
         plt.tight_layout()
 
-        plt.savefig(directory_id + ' batch cross homosygosity.png')
+        plt.savefig(directory_id + ' batch cross homozygosity.png')
         plt.clf()
-        print 'Cross homosygosity computed'
+        print 'Cross homozygosity computed'
         return self
 
     def save_erosion_var(self, directory_id):
@@ -875,14 +962,15 @@ class Batches(list):
 
 
 if __name__ == '__main__':
+    '''
     dir_id = id_generator(8)
     set_dir("/tmp/" + dir_id)
-    model_parameters = ModelParams(mutation_rate_prdm9=1.0 * 10 ** -5,
-                                   erosion_rate_hotspot=1.0 * 10 ** -4,
+    model_parameters = ModelParams(mutation_rate_prdm9=1.0 * 10 ** -6,
+                                   erosion_rate_hotspot=1.0 * 10 ** -5,
                                    population_size=10 ** 5,
                                    recombination_rate=1.0 * 10 ** -3,
-                                   fitness_param=0.5,
-                                   fitness='sigmoid')
+                                   fitness_param=0.1,
+                                   fitness='polynomial')
     batch_parameters = BatchParams(drift=True, linearized=False, color="blue", scaling=10)
     batch_parameters.append_simu_params(dict(red="linearized"))
     batches = Batches()
@@ -894,6 +982,16 @@ if __name__ == '__main__':
     for batch_simulation in batches:
         batch_simulation.save_figure(directory_id=dir_id)
     batches.save_figure(np.logspace(-0.5, 0.5, 5), directory_id=dir_id)
+    phasediagram = PhaseDiagram(model_parameters, batch_parameters, "population", "mutation", nbr_of_simulations=14, scale=10 ** 2)
+    phasediagram.run(nbr_of_cpu=7)
+    phasediagram.save_figure(interpolation=True)
+    phasediagram.save_figure(interpolation=False)
+    '''
+    dir_id = "713549A8"
+    set_dir("/tmp/" + dir_id)
+    phasediagram = pickle.load(open("PhaseDiagram.p", "rb"))
+    phasediagram.save_figure(interpolation=True, num=100)
+    phasediagram.save_figure(interpolation=False)
     '''
     dir_id = "3FCA8AF6"
     set_dir("/tmp/" + dir_id)
