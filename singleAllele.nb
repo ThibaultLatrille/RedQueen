@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     32816,        930]
-NotebookOptionsPosition[     30901,        860]
-NotebookOutlinePosition[     31242,        875]
-CellTagsIndexPosition[     31199,        872]
+NotebookDataLength[     32744,        926]
+NotebookOptionsPosition[     30858,        858]
+NotebookOutlinePosition[     31196,        873]
+CellTagsIndexPosition[     31153,        870]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -460,8 +460,6 @@ Cell[BoxData[
   3.670045547964528*^9}]
 }, Open  ]],
 
-Cell[CellGroupData[{
-
 Cell[BoxData[
  RowBox[{"Manipulate", "[", 
   RowBox[{
@@ -479,11 +477,6 @@ Cell[BoxData[
               RowBox[{"L", " ", 
                RowBox[{"Log", "[", "l", "]"}]}]}], ")"}], "/", "a"}]}], " ", 
           ",", " ", 
-          RowBox[{"l", " ", "b", 
-           RowBox[{"(", " ", 
-            RowBox[{"l", "-", "1", "-", 
-             RowBox[{"L", " ", 
-              RowBox[{"Log", "[", "l", "]"}]}]}], ")"}]}], ",", 
           RowBox[{
            RowBox[{"b", "/", "a"}], 
            RowBox[{"(", 
@@ -505,7 +498,14 @@ Cell[BoxData[
                  SuperscriptBox["\[ExponentialE]", 
                   RowBox[{
                    RowBox[{"-", "1"}], "/", "L"}]], "L"]}], "]"}]}], ",", 
-             "L"}], "}"}], ",", "None"}], "}"}]}]}], "]"}], ",", 
+             "L"}], "}"}], ",", "None"}], "}"}]}], ",", " ", 
+        RowBox[{"PlotRange", "\[Rule]", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"{", 
+            RowBox[{"0", ",", "1"}], "}"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"0", ",", "1"}], "}"}]}], "}"}]}]}], "]"}], ",", 
       RowBox[{"Module", "[", 
        RowBox[{
         RowBox[{"{", "sol", "}"}], ",", 
@@ -566,14 +566,14 @@ Cell[BoxData[
              RowBox[{"{", 
               RowBox[{
                RowBox[{"x", "[", "t", "]"}], ",", 
-               RowBox[{"l", "[", "t", "]"}], ",", 
                RowBox[{
                 RowBox[{"b", "/", "a"}], 
                 RowBox[{"(", 
                  RowBox[{"1", "-", " ", "L", "+", " ", 
                   RowBox[{"L", " ", 
-                   RowBox[{"Log", "[", "L", "]"}]}]}], ")"}]}]}], "}"}], "/.",
-              "\[VeryThinSpace]", "sol"}], "]"}], ",", 
+                   RowBox[{"Log", "[", "L", "]"}]}]}], ")"}]}], ",", 
+               RowBox[{"l", "[", "t", "]"}]}], "}"}], "/.", 
+             "\[VeryThinSpace]", "sol"}], "]"}], ",", 
            RowBox[{"{", 
             RowBox[{"t", ",", "0", ",", "15"}], "}"}], ",", 
            RowBox[{"PlotRange", "\[Rule]", "Full"}], ",", 
@@ -611,15 +611,15 @@ Cell[BoxData[
    ",", 
    RowBox[{"Paneled", "\[Rule]", "False"}]}], "]"}]], "Input",
  CellChangeTimes->CompressedData["
-1:eJwdyk0og3EAx/HlInkJjW1YeSmSlxYX7SBLk1Arb7G8LHFbJjEcKA5Ylnm5
-PLHDbO20w6Sw5nHwrFymNm3amtQIPcy8Lw4r/r//4dvn8i0Z0XWOpQgEAikJ
-hp11Za/dMcWyRVUJ57ftsXfidN9GHBZnaJQfROGbjppxPV6TIGr9S1Rv/13Z
-L3Ghl6fq/+5XhD0xhbRfZYCmiapd6BLJqfuTVRa4aS63wamBBwcsbQ05Ydtx
-7iGUuZNHUGwc9kED0+CH1by1Po/os7iptxW3M1B8aZ6DQeP6GrxITTfCpi41
-l09kpzxUji8MwNXzrBB8nu2Iw+BQ1zu0ydwJqI86fqClle8WEdsTrBo2RsdH
-YG24aRQ+Xn2b4PIitwU1NTkM1O4pzXBH8mSH2ZFMB2QY3wl0nbWwMGAt5+hX
-UuCFaW+eIBQ2f1LtrOEG8qcb1K/NG3ER8UUil8DI3YEz2RtTFAyaD+A/GUrk
-Rg==
+1:eJwdyk0og3EAx/Hlgrxr2LzEKJKRuEjRlryEUoZYXtbitpC8JorDWJbXy+I5
+jDWpHabVjJmDraSoTSYihbw8PN5ZHFb8f//Dt8/lK1J21XYE8Hi8ZBI8M+el
+vdZxUrW+JhOOLBi5d2Jf4+wLTAlVlH4Q+W9d1NCLzmwfUeUZpx403aT9Ekcb
+WGr/3+0Ev56TJjXVaOBMd9YS3IwrpK73ZOnhHJNugL3NdyaYWnFqhpW2aCvM
+tfs3oEDb5oYaXYEHitmV/BiiW2+nXmdcD0DBETMEvdrpKXgYGKKFEpncGUt0
+9LqoTjbhGE7uhZ/Cp8HqF+htlb1DQ67dB/uvTD9QX8HWxRGrfA45LL7qVMKc
+M0k7vD/5noHqMec8VGRH6aBquZSBi8JHI4w8DzNBnc69DTd3yxzweCXdST9R
+/AEMfnN5Ib/kk2p0aC4huzNL/Zq7FCQSn4WFQnh+YzH7GzhpfAtjgUG2cutD
+Iydlyva3oDhCaWCJRWvDq/AfveD1Wg==
   "]],
 
 Cell[BoxData[
@@ -634,19 +634,19 @@ Cell[BoxData[
        Hold[$CellContext`a$$], 1}, 0, 10}, {{
        Hold[$CellContext`L$$], 0.5}, 0, 1}, {{
        Hold[$CellContext`x0$$], 0.0001}, 0, 0.001}}, Typeset`size$$ = {
-    360., {56., 63.}}, Typeset`update$$ = 0, Typeset`initDone$$, 
-    Typeset`skipInitDone$$ = True, $CellContext`b$1737$$ = 
-    0, $CellContext`a$1738$$ = 0, $CellContext`L$1739$$ = 
-    0, $CellContext`x0$1740$$ = 0}, 
+    1691., {274., 280.}}, Typeset`update$$ = 0, Typeset`initDone$$, 
+    Typeset`skipInitDone$$ = True, $CellContext`b$3046$$ = 
+    0, $CellContext`a$3047$$ = 0, $CellContext`L$3048$$ = 
+    0, $CellContext`x0$3049$$ = 0}, 
     DynamicBox[Manipulate`ManipulateBoxes[
      1, StandardForm, 
       "Variables" :> {$CellContext`a$$ = 1, $CellContext`b$$ = 
         4, $CellContext`L$$ = 0.5, $CellContext`x0$$ = 0.0001}, 
       "ControllerVariables" :> {
-        Hold[$CellContext`b$$, $CellContext`b$1737$$, 0], 
-        Hold[$CellContext`a$$, $CellContext`a$1738$$, 0], 
-        Hold[$CellContext`L$$, $CellContext`L$1739$$, 0], 
-        Hold[$CellContext`x0$$, $CellContext`x0$1740$$, 0]}, 
+        Hold[$CellContext`b$$, $CellContext`b$3046$$, 0], 
+        Hold[$CellContext`a$$, $CellContext`a$3047$$, 0], 
+        Hold[$CellContext`L$$, $CellContext`L$3048$$, 0], 
+        Hold[$CellContext`x0$$, $CellContext`x0$3049$$, 0]}, 
       "OtherVariables" :> {
        Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
         Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
@@ -654,41 +654,40 @@ Cell[BoxData[
          Typeset`skipInitDone$$}, "Body" :> GraphicsRow[{
          Plot[{$CellContext`b$$ ((
              1 - $CellContext`l + $CellContext`L$$ 
-              Log[$CellContext`l])/$CellContext`a$$), ($CellContext`l \
-$CellContext`b$$) ($CellContext`l - 1 - $CellContext`L$$ 
-            Log[$CellContext`l]), ($CellContext`b$$/$CellContext`a$$) (
+              Log[$CellContext`l])/$CellContext`a$$), \
+($CellContext`b$$/$CellContext`a$$) (
             1 - $CellContext`L$$ + $CellContext`L$$ 
              Log[$CellContext`L$$])}, {$CellContext`l, 0, 1}, 
           GridLines -> {{(-$CellContext`L$$) 
              ProductLog[-(
                 E^((-1)/$CellContext`L$$)/$CellContext`L$$)], \
-$CellContext`L$$}, None}], 
+$CellContext`L$$}, None}, PlotRange -> {{0, 1}, {0, 1}}], 
          Module[{$CellContext`sol$}, $CellContext`sol$ = 
            NDSolve[{
              Derivative[
-               1][$CellContext`x][$CellContext`t] == ($CellContext`b$$ \
-($CellContext`l[$CellContext`t] - $CellContext`L$$)) \
+               1][$CellContext`x][$CellContext`t] == $CellContext`b$$ \
+($CellContext`l[$CellContext`t] - $CellContext`L$$) \
 $CellContext`x[$CellContext`t], 
               Derivative[
-               1][$CellContext`l][$CellContext`t] == ((-$CellContext`a$$) \
-$CellContext`l[$CellContext`t]) $CellContext`x[$CellContext`t], 
+               1][$CellContext`l][$CellContext`t] == (-$CellContext`a$$) \
+$CellContext`l[$CellContext`t] $CellContext`x[$CellContext`t], 
               Derivative[
-               1][$CellContext`g][$CellContext`t] == ($CellContext`b$$ \
-$CellContext`g[$CellContext`t]) ($CellContext`g[$CellContext`t] - 
+               1][$CellContext`g][$CellContext`t] == $CellContext`b$$ \
+$CellContext`g[$CellContext`t] ($CellContext`g[$CellContext`t] - 
                  1 - $CellContext`L$$ Log[
-                   $CellContext`g[$CellContext`t]]) - ($CellContext`a$$ \
-$CellContext`g[$CellContext`t]) $CellContext`x0$$, $CellContext`x[
+                   $CellContext`g[$CellContext`t]]) - $CellContext`a$$ \
+$CellContext`g[$CellContext`t] $CellContext`x0$$, $CellContext`x[
                0] == $CellContext`x0$$, $CellContext`l[0] == 
               1, $CellContext`g[0] == 
               1}, {$CellContext`x, $CellContext`l, $CellContext`g}, \
 {$CellContext`t, 0, 15}]; Plot[
             Evaluate[
              ReplaceAll[{
-               $CellContext`x[$CellContext`t], 
-               $CellContext`l[$CellContext`t], \
+               $CellContext`x[$CellContext`t], \
 ($CellContext`b$$/$CellContext`a$$) (
                 1 - $CellContext`L$$ + $CellContext`L$$ 
-                 Log[$CellContext`L$$])}, $CellContext`sol$]], \
+                 Log[$CellContext`L$$]), 
+               $CellContext`l[$CellContext`t]}, $CellContext`sol$]], \
 {$CellContext`t, 0, 15}, PlotRange -> Full, 
             GridLines -> {
              None, {(-$CellContext`L$$) 
@@ -699,7 +698,7 @@ $CellContext`L$$}}]]}],
          10}, {{$CellContext`a$$, 1}, 0, 10}, {{$CellContext`L$$, 0.5}, 0, 
          1}, {{$CellContext`x0$$, 0.0001}, 0, 0.001}}, 
       "Options" :> {Paneled -> False}, "DefaultOptions" :> {}],
-     ImageSizeCache->{380., {129., 136.}},
+     ImageSizeCache->{1711., {346., 353.}},
      SingleEvaluation->True],
     Deinitialization:>None,
     DynamicModuleValues:>{},
@@ -709,9 +708,8 @@ $CellContext`L$$}}]]}],
     UntrackedVariables:>{Typeset`size$$}], "Manipulate",
    Deployed->True,
    StripOnInput->False],
-  Manipulate`InterpretManipulate[1]]], "Output",
- CellChangeTimes->{{3.669484932160122*^9, 3.6694849498817263`*^9}}]
-}, Open  ]],
+  Manipulate`InterpretManipulate[1]]], "Input",
+ CellChangeTimes->{{3.670492508894269*^9, 3.670492513243951*^9}}],
 
 Cell[CellGroupData[{
 
@@ -858,8 +856,8 @@ Cell[BoxData[
  CellChangeTimes->{3.6699707762580976`*^9, 3.669970868056858*^9}]
 }, Open  ]]
 },
-WindowSize->{928, 1028},
-WindowMargins->{{Automatic, -10}, {Automatic, -10}},
+WindowSize->{1855, 1056},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
 FrontEndVersion->"10.4 for Linux x86 (64-bit) (February 25, 2016)",
 StyleDefinitions->"Default.nb"
 ]
@@ -881,56 +879,54 @@ Cell[1508, 48, 641, 15, 49, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
 Cell[2186, 68, 970, 20, 55, "Input"],
-Cell[3159, 90, 790, 15, 41, "Message"],
+Cell[3159, 90, 790, 15, 23, "Message"],
 Cell[3952, 107, 431, 14, 52, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
 Cell[4420, 126, 568, 15, 32, "Input"],
-Cell[4991, 143, 598, 12, 41, "Message"],
+Cell[4991, 143, 598, 12, 23, "Message"],
 Cell[5592, 157, 524, 17, 60, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
 Cell[6153, 179, 780, 22, 32, "Input"],
-Cell[6936, 203, 1522, 44, 96, "Output"]
+Cell[6936, 203, 1522, 44, 52, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[8495, 252, 1691, 38, 99, "Input"],
+Cell[8495, 252, 1691, 38, 32, "Input"],
 Cell[10189, 292, 193, 5, 32, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[10419, 302, 1670, 39, 121, "Input"],
-Cell[12092, 343, 645, 12, 41, "Message"],
+Cell[10419, 302, 1670, 39, 32, "Input"],
+Cell[12092, 343, 645, 12, 23, "Message"],
 Cell[12740, 357, 942, 24, 53, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[13719, 386, 1539, 40, 143, "Input"],
-Cell[15261, 428, 600, 12, 41, "Message"],
+Cell[13719, 386, 1539, 40, 32, "Input"],
+Cell[15261, 428, 600, 12, 23, "Message"],
 Cell[15864, 442, 554, 17, 64, "Output"]
 }, Open  ]],
+Cell[16433, 462, 6114, 160, 179, "Input"],
+Cell[22550, 624, 4312, 87, 716, InheritFromParent],
 Cell[CellGroupData[{
-Cell[16455, 464, 6039, 158, 396, "Input"],
-Cell[22497, 624, 4396, 88, 282, "Output"]
+Cell[26887, 715, 308, 9, 32, "Input"],
+Cell[27198, 726, 187, 6, 56, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[26930, 717, 308, 9, 32, "Input"],
-Cell[27241, 728, 187, 6, 56, "Output"]
+Cell[27422, 737, 326, 9, 32, "Input"],
+Cell[27751, 748, 297, 10, 56, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[27465, 739, 326, 9, 32, "Input"],
-Cell[27794, 750, 297, 10, 56, "Output"]
+Cell[28085, 763, 540, 16, 32, "Input"],
+Cell[28628, 781, 430, 10, 23, "Message"],
+Cell[29061, 793, 500, 16, 55, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[28128, 765, 540, 16, 32, "Input"],
-Cell[28671, 783, 430, 10, 23, "Message"],
-Cell[29104, 795, 500, 16, 55, "Output"]
+Cell[29598, 814, 175, 4, 32, "Input"],
+Cell[29776, 820, 118, 2, 35, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[29641, 816, 175, 4, 32, "Input"],
-Cell[29819, 822, 118, 2, 35, "Output"]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[29974, 829, 610, 17, 32, "Input"],
-Cell[30587, 848, 298, 9, 50, "Output"]
+Cell[29931, 827, 610, 17, 32, "Input"],
+Cell[30544, 846, 298, 9, 50, "Output"]
 }, Open  ]]
 }
 ]
