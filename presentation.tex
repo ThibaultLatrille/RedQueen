@@ -118,9 +118,9 @@
 \end{frame}
 
 \begin{frame}
+	\frametitle{Trajectory}
 	\begin{center}
-		\Large
-    Trajectory of frequency and erosion (images of simulations)
+       \includegraphics[width=10.5cm]{Images/simulations.png}
 	\end{center}
 \end{frame}
 
@@ -144,130 +144,193 @@
 
 \begin{frame}
 	\begin{center}
-	\Large
-    Define $K_e$ and see evolution of $K_e$ with $N_e$
-	\end{center}
-\end{frame}
-
-\begin{frame}
-	\begin{center}
 		\Large
-    	Polymorphism of PRDM9
+    	Definition of the PRDM9's diversity $K_e$ 
+    \end{center}
+	Let $x_i$ be the frequency of the $i^{th}$ PRDM9 variant.\\
+
+    \[ K_e = \dfrac{1}{\displaystyle \sum_i x_i^2}   \]
+	\begin{center}
+       \includegraphics[width=7cm]{Images/ne-diversity.png}
 	\end{center}
-	$ u $ is the mutation rate of PRDM9. \\
-	$ N_e $ is the population size. \\ 
-	\begin{enumerate}
-		\item $u N_e \ll 1 \Rightarrow  $ single allele succession.
-		\item $u N_e \gg 1 \Rightarrow  $ polymorphism.
-		
-		\item $\nearrow$ with regard to $u$ and $N_e$.
-		
-		\item $\rightsquigarrow$ with regard to the mutation ($v$) and recombination rate at the hotspots ($r_o$)
-		
-		\item $\rightsquigarrow$ with regard to the fitness function.
-	\end{enumerate}
 \end{frame}
 
 \begin{frame}
 	\begin{center}
+		\begin{enumerate}
+		\item $K_e \nearrow$ with the mutation rate of PRDM9 ($u$).
+		
+		\item $K_e \rightsquigarrow$ with the mutation rate at the hotspots ($v$).
+		\end{enumerate}
        \includegraphics[width=11cm]{Images/simpson-entropy-mutation-erosion.png}
 	\end{center}
 \end{frame}
 
-
 \begin{frame}
 	\begin{center}
-       \includegraphics[width=11cm]{Images/simpson-entropy-population-erosion.png}
-	\end{center}
-\end{frame}
-
-\begin{frame}
-	\begin{center}
+		\begin{enumerate}
+		\item $K_e \nearrow$ with the the population size ($N_e$).
+		
+		\item $K_e \nearrow$ with the mutation rate of PRDM9 ($u$).
+		\end{enumerate}
        \includegraphics[width=11cm]{Images/simpson-entropy-population-mutation.png}
 	\end{center}
 \end{frame}
 
-
 \begin{frame}
 	\begin{center}
-	\Large
-    Define $\bar{L}$ and see evolution of $\bar{L}$ with $N_e$
+		\begin{enumerate}
+		\item $K_e \nearrow$ with the the population size ($N_e$).
+		
+		\item $K_e \rightsquigarrow$ with the mutation rate at the hotspots ($v$).
+		\end{enumerate}
+       \includegraphics[width=11cm]{Images/simpson-entropy-population-erosion.png}
 	\end{center}
 \end{frame}
+
 
 \begin{frame}
 	\begin{center}
 		\Large
-    	Mean erosion of the hotspots
+    	Evolution of the PRDM9's diversity $K_e$ 
 	\end{center}
+	$ N_e $ is the population size. \\ 
+	$ u $ is the mutation rate of PRDM9. \\
 	\begin{enumerate}
-		\item $\nearrow$ with regard to the mutation ($v$) and recombination rate at the hotspots ($r_o$).
+		\item $ N_e u \ll 1 \Rightarrow  K_e \simeq 1$ (single allele succession)
+		\item $ N_e u \gg 1 \Rightarrow  K_e > 1 $ (polymorphism)
 		
-		\item $\searrow$ with regard to mutation rate of PRDM9. ($u$).
+		\item $K_e \nearrow$ with $N_e$ and $u$.
 		
-		\item $\rightsquigarrow$ with regard to the population size ($N_e$).
+		\item $K_e \rightsquigarrow$ with the mutation ($v$) and recombination rate at the hotspots ($r_o$)
 		
-		\item 	The fitness function can be linearised around the mean erosion.
+		\item $K_e \rightsquigarrow$ with the fitness function.
 	\end{enumerate}
+\end{frame}
+
+
+\begin{frame}
+	\begin{center}
+		\Large
+    	Definition of the mean fraction of hot hotspots $\bar{L}$ 
+    \end{center}
+	Let $x_i$ be the frequency of the $i^{th}$ PRDM9 variant.\\
+	Let $l_i$ be the fraction of hot hotspots (still not eroded) associated with the $i^{th}$ PRDM9 variant.\\
+
+    \[ \bar{L} =  \sum_i x_i l_i   \]
+	\begin{center}
+       \includegraphics[width=7cm]{Images/ne-mean-erosion.png}
+	\end{center}
 \end{frame}
 
 \begin{frame}
 	\begin{center}
+		\begin{enumerate}
+		\item $\bar{L} \nearrow$ with the mutation rate of PRDM9 ($u$).
+		
+		\item $\bar{L} \searrow$ with the mutation rate at the hotspots ($v$).
+	\end{enumerate}
        \includegraphics[width=11cm]{Images/mean-erosion-mutation-erosion.png}
 	\end{center}
 \end{frame}
 
 \begin{frame}
 	\begin{center}
-       \includegraphics[width=11cm]{Images/mean-erosion-population-erosion.png}
-	\end{center}
-\end{frame}
-
-\begin{frame}
-	\begin{center}
+		\begin{enumerate}
+		\item $\bar{L} \rightsquigarrow$ with the population size ($N_e$).
+		
+		\item $\bar{L} \nearrow$ with the mutation rate of PRDM9 ($u$).
+	\end{enumerate}
        \includegraphics[width=11cm]{Images/mean-erosion-population-mutation.png}
 	\end{center}
 \end{frame}
 
 \begin{frame}
 	\begin{center}
-	\Large
-    Define $\tau$ and see evolution of $\tau$ with $N_e$
+		\begin{enumerate}
+		\item $\bar{L} \rightsquigarrow$ with the population size ($N_e$).
+				
+		\item $\bar{L} \nearrow$ with the mutation rate at the hotspots ($v$).
+	\end{enumerate}
+       \includegraphics[width=11cm]{Images/mean-erosion-population-erosion.png}
 	\end{center}
 \end{frame}
+
 
 \begin{frame}
 	\begin{center}
 		\Large
-    	Cross-homozygosity of the hotspots
+    	Evolution of the mean fraction of hot hotspots $\bar{L}$
 	\end{center}
 	\begin{enumerate}
-		\item $\searrow$ with regard to the mutation ($v$) and recombination rate at the hotspots ($r_o$).
+			
+		\item $\bar{L} \rightsquigarrow$ with the population size ($N_e$).
+				
+		\item $\bar{L} \nearrow$ with the mutation rate of PRDM9. ($u$).
 		
-		\item $\searrow$ with regard to mutation rate of PRDM9. ($u$).
-		
-		\item $\searrow$ with regard to the population size ($N_e$).
-		
+		\item $\bar{L} \searrow$ with the mutation ($v$) and recombination rate at the hotspots ($r_o$).
+
+		\item 	The fitness function can be linearised around the mean erosion $\bar{L}$.
 	\end{enumerate}
 \end{frame}
 
 \begin{frame}
 	\begin{center}
+		\Large
+    	Definition of the turn-over rate $\tau$ 
+    \end{center}
+	$\tau$ is the number of generations needed to replace all PRDM9 variants. \\
+	It is such that the homozygosity between $x_i(t)$ and $x_i(t+\tau)$ vanishes.
+	\begin{center}
+       \includegraphics[width=7cm]{Images/ne-turn-over.png}
+	\end{center}
+\end{frame}
+
+\begin{frame}
+	\begin{center}
+		\begin{enumerate}
+		\item $\tau \searrow$ with the mutation rate of PRDM9. ($u$).
+		
+		\item $\tau \searrow$ with the mutation rate at the hotspots ($v$).
+		\end{enumerate}
        \includegraphics[width=11cm]{Images/cross-homozygosity-mutation-erosion.png}
 	\end{center}
 \end{frame}
 
+\begin{frame}
+	\begin{center}
+		\begin{enumerate}
+		\item $\tau \searrow$ with the population size ($N_e$).
+			
+		\item $\tau \searrow$ with the mutation rate of PRDM9. ($u$).
+		\end{enumerate}
+       \includegraphics[width=11cm]{Images/cross-homozygosity-population-mutation.png}
+	\end{center}
+\end{frame}
 
 \begin{frame}
 	\begin{center}
+		\begin{enumerate}
+		\item $\tau \searrow$ with the population size ($N_e$).
+			
+		\item $\tau \searrow$ with the mutation rate at the hotspots ($v$).
+		\end{enumerate}
        \includegraphics[width=11cm]{Images/cross-homozygosity-population-erosion.png}
 	\end{center}
 \end{frame}
 
 \begin{frame}
 	\begin{center}
-       \includegraphics[width=11cm]{Images/cross-homozygosity-population-mutation.png}
+		\Large
+    	Evolution of the turn-over rate $\tau$
 	\end{center}
+	\begin{enumerate}
+		\item $\tau \searrow$ with the population size ($N_e$).
+			
+		\item $\tau \searrow$ with the mutation rate of PRDM9. ($u$).
+		
+		\item $\tau \searrow$ with the mutation ($v$) and recombination rate at the hotspots ($r_o$).
+	\end{enumerate}
 \end{frame}
 
 \begin{frame}
@@ -377,12 +440,15 @@
 \begin{frame}
 	\begin{center}
 		\Large
-    Polymorphism from single allele equations.
+    Diversity from single allele equations.
 	\end{center}
 \[
-  K_e = \left( \sum_i x_i^2  \right)^{-1} \simeq 
+  K_e(\bar{L}) \simeq 
   \dfrac{4 \rho f(\overline{L})}{f'(\overline{L})\left[ 1 + l_{\infty} - 2 \overline{L}  \right]}
 \]
+	\begin{center}
+       \includegraphics[width=11cm]{Images/approximated-diversity.png}
+	\end{center}
 \end{frame}
 
 \begin{frame}
@@ -391,28 +457,51 @@
     Turn-over rate from single allele equations.
 	\end{center}
 \[
-  \tau \sim \dfrac{2 f'(\overline{L})}{f(\overline{L})[\overline{L}-1 + \overline{L} \mathrm{log}(\overline{L})]}
+  \tau (\bar{L}) \sim \dfrac{2 f'(\overline{L})}{f(\overline{L})[\overline{L}-1 + \overline{L} \mathrm{log}(\overline{L})]}
 \]
-\end{frame}
-
-\begin{frame}
 	\begin{center}
-		\Large
-    Comparison of simulated data with estimated from single equation using parameters and mean erosion.
+       \includegraphics[width=11cm]{Images/approximated-turn-over.png}
 	\end{center}
 \end{frame}
 
 \begin{frame}
 	\begin{center}
 		\Large
-    Estimation of mean erosion from parameters.
+    Mean erosion estimate.
+	\end{center}
+\[
+  0 \simeq N_e u (1 - \bar{L}) - \dfrac{f(\overline{L})}{f'(\overline{L})} -
+  4 N_e v r_o \bar{L}
+\]
+	\begin{center}
+       \includegraphics[width=11cm]{Images/estimated-mean-erosion.png}
 	\end{center}
 \end{frame}
 
 \begin{frame}
 	\begin{center}
 		\Large
-    Comparison of simulated data with estimated from single equations, using only parameters.
+    Diversity using a plug-in estimate for $\bar{L}$.
+	\end{center}
+\[
+  K_e(\bar{L}) \simeq 
+  \dfrac{4 \rho f(\overline{L})}{f'(\overline{L})\left[ 1 + l_{\infty} - 2 \overline{L}  \right]}
+\]
+	\begin{center}
+       \includegraphics[width=11cm]{Images/estimated-diversity.png}
+	\end{center}
+\end{frame}
+
+\begin{frame}
+	\begin{center}
+		\Large
+    Turn-over rate using a plug-in estimate for $\bar{L}$.
+	\end{center}
+\[
+  \tau (\bar{L}) \sim \dfrac{2 f'(\overline{L})}{f(\overline{L})[\overline{L}-1 + \overline{L} \mathrm{log}(\overline{L})]}
+\]
+	\begin{center}
+       \includegraphics[width=11cm]{Images/estimated-turn-over.png}
 	\end{center}
 \end{frame}
 
