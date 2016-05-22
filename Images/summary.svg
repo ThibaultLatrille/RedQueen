@@ -1,225 +1,249 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Generator: Adobe Illustrator 19.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 1920 1080" style="enable-background:new 0 0 1920 1080;" xml:space="preserve">
+	 viewBox="654 -1080 1920 1080" style="enable-background:new 654 -1080 1920 1080;" xml:space="preserve">
 <style type="text/css">
 	.st0{fill:#FFFFFF;stroke:#414042;stroke-width:6;stroke-miterlimit:10;}
-	.st1{fill:#414042;stroke:#414042;stroke-miterlimit:10;}
+	.st1{fill:#414042;}
 	.st2{font-family:'LMRoman12-Bold';}
 	.st3{font-size:45px;}
-	.st4{fill:#00A14B;stroke:#00A14B;stroke-miterlimit:10;}
-	.st5{fill:#FFFFFF;stroke:#000000;stroke-width:6;stroke-miterlimit:10;}
-	.st6{font-size:49px;}
-	.st7{fill:none;stroke:#1C75BC;stroke-width:6;stroke-linecap:round;stroke-miterlimit:10;}
-	.st8{fill:#1C75BC;}
-	.st9{fill:none;stroke:#BCBEC0;stroke-width:6;stroke-linecap:round;stroke-miterlimit:10;}
+	.st4{fill:none;stroke:#414042;stroke-miterlimit:10;}
+	.st5{fill:#00A14B;stroke:#00A14B;stroke-miterlimit:10;}
+	.st6{fill:#FFFFFF;stroke:#000000;stroke-width:6;stroke-miterlimit:10;}
+	.st7{font-size:49px;}
+	.st8{fill:none;stroke:#1C75BC;stroke-width:6;stroke-linecap:round;stroke-miterlimit:10;}
+	.st9{fill:#1C75BC;}
 	.st10{fill:none;stroke:#BCBEC0;stroke-width:6;stroke-linecap:round;stroke-miterlimit:10;stroke-dasharray:11.9998,11.9998;}
-	.st11{fill:#BCBEC0;}
-	.st12{fill:none;stroke:#BE1E2D;stroke-width:6;stroke-linecap:round;stroke-miterlimit:10;}
-	.st13{fill:#BE1E2D;}
-	.st14{fill:none;stroke:#BCBEC0;stroke-width:6;stroke-linecap:round;stroke-miterlimit:10;stroke-dasharray:12.1548,12.1548;}
-	.st15{fill:none;stroke:#BE1E2D;stroke-width:5;stroke-miterlimit:10;}
-	.st16{font-size:29px;}
-	.st17{fill:none;stroke:#1C75BC;stroke-width:5;stroke-miterlimit:10;}
-	.st18{fill:none;stroke:#BCBEC0;stroke-width:3;stroke-miterlimit:10;}
-	.st19{font-size:46.1839px;}
+	.st11{fill:none;stroke:#BCBEC0;stroke-width:6;stroke-linecap:round;stroke-miterlimit:10;}
+	.st12{fill:#BCBEC0;}
+	.st13{fill:none;stroke:#BE1E2D;stroke-width:6;stroke-linecap:round;stroke-miterlimit:10;}
+	.st14{fill:#BE1E2D;}
+	.st15{fill:none;stroke:#BCBEC0;stroke-width:6;stroke-linecap:round;stroke-miterlimit:10;stroke-dasharray:12.1548,12.1548;}
+	.st16{fill:none;stroke:#BE1E2D;stroke-width:5;stroke-miterlimit:10;}
+	.st17{font-size:29px;}
+	.st18{fill:none;stroke:#1C75BC;stroke-width:5;stroke-miterlimit:10;}
+	.st19{fill:none;stroke:#BCBEC0;stroke-width:3;stroke-miterlimit:10;}
+	.st20{font-size:46.1839px;}
 </style>
-<path id="XMLID_1_" class="st0" d="M495.1,226.2H53.2c-6.6,0-12-5.4-12-12V43.9c0-6.6,5.4-12,12-12h441.9c6.6,0,12,5.4,12,12v170.3
-	C507.1,220.8,501.7,226.2,495.1,226.2z"/>
-<text id="XMLID_5_" transform="matrix(1 0 0 1 105.5329 183.8167)" class="st1 st2 st3">Population size</text>
+<path id="XMLID_1_" class="st0" d="M1149.1-853.8H707.2c-6.6,0-12-5.4-12-12v-170.3c0-6.6,5.4-12,12-12h441.9c6.6,0,12,5.4,12,12
+	v170.3C1161.1-859.2,1155.7-853.8,1149.1-853.8z"/>
+<text transform="matrix(1 0 0 1 759.5329 -896.1833)" class="st1 st2 st3">Population size</text>
+<text id="XMLID_5_" transform="matrix(1 0 0 1 759.5329 -896.1833)" class="st4 st2 st3">Population size</text>
 <g id="XMLID_11_">
 	<g id="XMLID_199_">
-		<path id="g0-78" class="st4" d="M277.3,68.9c0.8-3.1,1.9-5.3,7.4-5.5c0.2,0,1.1-0.1,1.1-1.3c0-0.8-0.6-0.8-0.9-0.8
+		<path id="g0-78" class="st5" d="M931.3-1011.1c0.8-3.1,1.9-5.3,7.4-5.5c0.2,0,1.1-0.1,1.1-1.3c0-0.8-0.6-0.8-0.9-0.8
 			c-1.4,0-5.1,0.1-6.6,0.1h-3.5c-1,0-2.3-0.1-3.3-0.1c-0.4,0-1.3,0-1.3,1.4c0,0.7,0.6,0.7,1.1,0.7c4.3,0.1,4.6,1.8,4.6,3.1
-			c0,0.6-0.1,0.9-0.3,1.9l-8.2,32.5l-15.4-38.4c-0.5-1.2-0.6-1.2-2.2-1.2h-8.8c-1.4,0-2.1,0-2.1,1.4c0,0.7,0.5,0.7,1.9,0.7
+			c0,0.6-0.1,0.9-0.3,1.9l-8.2,32.5l-15.4-38.4c-0.5-1.2-0.6-1.2-2.2-1.2H895c-1.4,0-2.1,0-2.1,1.4c0,0.7,0.5,0.7,1.9,0.7
 			c0.4,0,4.6,0,4.6,0.6c0,0.1-0.1,0.7-0.2,0.9l-9.6,38.2c-0.9,3.5-2.6,5-7.4,5.3c-0.4,0-1.1,0.1-1.1,1.4c0,0.7,0.7,0.7,0.9,0.7
 			c1.4,0,5.1-0.1,6.6-0.1h3.5c1,0,2.2,0.1,3.2,0.1c0.5,0,1.3,0,1.3-1.4c0-0.6-0.7-0.7-1-0.7c-2.4-0.1-4.7-0.5-4.7-3.1
-			c0-0.6,0.1-1.2,0.3-1.8l9.7-38.6c0.4,0.7,0.4,0.9,0.7,1.5l17.2,42.8c0.4,0.9,0.5,1.3,1.2,1.3c0.7,0,0.8-0.2,1.1-1.4L277.3,68.9z"
-			/>
+			c0-0.6,0.1-1.2,0.3-1.8l9.7-38.6c0.4,0.7,0.4,0.9,0.7,1.5l17.2,42.8c0.4,0.9,0.5,1.3,1.2,1.3c0.7,0,0.8-0.2,1.1-1.4L931.3-1011.1z
+			"/>
 	</g>
 	<g id="XMLID_196_">
-		<path id="g1-101" class="st4" d="M290.2,110.4c1.1,0,4.7,0,7.2-1c4.2-1.4,4.3-4.3,4.3-5c0-2.7-2.5-4.2-5.7-4.2
-			c-5.4,0-13.2,4.3-13.2,12.8c0,4.9,3,8.9,8.3,8.9c7.5,0,11.5-4.8,11.5-5.5c0-0.4-0.5-0.8-0.8-0.8c-0.3,0-0.4,0.1-0.7,0.4
-			c-3.8,4.5-9.2,4.5-10,4.5c-3.5,0-4.6-3-4.6-5.7c0-1.4,0.4-3.6,0.6-4.4H290.2z M287.7,109.1c1.5-5.9,5.9-7.5,8.4-7.5
-			c1.9,0,3.8,1,3.8,2.9c0,4.7-7.9,4.7-9.9,4.7H287.7z"/>
+		<path id="g1-101" class="st5" d="M944.2-969.6c1.1,0,4.7,0,7.2-1c4.2-1.4,4.3-4.3,4.3-5c0-2.7-2.5-4.2-5.7-4.2
+			c-5.4,0-13.2,4.3-13.2,12.8c0,4.9,3,8.9,8.3,8.9c7.5,0,11.5-4.8,11.5-5.5c0-0.4-0.5-0.8-0.8-0.8s-0.4,0.1-0.7,0.4
+			c-3.8,4.5-9.2,4.5-10,4.5c-3.5,0-4.6-3-4.6-5.7c0-1.4,0.4-3.6,0.6-4.4C941.1-969.6,944.2-969.6,944.2-969.6z M941.7-970.9
+			c1.5-5.9,5.9-7.5,8.4-7.5c1.9,0,3.8,1,3.8,2.9c0,4.7-7.9,4.7-9.9,4.7h-2.3V-970.9z"/>
 	</g>
 </g>
-<path id="XMLID_2_" class="st0" d="M1879.7,219h-441.9c-6.6,0-12-5.4-12-12V36.7c0-6.6,5.4-12,12-12h441.9c6.6,0,12,5.4,12,12V207
-	C1891.7,213.6,1886.3,219,1879.7,219z"/>
-<text id="XMLID_6_" transform="matrix(1 0 0 1 1502.4386 135.6107)"><tspan x="0" y="0" class="st1 st2 st3">Mutation rate</tspan><tspan x="35.3" y="54" class="st1 st2 st3">of PRDM9</tspan></text>
+<path id="XMLID_2_" class="st0" d="M2533.7-861h-441.9c-6.6,0-12-5.4-12-12v-170.3c0-6.6,5.4-12,12-12h441.9c6.6,0,12,5.4,12,12
+	V-873C2545.7-866.4,2540.3-861,2533.7-861z"/>
+<text transform="matrix(1 0 0 1 2156.4385 -944.3893)" class="st1 st2 st3">Mutation rate</text>
+<text transform="matrix(1 0 0 1 2156.4385 -944.3893)" class="st4 st2 st3">Mutation rate</text>
+<text transform="matrix(1 0 0 1 2191.7388 -890.3893)" class="st1 st2 st3">of PRDM9</text>
+<text transform="matrix(1 0 0 1 2191.7388 -890.3893)" class="st4 st2 st3">of PRDM9</text>
 <g id="XMLID_194_">
-	<path id="g0-117" class="st4" d="M1655,68.8c0.9,4,4.4,4.9,6.1,4.9c2.3,0,4-1.5,5.2-4c1.2-2.6,2.2-6.9,2.2-7.1
+	<path id="g0-117" class="st5" d="M2309-1011.2c0.9,4,4.4,4.9,6.1,4.9c2.3,0,4-1.5,5.2-4c1.2-2.6,2.2-6.9,2.2-7.1
 		c0-0.4-0.3-0.6-0.7-0.6c-0.6,0-0.7,0.4-1,1.4c-1.3,5-2.6,8.8-5.5,8.8c-2.2,0-2.2-2.4-2.2-3.3c0-1.7,0.2-2.4,0.9-5.4
 		c0.5-1.9,1-3.9,1.4-5.9l3-11.8c0.5-1.8,0.5-1.9,0.5-2.2c0-1.1-0.9-1.8-1.9-1.8c-2.1,0-2.6,1.8-3,3.6c-0.7,2.8-4.6,18.3-5.1,20.8
 		c-0.1,0-2.9,5.9-8.2,5.9c-3.8,0-4.5-3.2-4.5-5.9c0-4.1,2-9.9,3.9-14.7c0.9-2.3,1.2-3.2,1.2-4.7c0-3.1-2.2-5.8-5.7-5.8
 		c-6.6,0-9.3,10.5-9.3,11c0,0.3,0.3,0.6,0.8,0.6c0.6,0,0.7-0.3,1-1.3c1.7-6.2,4.5-8.9,7.3-8.9c0.7,0,1.9,0.1,1.9,2.4
-		c0,1.9-0.8,4-1.9,6.7c-3.2,8.6-3.5,11.3-3.5,13.5c0,7.4,5.6,8.5,8.5,8.5C1651,73.7,1653.5,70.5,1655,68.8z"/>
+		c0,1.9-0.8,4-1.9,6.7c-3.2,8.6-3.5,11.3-3.5,13.5c0,7.4,5.6,8.5,8.5,8.5C2305-1006.3,2307.5-1009.5,2309-1011.2z"/>
 </g>
 <g id="XMLID_19_">
-	<path id="XMLID_4_" class="st5" d="M1756.6,1344.8h-441.9c-6.6,0-12-5.4-12-12v-170.3c0-6.6,5.4-12,12-12h441.9c6.6,0,12,5.4,12,12
-		v170.3C1768.6,1339.4,1763.2,1344.8,1756.6,1344.8z"/>
+	<path id="XMLID_4_" class="st6" d="M2410.6,264.8h-441.9c-6.6,0-12-5.4-12-12V82.5c0-6.6,5.4-12,12-12h441.9c6.6,0,12,5.4,12,12
+		v170.3C2422.6,259.4,2417.2,264.8,2410.6,264.8z"/>
 	<g id="XMLID_15_">
-		<text id="XMLID_8_" transform="matrix(1 0 0 1 1358.0546 1304.9124)" class="st2 st3">Fitness function</text>
+		<text id="XMLID_8_" transform="matrix(1 0 0 1 2012.0546 224.9124)" class="st2 st3">Fitness function</text>
 		<g id="XMLID_39_">
-			<path id="g0-102" class="st4" d="M1537.8,1199.3c1.4,0,2,0,2-1.4c0-0.7-0.6-0.7-1.9-0.7h-5.8c1.4-7.4,2.4-12.5,3-14.9
+			<path id="g0-102" class="st5" d="M2191.8,119.3c1.4,0,2,0,2-1.4c0-0.7-0.6-0.7-1.9-0.7h-5.8c1.4-7.4,2.4-12.5,3-14.9
 				c0.4-1.7,1.9-3.4,3.8-3.4c1.5,0,3,0.6,3.8,1.3c-2.8,0.3-3.7,2.4-3.7,3.6c0,1.4,1.1,2.3,2.5,2.3c1.4,0,3.6-1.2,3.6-4
 				c0-3-3-4.7-6.2-4.7c-3.1,0-6.1,2.3-7.6,5.1c-1.3,2.5-2,5.1-3.7,14.6h-4.8c-1.4,0-2.1,0-2.1,1.3c0,0.8,0.4,0.8,1.9,0.8h4.6
 				c-1.3,6.7-4.3,23-5.9,30.7c-1.2,6.3-2.3,11.5-5.9,11.5c-0.2,0-2.3,0-3.6-1.4c3.7-0.3,3.7-3.5,3.7-3.5c0-1.4-1.1-2.3-2.5-2.3
-				c-1.4,0-3.6,1.2-3.6,4c0,3.1,3.2,4.7,6,4.7c7.4,0,10.4-13.2,11.2-16.8c1.3-5.6,4.8-24.7,5.2-26.9H1537.8z"/>
+				c-1.4,0-3.6,1.2-3.6,4c0,3.1,3.2,4.7,6,4.7c7.4,0,10.4-13.2,11.2-16.8c1.3-5.6,4.8-24.7,5.2-26.9h6V119.3z"/>
 		</g>
 	</g>
 </g>
-<path id="XMLID_3_" class="st0" d="M494.3,1050.1H52.4c-6.6,0-12-5.4-12-12V799.2c0-6.6,5.4-12,12-12h441.9c6.6,0,12,5.4,12,12
-	v238.9C506.3,1044.7,500.9,1050.1,494.3,1050.1z"/>
-<text id="XMLID_7_" transform="matrix(1 0 0 1 177.0734 976.9712)"><tspan x="0" y="0" class="st1 st2 st3">Mutation rate</tspan><tspan x="-19.1" y="54" class="st1 st2 st3">of the hotspots</tspan></text>
-<text id="XMLID_9_" transform="matrix(1 0 0 1 64.7096 846.9739)"><tspan x="0" y="0" class="st1 st2 st3">Recombination</tspan><tspan x="0" y="54" class="st1 st2 st3">rate</tspan></text>
+<path id="XMLID_3_" class="st0" d="M1147.8-29.9H687.3c-6.9,0-12.5-5.4-12.5-12v-238.9c0-6.6,5.6-12,12.5-12h460.5
+	c6.9,0,12.5,5.4,12.5,12v238.9C1160.3-35.3,1154.7-29.9,1147.8-29.9z"/>
+<g>
+	<g>
+		<text transform="matrix(1 0 0 1 761.2188 -241.6495)" class="st1 st2 st3">Mutation rate</text>
+		<text transform="matrix(1 0 0 1 761.2188 -241.6495)" class="st4 st2 st3">Mutation rate</text>
+	</g>
+	<g>
+		<text transform="matrix(1 0 0 1 750.9818 -187.6495)" class="st1 st2 st3">of the hotspots</text>
+		<text transform="matrix(1 0 0 1 750.9818 -187.6495)" class="st4 st2 st3">of the hotspots</text>
+	</g>
+</g>
+<g>
+	<g>
+		<text transform="matrix(1 0 0 1 699.0191 -56.8998)" class="st1 st2 st3">Recombination</text>
+		<text transform="matrix(1 0 0 1 699.0191 -56.8998)" class="st4 st2 st3">Recombination</text>
+	</g>
+	<g>
+		<text transform="matrix(1 0 0 1 1048.0096 -56.9002)" class="st1 st2 st3">rate</text>
+		<text transform="matrix(1 0 0 1 1048.0096 -56.9002)" class="st4 st2 st3">rate</text>
+	</g>
+</g>
 <g id="XMLID_10_">
 	<g id="XMLID_73_">
-		<path id="g0-118" class="st4" d="M215.1,882.8c0-4.5-2.3-4.8-2.9-4.8c-1.7,0-3.3,1.7-3.3,3.2c0,0.9,0.5,1.4,0.8,1.7
+		<path id="g0-118" class="st5" d="M887.7-151.1c0-4.5-2.3-4.8-2.9-4.8c-1.7,0-3.3,1.7-3.3,3.2c0,0.9,0.5,1.4,0.8,1.7
 			c0.7,0.6,2.6,2.6,2.6,6.3c0,3-4.3,19.9-13,19.9c-4.4,0-5.3-3.7-5.3-6.3c0-3.6,1.7-8.7,3.6-13.8c1.2-3,1.4-3.7,1.4-5.1
 			c0-3-2.2-5.8-5.7-5.8c-6.6,0-9.3,10.5-9.3,11c0,0.3,0.3,0.6,0.8,0.6c0.6,0,0.7-0.3,1-1.3c1.7-6.2,4.5-8.9,7.3-8.9
 			c0.6,0,1.9,0,1.9,2.4c0,1.9-0.8,4-1.9,6.7c-3.5,9.2-3.5,11.5-3.5,13.2c0,1.6,0.2,4.5,2.5,6.6c2.6,2.2,6.2,2.2,6.9,2.2
-			C211,910.5,215.1,886.9,215.1,882.8z"/>
+			C883.6-123.4,887.7-147,887.7-151.1z"/>
 	</g>
 	<g id="XMLID_71_">
-		<path id="g0-59_2_" class="st4" d="M233,910.1c0-4.2-1.4-7.3-4.3-7.3c-2.3,0-3.5,1.9-3.5,3.5s1.1,3.5,3.5,3.5
+		<path id="g0-59_2_" class="st5" d="M905.6-123.8c0-4.2-1.4-7.3-4.3-7.3c-2.3,0-3.5,1.9-3.5,3.5s1.1,3.5,3.5,3.5
 			c0.9,0,1.7-0.3,2.4-0.9c0.1-0.1,0.2-0.1,0.3-0.1c0.1,0,0.1,1,0.1,1.4c0,2.4-0.4,7.1-4.6,11.8c-0.8,0.9-0.8,1-0.8,1.2
-			c0,0.4,0.4,0.7,0.7,0.7C227.4,923.7,233,918.3,233,910.1z"/>
+			c0,0.4,0.4,0.7,0.7,0.7C900-110.2,905.6-115.6,905.6-123.8z"/>
 	</g>
 	<g id="XMLID_70_">
-		<path id="g0-114" class="st4" d="M278.6,880.3c-2.2,0.4-3.4,2-3.4,3.6c0,1.7,1.4,2.3,2.4,2.3c2,0,3.7-1.7,3.7-3.9
+		<path id="g0-114" class="st5" d="M951.2-153.6c-2.2,0.4-3.4,2-3.4,3.6c0,1.7,1.4,2.3,2.4,2.3c2,0,3.7-1.7,3.7-3.9
 			c0-2.3-2.2-4.3-5.8-4.3c-2.9,0-6.2,1.3-9.2,5.7c-0.5-3.8-3.4-5.7-6.3-5.7c-2.8,0-4.3,2.2-5.1,3.8c-1.2,2.6-2.3,6.9-2.3,7.3
 			c0,0.3,0.3,0.6,0.8,0.6c0.6,0,0.6-0.1,1.1-1.7c1.1-4.3,2.5-8.5,5.3-8.5c1.7,0,2.2,1.2,2.2,3.3c0,1.6-0.7,4.4-1.2,6.6l-2,7.8
 			c-0.3,1.4-1.1,4.6-1.4,5.9c-0.5,1.9-1.3,5.3-1.3,5.6c0,1,0.8,1.8,1.9,1.8c0.8,0,2.2-0.5,2.6-1.9c0.2-0.6,2.9-11.5,3.3-13.1
 			c0.4-1.6,0.8-3.1,1.2-4.7c0.3-1,0.6-2.2,0.8-3.1c0.2-0.6,2.2-4.2,4-5.8c0.9-0.8,2.7-2.5,5.7-2.5
-			C276.5,879.4,277.6,879.6,278.6,880.3z"/>
+			C949.1-154.5,950.2-154.3,951.2-153.6z"/>
 	</g>
 	<g id="XMLID_65_">
-		<path id="g2-48" class="st4" d="M305.9,905.2c0-5.1-0.5-8.3-2.1-11.3c-2.1-4.2-6-5.3-8.7-5.3c-6.1,0-8.3,4.5-8.9,5.9
+		<path id="g2-48" class="st5" d="M978.5-128.7c0-5.1-0.5-8.3-2.1-11.3c-2.1-4.2-6-5.3-8.7-5.3c-6.1,0-8.3,4.5-8.9,5.9
 			c-1.7,3.5-1.8,8.3-1.8,10.8c0,3.2,0.1,8,2.5,11.9c2.2,3.6,5.8,4.5,8.3,4.5c2.3,0,6.4-0.7,8.8-5.5
-			C305.7,912.7,305.9,908.4,305.9,905.2z M295.1,920.2c-1.6,0-5-0.8-6-5.8c-0.5-2.7-0.5-7.3-0.5-9.8c0-3.3,0-6.7,0.5-9.3
-			c1-4.9,4.8-5.4,6-5.4c1.6,0,5,0.8,5.9,5.2c0.6,2.6,0.6,6.3,0.6,9.5c0,2.8,0,7.2-0.6,9.9C300,919.6,296.7,920.2,295.1,920.2z"/>
+			C978.3-121.2,978.5-125.5,978.5-128.7z M967.7-113.7c-1.6,0-5-0.8-6-5.8c-0.5-2.7-0.5-7.3-0.5-9.8c0-3.3,0-6.7,0.5-9.3
+			c1-4.9,4.8-5.4,6-5.4c1.6,0,5,0.8,5.9,5.2c0.6,2.6,0.6,6.3,0.6,9.5c0,2.8,0,7.2-0.6,9.9C972.6-114.3,969.3-113.7,967.7-113.7z"/>
 	</g>
 </g>
-<path id="XMLID_51_" class="st0" d="M1358,471.9H916.1c-6.6,0-12-5.4-12-12V334c0-6.6,5.4-12,12-12H1358c6.6,0,12,5.4,12,12v125.9
-	C1370,466.5,1364.6,471.9,1358,471.9z"/>
-<text id="XMLID_50_" transform="matrix(1 0 0 1 975.178 410.5345)" class="st1 st2 st6">Mean erosion</text>
-<path id="XMLID_42_" class="st0" d="M824.9,617H406.3c-6.6,0-12-5.4-12-12l0-129.2c0-6.6,5.4-12,12-12l418.6,0c6.6,0,12,5.4,12,12
-	l0,129.2C836.9,611.6,831.5,617,824.9,617z"/>
-<text id="XMLID_41_" transform="matrix(1 0 0 1 440.5428 553.9806)" class="st1 st2 st6">Polymorphism</text>
-<path id="XMLID_36_" class="st0" d="M1358,731.4H930c-6.6,0-12-5.4-12-12V595.1c0-6.6,5.4-12,12-12h428c6.6,0,12,5.4,12,12v124.3
-	C1370,726,1364.6,731.4,1358,731.4z"/>
-<text id="XMLID_35_" transform="matrix(1 0 0 1 973.3099 670.8613)" class="st1 st2 st6">Turn-over rate</text>
+<path id="XMLID_51_" class="st0" d="M2012-608.1h-441.9c-6.6,0-12-5.4-12-12V-746c0-6.6,5.4-12,12-12H2012c6.6,0,12,5.4,12,12v125.9
+	C2024-613.5,2018.6-608.1,2012-608.1z"/>
+<text transform="matrix(1 0 0 1 1629.178 -669.4655)" class="st1 st2 st7">Mean erosion</text>
+<text id="XMLID_50_" transform="matrix(1 0 0 1 1629.178 -669.4655)" class="st4 st2 st7">Mean erosion</text>
+<path id="XMLID_42_" class="st0" d="M1478.9-463h-418.6c-6.6,0-12-5.4-12-12v-129.2c0-6.6,5.4-12,12-12h418.6c6.6,0,12,5.4,12,12
+	V-475C1490.9-468.4,1485.5-463,1478.9-463z"/>
+<text transform="matrix(1 0 0 1 1094.5427 -526.0194)" class="st1 st2 st7">Diversity</text>
+<path id="XMLID_36_" class="st0" d="M2012-348.6h-428c-6.6,0-12-5.4-12-12v-124.3c0-6.6,5.4-12,12-12h428c6.6,0,12,5.4,12,12v124.3
+	C2024-354,2018.6-348.6,2012-348.6z"/>
+<text transform="matrix(1 0 0 1 1627.3098 -409.1387)" class="st1 st2 st7">Turn-over rate</text>
+<text id="XMLID_35_" transform="matrix(1 0 0 1 1627.3098 -409.1387)" class="st4 st2 st7">Turn-over rate</text>
 <g id="XMLID_21_">
 	<g id="XMLID_109_">
-		<path id="XMLID_112_" class="st7" d="M435.1,226.2c241.2,0,452.7,196.2,489.3,321.5"/>
+		<path id="XMLID_112_" class="st8" d="M1161.1-912.9c0,100.2,417.3,249.5,417.3,380.6"/>
 		<g id="XMLID_110_">
-			<polygon id="XMLID_111_" class="st8" points="898.9,535.2 922.4,540.6 942.6,527.4 930,583.1 			"/>
+			<polygon id="XMLID_111_" class="st9" points="1552.9,-544.8 1576.4,-539.4 1596.6,-552.6 1584,-496.9 			"/>
 		</g>
 	</g>
 </g>
 <g id="XMLID_20_">
 	<g id="XMLID_119_">
-		<path id="XMLID_124_" class="st9" d="M506.3,129.1c2,0,4,0,6,0"/>
-		<path id="XMLID_123_" class="st10" d="M524.3,128.9c184.7-2.6,534.8-39.8,584.3,145.7"/>
-		<path id="XMLID_122_" class="st9" d="M1110,280.5c0.4,1.9,0.8,3.9,1.2,5.9"/>
+		<path id="XMLID_123_" class="st10" d="M1161.1-994.1c0,114.6,552,3.2,601.5,188.7"/>
+		<path id="XMLID_122_" class="st11" d="M1764-799.5c0.4,1.9,0.8,3.9,1.2,5.9"/>
 		<g id="XMLID_120_">
-			<polygon id="XMLID_121_" class="st11" points="1086.8,272 1109.9,279 1131,267.3 1114.5,322 			"/>
+			<polygon id="XMLID_121_" class="st12" points="1740.8,-808 1763.9,-801 1785,-812.7 1768.5,-758 			"/>
 		</g>
 	</g>
 </g>
 <g id="XMLID_28_">
 	<g id="XMLID_89_">
-		<path id="XMLID_103_" class="st12" d="M244.7,226.2c137.4,0,321.1,72.5,350,202"/>
+		<path id="XMLID_103_" class="st13" d="M898.7-853.8c137.4,0,321.1,72.5,350,202"/>
 		<g id="XMLID_101_">
-			<polygon id="XMLID_102_" class="st13" points="569.9,414.3 593.2,420.9 614,408.8 598.6,463.8 			"/>
+			<polygon id="XMLID_102_" class="st14" points="1223.9,-665.7 1247.2,-659.1 1268,-671.2 1252.6,-616.2 			"/>
 		</g>
 	</g>
 </g>
 <g id="XMLID_68_">
 	<g id="XMLID_80_">
-		<path id="XMLID_105_" class="st7" d="M1768.6,219c-161.7,0,20.7,378-362.7,399.9"/>
+		<path id="XMLID_105_" class="st8" d="M2422.6-861c-161.7,0,20.7,378-362.7,399.9"/>
 		<g id="XMLID_90_">
-			<polygon id="XMLID_104_" class="st8" points="1421.9,596 1413.2,618.5 1423.4,640.4 1370,619.9 			"/>
+			<polygon id="XMLID_104_" class="st9" points="2075.9,-484 2067.2,-461.5 2077.4,-439.6 2024,-460.1 			"/>
 		</g>
 	</g>
 </g>
 <g id="XMLID_56_">
 	<g id="XMLID_83_">
-		<path id="XMLID_87_" class="st12" d="M1602.1,219c14.7,387.3-205.9,296.9-729.3,292.7"/>
+		<path id="XMLID_87_" class="st13" d="M2286.3-861c-135.8,0,139.7,460-759.5,292.7"/>
 		<g id="XMLID_84_">
-			<polygon id="XMLID_86_" class="st13" points="889.8,489.9 880.1,512.1 889.3,534.4 836.9,511.6 			"/>
+			<polygon id="XMLID_86_" class="st14" points="1543.8,-590.1 1534.1,-567.9 1543.3,-545.6 1490.9,-568.4 			"/>
 		</g>
 	</g>
 </g>
 <g id="XMLID_47_">
 	<g id="XMLID_69_">
-		<path id="XMLID_75_" class="st12" d="M178.6,787.2c0-222.9-189.9-391.1,689.7-395.5"/>
+		<path id="XMLID_75_" class="st13" d="M733.7-292.8c270.4,0,58.9-623.1,788.6-395.5"/>
 		<g id="XMLID_72_">
-			<polygon id="XMLID_74_" class="st13" points="851.6,414.1 860.9,391.9 851.3,369.7 904.1,391.6 			"/>
+			<polygon id="XMLID_74_" class="st14" points="1505.6,-665.9 1514.9,-688.1 1505.3,-710.3 1558.1,-688.4 			"/>
 		</g>
 	</g>
 </g>
 <g id="XMLID_92_">
 	<g id="XMLID_94_">
-		<path id="XMLID_97_" class="st7" d="M1510.6,219c-100.5,0,34.2,160.9-104.8,183.1"/>
+		<path id="XMLID_97_" class="st8" d="M2199.1-861c-100.5,0-0.3,160.9-139.3,183.1"/>
 		<g id="XMLID_95_">
-			<polygon id="XMLID_96_" class="st8" points="1420.6,378 1413.1,401 1424.4,422.3 1370,404.7 			"/>
+			<polygon id="XMLID_96_" class="st9" points="2074.6,-702 2067.1,-679 2078.4,-657.7 2024,-675.3 			"/>
 		</g>
 	</g>
 </g>
 <g id="XMLID_85_">
 	<g id="XMLID_115_">
-		<path id="XMLID_118_" class="st7" d="M506.3,969.1c0-89.8,200.3-249.4,375.9-269.5"/>
+		<path id="XMLID_118_" class="st8" d="M1160.3-110.9c0-89.8,200.3-249.4,375.9-269.5"/>
 		<g id="XMLID_116_">
-			<polygon id="XMLID_117_" class="st8" points="867,723.3 874.9,700.5 863.9,679 918,697.5 			"/>
+			<polygon id="XMLID_117_" class="st9" points="1521,-356.7 1528.9,-379.5 1517.9,-401 1572,-382.5 			"/>
 		</g>
 	</g>
 </g>
 <g id="XMLID_78_">
 	<g id="XMLID_93_">
-		<path id="XMLID_107_" class="st9" d="M384.1,787.2c2,0,4-0.1,6-0.2"/>
-		<path id="XMLID_106_" class="st14" d="M402.2,785.8c67-9.9,158.2-70.3,196-124.5"/>
-		<path id="XMLID_100_" class="st9" d="M601.5,656.3c1.1-1.7,2.1-3.4,3.1-5.1"/>
+		<path id="XMLID_107_" class="st11" d="M1038.1-292.8c2,0,4-0.1,6-0.2"/>
+		<path id="XMLID_106_" class="st15" d="M1056.2-294.2c67-9.9,158.2-70.3,196-124.5"/>
+		<path id="XMLID_100_" class="st11" d="M1255.5-423.7c1.1-1.7,2.1-3.4,3.1-5.1"/>
 		<g id="XMLID_98_">
-			<polygon id="XMLID_99_" class="st11" points="618.9,674.1 601.1,657.7 577,659.2 615.6,617 			"/>
+			<polygon id="XMLID_99_" class="st12" points="1272.9,-405.9 1255.1,-422.3 1231,-420.8 1269.6,-463 			"/>
 		</g>
 	</g>
 </g>
 <g id="XMLID_27_">
-	<circle id="XMLID_25_" class="st12" cx="601.6" cy="494.5" r="22.6"/>
-	<text id="XMLID_26_" transform="matrix(1 0 0 1 588.9211 502.5678)" class="st15 st2 st16">+</text>
+	<circle id="XMLID_25_" class="st13" cx="1255.6" cy="-585.5" r="22.6"/>
+	<text id="XMLID_26_" transform="matrix(1 0 0 1 1242.9211 -577.4322)" class="st16 st2 st17">+</text>
 </g>
 <g id="XMLID_29_">
-	<circle id="XMLID_31_" class="st12" cx="804.7" cy="503.6" r="22.6"/>
-	<text id="XMLID_30_" transform="matrix(1 0 0 1 791.9626 511.6011)" class="st15 st2 st16">+</text>
+	<circle id="XMLID_31_" class="st13" cx="1458.7" cy="-576.4" r="22.6"/>
+	<text id="XMLID_30_" transform="matrix(1 0 0 1 1445.9626 -568.3989)" class="st16 st2 st17">+</text>
 </g>
 <g id="XMLID_32_">
-	<circle id="XMLID_34_" class="st12" cx="940.6" cy="394" r="22.6"/>
-	<text id="XMLID_33_" transform="matrix(1 0 0 1 927.901 402.0493)" class="st15 st2 st16">+</text>
+	<circle id="XMLID_34_" class="st13" cx="1594.6" cy="-686" r="22.6"/>
+	<text id="XMLID_33_" transform="matrix(1 0 0 1 1581.901 -677.9507)" class="st16 st2 st17">+</text>
 </g>
 <g id="XMLID_61_">
-	<circle id="XMLID_66_" class="st7" cx="951.3" cy="697.5" r="22.6"/>
-	<text id="XMLID_62_" transform="matrix(1 0 0 1 945.8386 705.5066)" class="st17 st2 st16">-</text>
+	<circle id="XMLID_66_" class="st8" cx="1605.3" cy="-382.5" r="22.6"/>
+	<text id="XMLID_62_" transform="matrix(1 0 0 1 1599.8386 -374.4934)" class="st18 st2 st17">-</text>
 </g>
 <g id="XMLID_45_">
-	<circle id="XMLID_48_" class="st7" cx="952.3" cy="617" r="22.6"/>
-	<text id="XMLID_46_" transform="matrix(1 0 0 1 946.8386 625.0477)" class="st17 st2 st16">-</text>
+	<circle id="XMLID_48_" class="st8" cx="1606.3" cy="-463" r="22.6"/>
+	<text id="XMLID_46_" transform="matrix(1 0 0 1 1600.8386 -454.9523)" class="st18 st2 st17">-</text>
 </g>
 <g id="XMLID_49_">
-	<circle id="XMLID_53_" class="st7" cx="1331.6" cy="621" r="22.6"/>
-	<text id="XMLID_52_" transform="matrix(1 0 0 1 1326.1975 629.0813)" class="st17 st2 st16">-</text>
+	<circle id="XMLID_53_" class="st8" cx="1985.6" cy="-459" r="22.6"/>
+	<text id="XMLID_52_" transform="matrix(1 0 0 1 1980.1975 -450.9187)" class="st18 st2 st17">-</text>
 </g>
 <g id="XMLID_54_">
-	<circle id="XMLID_57_" class="st7" cx="1333.6" cy="394" r="22.6"/>
-	<text id="XMLID_55_" transform="matrix(1 0 0 1 1328.1166 402.0494)" class="st17 st2 st16">-</text>
+	<circle id="XMLID_57_" class="st8" cx="1987.6" cy="-686" r="22.6"/>
+	<text id="XMLID_55_" transform="matrix(1 0 0 1 1982.1166 -677.9506)" class="st18 st2 st17">-</text>
 </g>
 <g id="XMLID_12_">
-	<circle id="XMLID_14_" class="st9" cx="615.6" cy="584.6" r="22.6"/>
-	<text id="XMLID_13_" transform="matrix(0.6279 0 0 1 602.9053 597.3771)" class="st18 st2 st19">=</text>
+	<circle id="XMLID_14_" class="st11" cx="1269.6" cy="-495.4" r="22.6"/>
+	<text id="XMLID_13_" transform="matrix(0.6279 0 0 1 1256.9061 -482.623)" class="st19 st2 st20">=</text>
 </g>
 <g id="XMLID_16_">
-	<circle id="XMLID_18_" class="st9" cx="1115.5" cy="357.2" r="22.6"/>
-	<text id="XMLID_17_" transform="matrix(0.6279 0 0 1 1102.7725 369.9608)" class="st18 st2 st19">=</text>
+	<circle id="XMLID_18_" class="st11" cx="1769.5" cy="-722.8" r="22.6"/>
+	<text id="XMLID_17_" transform="matrix(0.6279 0 0 1 1756.7726 -710.0391)" class="st19 st2 st20">=</text>
 </g>
 </svg>
