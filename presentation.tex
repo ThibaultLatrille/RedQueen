@@ -12,7 +12,7 @@
 \usepackage{tikz}
 \setbeamercovered{transparent}
 
-\author{Latrille Thibault, Nicolas Lartillot, Laurent Duret}
+\author{Latrille Thibault, Laurent Duret, Nicolas Lartillot}
 \title{The red queen dynamic in the kingdom of recombination.}  
 \institute{Laboratoire de Biométrie et Biologie Évolutive (LBBE), UMR CNRS 5558, Lyon}
 
@@ -106,14 +106,61 @@
 \begin{frame}
 	\begin{center}
 		\Large
-    Erosion of the hotspots (explanation, equation)
+    Erosion of the hotspots.
 	\end{center}
+
+	$\bullet$ $\forall i \in \{ 1, \, \dots, \, K \} $, $K$ is the number of variants in the population.
+		
+	$\bullet$ $x_i$ is the frequency of the $i^{th}$ PRDM9 variant.\\
+	
+	$\bullet$ $l_i$ is the proportion of hot hotspots associated to the $i^{th}$ PRDM9 variant.\\
+	
+	$\bullet$ $N_e$ is the population size.\\
+	
+	$\bullet$ $v$ is the mutation rate at the hotspot.\\
+	
+	$\bullet$ $r_0$ is the recombination rate.\\
+		\begin{enumerate}
+	\item Substitution from hot to cold at a rate $ 2 N_e v  l_i $ \\
+	\item Selection at a rate $2 r_0 x_i $
+	\end{enumerate}
+\[
+      \begin{aligned}
+        \dfrac{\mathrm{d}l_i}{\mathrm{d}t} &= 
+        - 4 N_e v r_0 x_i l_i \\
+      \end{aligned}
+\]
 \end{frame}
 
 \begin{frame}
 	\begin{center}
 		\Large
-    Mutation of PRDM9, selection (explanation, equation)
+    Mutation and selection of PRDM9.
+	\end{center}
+
+		$\bullet$ $\forall i \in \{ 1, \, \dots, \, K \} $, $K$ is the number of variants in the population.
+		
+	$\bullet$ $x_i$ is the frequency of the $i^{th}$ PRDM9 variant.\\
+	
+	$\bullet$ $l_i$ is the proportion of hot hotspots associated to the $i^{th}$ PRDM9 variant.\\
+	
+	$\bullet$ $N_e$ is the population size.\\
+	
+	$\bullet$ $u$ is the mutation rate of PRDM9.\\
+
+	$\bullet$ $\overline{\omega_i}=\sum_j x_j f \left( \tfrac{L_i + L_j}{2} \right)$ is the fitness of the $i^{th}$ PRDM9 variant.\\
+	
+	$\bullet$ $\overline{\omega}=\sum_{i} x_i \overline{\omega_i}$ is the mean fitness in the population.\\
+		\begin{enumerate}
+	\item New variant from a Poisson distribution at a rate $ 2 N_e u $ per generation. \\
+	\item The probability of drawing variant $i$ in the new generation is $ \tfrac{x_i \overline{\omega_i}}{\overline{\omega}} $
+		\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Parameters}
+	\begin{center}
+       \includegraphics[width=9cm]{Images/red-queen-model.jpg}
 	\end{center}
 \end{frame}
 
@@ -289,7 +336,7 @@
 \begin{frame}
 	\begin{center}
 		\begin{enumerate}
-		\item $\tau \searrow$ with the mutation rate of PRDM9. ($u$).
+		\item $\tau \searrow$ and $\nearrow$ with the mutation rate of PRDM9 ($u$).
 		
 		\item $\tau \searrow$ with the mutation rate at the hotspots ($v$).
 		\end{enumerate}
@@ -300,9 +347,9 @@
 \begin{frame}
 	\begin{center}
 		\begin{enumerate}
-		\item $\tau \searrow$ with the population size ($N_e$).
+		\item $\tau \searrow$ and $\rightsquigarrow$ with the population size ($N_e$).
 			
-		\item $\tau \searrow$ with the mutation rate of PRDM9. ($u$).
+		\item $\tau \searrow$ with the mutation rate of PRDM9 ($u$).
 		\end{enumerate}
        \includegraphics[width=11cm]{Images/cross-homozygosity-population-mutation.png}
 	\end{center}
@@ -311,7 +358,7 @@
 \begin{frame}
 	\begin{center}
 		\begin{enumerate}
-		\item $\tau \searrow$ with the population size ($N_e$).
+		\item $\tau \searrow$ and $\rightsquigarrow$ with the population size ($N_e$).
 			
 		\item $\tau \searrow$ with the mutation rate at the hotspots ($v$).
 		\end{enumerate}
@@ -325,9 +372,9 @@
     	Evolution of the turn-over rate $\tau$
 	\end{center}
 	\begin{enumerate}
-		\item $\tau \searrow$ with the population size ($N_e$).
+		\item $\tau \searrow$ and $\rightsquigarrow$ with the population size ($N_e$).
 			
-		\item $\tau \searrow$ with the mutation rate of PRDM9. ($u$).
+		\item $\tau \searrow$ and $\nearrow$ with the mutation rate of PRDM9. ($u$).
 		
 		\item $\tau \searrow$ with the mutation ($v$) and recombination rate at the hotspots ($r_o$).
 	\end{enumerate}
@@ -438,6 +485,13 @@
 \end{frame}
 
 \begin{frame}
+\frametitle{Single allele equations}
+	\begin{center}
+       \includegraphics[width=8.5cm]{Images/overline-5.png}
+	\end{center}
+\end{frame}
+
+\begin{frame}
 	\begin{center}
 		\Large
     Diversity from single allele equations.
@@ -470,8 +524,8 @@
     Mean erosion estimate.
 	\end{center}
 \[
-  0 \simeq N_e u (1 - \bar{L}) - \dfrac{f(\overline{L})}{f'(\overline{L})} -
-  4 N_e v r_o \bar{L}
+  0 \simeq N_e u \dfrac{f(\overline{L})}{2f'(\overline{L})} (1 - \bar{L}) -
+  4 N_e v r_o
 \]
 	\begin{center}
        \includegraphics[width=11cm]{Images/estimated-mean-erosion.png}

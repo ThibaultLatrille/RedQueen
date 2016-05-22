@@ -278,26 +278,42 @@ class ModelParams(object):
             else:
                 return 1.0 / (2 * x)
 
-    def ratio_parameter(self, balance=2):
-        return balance * 2 * self.erosion_rate_hotspot * self.recombination_rate / self.mutation_rate_prdm9
+    def ratio_parameter(self, balance=1.):
+        return balance * 2 * self.erosion_rate_hotspot * self.recombination_rate
 
-    def bound_mean_erosion(self, balance=1):
-        if self.fitness_family == 2:
-            rate_out = np.power(self.erosion_rate_hotspot * self.recombination_rate, 0.67)
-            rate_in = np.power(balance * self.fitness_param * self.mutation_rate_prdm9, 0.67)
-            return rate_in / (rate_in + rate_out)
+    def bound_mean_erosion(self, balance=1.):
+        return brentq(lambda x: self.variation_mean_erosion(x, balance), 0, 1)
+
+    def lx_bar(self, x, balance=1):
+        if x == 0.:
+            return 0.
         else:
-            return brentq(lambda x: self.coefficient_fitness(x) * (1 - x) - self.ratio_parameter(balance), 0, 1)
+            b = self.coefficient_fitness(x) / self.ratio_parameter(balance)
+            return x * b * (1 - 2 * x + self.erosion_limit(x)) / 2
+
+    def variation_mean_erosion(self, x, balance=1.):
+        rate_in = self.mutation_rate_prdm9 * (1 - x) * self.fixation_new_variant(x) * 4
+        rate_out = self.ratio_parameter(0.5) * x
+        return rate_in - rate_out
 
     @staticmethod
     def erosion_limit(mean_erosion):
-        return -1 * mean_erosion * np.real(lambertw(-np.exp(- 1. / mean_erosion) / mean_erosion))
+        if mean_erosion == 0.:
+            return 0.
+        else:
+            return -1 * mean_erosion * np.real(lambertw(-np.exp(- 1. / mean_erosion) / mean_erosion))
 
     def estimated_simpson(self, mean_erosion):
-        denom = 1 - 2 * mean_erosion + self.erosion_limit(mean_erosion)
-        simpson = (2 * self.erosion_rate_hotspot * self.recombination_rate * self.population_size) / (
-            self.coefficient_fitness(mean_erosion) * denom)
-        return max(1, simpson)
+        if mean_erosion == 1.:
+            return self.population_size
+        else:
+            denom = 1 - 2 * mean_erosion + self.erosion_limit(mean_erosion)
+            simpson = (2 * self.erosion_rate_hotspot * self.recombination_rate * self.population_size) / (
+                self.coefficient_fitness(mean_erosion) * denom)
+            return max(1., simpson)
+
+    def estimated_params_simpson(self):
+        return self.estimated_simpson(self.bound_mean_erosion())
 
     def estimated_erosion_var(self, mean_erosion):
         return mean_erosion * (1 - 2 * mean_erosion + self.erosion_limit(mean_erosion)) / 2
@@ -305,13 +321,23 @@ class ModelParams(object):
     def turn_over_neutral(self):
         return 1 / self.mutation_rate_prdm9
 
+    def fixation_new_variant(self, mean_erosion):
+        if mean_erosion == 0.:
+            return 1.
+        elif mean_erosion == 1.:
+            return 1. / self.population_size
+        else:
+            selection = self.coefficient_fitness(mean_erosion) * (1 - mean_erosion)
+            return (1 - np.exp(-selection)) / (1 - np.exp(-2 * self.population_size * selection))
+
     def turn_over_selection(self, mean_erosion):
-        selection = self.coefficient_fitness(mean_erosion) * (1 - mean_erosion)
-        fixation = (1 - np.exp(-selection)) / (1 - np.exp(-2 * self.population_size * selection))
-        return 1. / fixation
+        return 1. / self.fixation_new_variant(mean_erosion)
 
     def turn_over_derivative(self, mean_erosion):
         return -1. / (self.coefficient_fitness(mean_erosion) * (mean_erosion - 1 + mean_erosion * np.log(mean_erosion)))
+
+    def turn_over_params_derivative(self):
+        return self.turn_over_derivative(self.bound_mean_erosion())
 
     def turn_over_max(self):
         return max(1, 1 / (self.mutation_rate_prdm9 * self.population_size))
@@ -335,7 +361,7 @@ class ModelParams(object):
 
     def caption(self):
         caption = "Mutation rate of PRDM9: %.1e. \n" % self.mutation_rate_prdm9 + \
-                  "Erosion rate of the hotspots: %.1e. \n" % self.erosion_rate_hotspot + \
+                  "Mutation rate of the hotspots: %.1e. \n" % self.erosion_rate_hotspot + \
                   "Recombination rate at the hotspots: %.1e. \n" % self.recombination_rate + \
                   "Population size: %.1e. \n" % self.population_size
         if self.fitness_family == 3:
@@ -470,6 +496,36 @@ class Simulation(object):
         plt.text(0.5, 0.5, "Mean = {0:.1e}  \nVar = {1:.1e}".format(np.mean(lst), np.var(lst)), fontsize=12,
                  verticalalignment='top')
 
+    def save_trajectory(self):
+        my_dpi = 96
+        plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
+
+        generations = list(itertools.chain.from_iterable(map(lambda x, y: [x] * len(y),
+                                                             self.generations, self.data.prdm9_frequencies)))
+        xlim = [min(generations), max(generations)]
+        plt.subplot(211)
+        plt.scatter(generations, self.data.flat_frequencies())
+        plt.title('PRDM9 frequencies over time. \n')
+        plt.xlabel('Generations')
+        plt.ylim([0, 1])
+        plt.xlim(xlim)
+        plt.ylabel('PRDM9 frequency')
+
+        plt.subplot(212)
+        plt.scatter(generations, self.data.flat_erosion())
+        plt.title('Hotspots erosion over time. \n')
+        plt.xlabel('Generations')
+        plt.ylabel('Hotspot erosion')
+        plt.ylim([0, 1])
+        plt.xlim(xlim)
+
+        plt.tight_layout()
+
+        plt.savefig('trajectory.png')
+        print "Trajectory computed"
+        plt.clf()
+        return str(self)
+
     def save_figure(self):
         mean_erosion = self.data.mean_erosion()
         params_mean_erosion = self.model_params.bound_mean_erosion()
@@ -566,6 +622,9 @@ class Simulation(object):
     def estimated_simpson(self):
         return self.model_params.estimated_simpson(self.data.mean_erosion())
 
+    def estimated_params_simpson(self):
+        return self.model_params.estimated_params_simpson()
+
     def estimated_erosion_var(self):
         return self.model_params.estimated_erosion_var(self.data.mean_erosion())
 
@@ -574,6 +633,9 @@ class Simulation(object):
 
     def turn_over_derivative(self):
         return self.model_params.turn_over_derivative(self.data.mean_erosion())
+
+    def turn_over_params_derivative(self):
+        return self.model_params.turn_over_params_derivative()
 
 
 class BatchSimulation(object):
@@ -585,7 +647,7 @@ class BatchSimulation(object):
                  scale=10 ** 2):
         axis_hash = {"fitness": "The fitness parameter",
                      "mutation": "Mutation rate of PRDM9",
-                     "erosion": "Erosion rate of the hotspots",
+                     "erosion": "Mutation rate of the hotspots",
                      "population": "The population size",
                      "recombination": "The recombination rate of the hotspots",
                      "scaling": "The scaling factor"}
@@ -637,7 +699,7 @@ class BatchSimulation(object):
         return "Batch of %s simulations. \n" % self.nbr_of_simulations + self.axis_str + \
                "is scaled %.1e times.\n" % self.scale + self.batch_params.caption() + self.model_params.caption()
 
-    def run(self, nbr_of_cpu=4, directory_id=None):
+    def run(self, nbr_of_cpu=7, directory_id=None):
         if directory_id is None:
             directory_id = id_generator(8)
         set_dir("/" + directory_id + " " + self.axis_str)
@@ -656,14 +718,15 @@ class BatchSimulation(object):
     def pickle(self):
         pickle.dump(self, open(self.axis_str + ".p", "wb"))
 
-    def plot_series(self, series, color, caption):
+    def plot_series(self, series, color, caption, title=True):
         mean = map(lambda serie: np.mean(serie), series)
         plt.plot(self.axis_range, mean, color=color)
         sigma = map(lambda serie: np.sqrt(np.var(serie)), series)
         y_max = np.add(mean, sigma)
         y_min = np.subtract(mean, sigma)
         plt.fill_between(self.axis_range, y_max, y_min, color=color, alpha=0.3)
-        plt.title('{0} for different {1}'.format(caption, self.axis_str))
+        if title:
+            plt.title('{0} for different {1}'.format(caption, self.axis_str))
         plt.xlabel(self.axis_str)
         plt.ylabel(caption)
         if self.axis == "fitness" and self.model_params.fitness_family == 3:
@@ -756,6 +819,55 @@ class BatchSimulation(object):
         plt.clf()
         return self
 
+    def plot_polymorphism(self):
+        my_dpi = 96
+        plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
+
+        simulations = self.simulations["blue"]
+        self.plot_series(map(lambda sim: sim.data.simpson_entropy_prdm9(), simulations), "blue",
+                         'PRDM9 diversity')
+        plt.yscale('log')
+        plt.ylim([1, plt.ylim()[1]])
+
+        plt.tight_layout()
+
+        plt.savefig('polymorphism.png')
+        plt.clf()
+
+    def plot_mean_erosion(self):
+        my_dpi = 96
+        plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
+
+        simulations = self.simulations["blue"]
+        self.plot_series(map(lambda sim: sim.data.hotspots_erosion_bound(), simulations), "blue",
+                         'PRDM9 diversity')
+        plt.yscale('linear')
+
+        plt.tight_layout()
+
+        plt.savefig('mean-erosion.png')
+        plt.clf()
+
+    def plot_cross_homozygosity(self):
+        my_dpi = 96
+        plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
+
+        simulations = self.simulations["blue"]
+        for percent in np.linspace(0.01, 0.1, 10):
+            lag = map(lambda sim: sim.generations[sim.data.dichotomic_search(percent)], simulations)
+            plt.plot(self.axis_range, lag, color="blue", alpha=10 * percent)
+
+        plt.title('{0} for different {1}'.format('Cross-homozygosity', self.axis_str))
+        plt.xlabel(self.axis_str)
+        plt.ylabel('Cross-homozygosity')
+        plt.yscale('log')
+        plt.xscale('log')
+
+        plt.tight_layout()
+
+        plt.savefig('cross-homozygosity.png')
+        plt.clf()
+
 
 class PhaseDiagram(object):
     def __init__(self,
@@ -793,7 +905,7 @@ class PhaseDiagram(object):
                          "Simpson entropy of PRDM9 (polymorphism)", interpolation, num)
         self.save_pcolor(lambda sim: np.mean(sim.data.hotspots_erosion_mean()),
                          "Mean Erosion of the hotspots", interpolation, num)
-        self.save_pcolor(lambda sim: sim.data.dichotomic_search(0.05),
+        self.save_pcolor(lambda sim: sim.generations[sim.data.dichotomic_search(0.01)],
                          "Cross-homozygosity of PRDM9 (turn-over)", interpolation, num)
 
     def save_pcolor(self, function, name, interpolation=True, num=30):
@@ -834,27 +946,26 @@ class PhaseDiagram(object):
     def label(axis):
         return {"fitness": "The fitness parameter",
                 "mutation": "Mutation rate of PRDM9",
-                "erosion": "Erosion rate of the hotspots",
+                "erosion": "Mutation rate of the hotspots",
                 "population": "The population size",
                 "recombination": "The recombination rate of the hotspots",
                 "scaling": "The scaling factor"}[axis]
 
 
 class Batches(list):
-    def save_figure(self, k_range=np.logspace(-1, 1, 5), directory_id=None):
-        if directory_id is None:
-            directory_id = id_generator(8)
-        self.save_erosion(directory_id, k_range)
-        self.save_simpson(directory_id)
-        self.save_erosion_var(directory_id)
-        self.save_cross_homozygosity(directory_id)
+    def save_figure(self, k_range=np.logspace(-1, 1, 5)):
+        self.save_erosion(k_range)
+        self.save_simpson(False)
+        self.save_cross_homozygosity(False)
+        self.save_simpson(True)
+        self.save_cross_homozygosity(True)
 
-    def save_erosion(self, directory_id, k_range=np.logspace(-1, 1, 5)):
+    def save_erosion(self, k_range=np.logspace(-1, 1, 5)):
         my_dpi = 96
-        plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
+        plt.figure(figsize=(1920 / my_dpi, 540 / my_dpi), dpi=my_dpi)
 
         for j, batch in enumerate(self):
-            plt.subplot(2, 2, j + 1)
+            plt.subplot(1, 3, j + 1)
             for simu_params in batch.batch_params:
                 simulations = batch.simulations[simu_params.color]
 
@@ -862,50 +973,52 @@ class Batches(list):
 
                 batch.plot_series(
                     map(lambda sim: np.array(sim.data.hotspots_erosion_bound()), simulations), simu_params.color,
-                    'Mean Hotspot Erosion')
+                    'Mean Hotspot Erosion', title=False)
                 for k_value in k_range:
                     plt.text(0.5, 0.5, "k = %s" % k_value, fontsize=12, verticalalignment='top')
                     mean_erosion = map(lambda model_param: model_param.bound_mean_erosion(k_value), models_params)
-                    plt.plot(batch.axis_range, mean_erosion, color='orange')
+                    plt.plot(batch.axis_range, mean_erosion, color='orange', linewidth=3)
                 plt.yscale('linear')
 
         plt.tight_layout()
 
-        plt.savefig(directory_id + ' batch erosion mean.png')
+        plt.savefig(' batch erosion mean.png')
         plt.clf()
         print 'Erosion Mean computed'
         return self
 
-    def save_simpson(self, directory_id):
+    def save_simpson(self, estimated_mean_erosion=True):
         my_dpi = 96
-        plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
+        plt.figure(figsize=(1920 / my_dpi, 540 / my_dpi), dpi=my_dpi)
 
         for j, batch in enumerate(self):
-            plt.subplot(2, 2, j + 1)
+            plt.subplot(1, 3, j + 1)
             for simu_params in batch.batch_params:
                 simulations = batch.simulations[simu_params.color]
 
-                simu_simpson = map(lambda sim: sim.estimated_simpson(), simulations)
-
                 batch.plot_series(map(lambda sim: sim.data.simpson_entropy_prdm9(), simulations),
-                                  simu_params.color,
-                                  'Number of PRDM9 alleles')
-                plt.plot(batch.axis_range, simu_simpson, color='green')
+                                  simu_params.color, 'Diversity', title=False)
+                if estimated_mean_erosion:
+                    simu_simpson = map(lambda sim: sim.estimated_params_simpson(), simulations)
+                    plt.plot(batch.axis_range, simu_simpson, color='orange', linewidth=3)
+                else:
+                    simu_simpson = map(lambda sim: sim.estimated_simpson(), simulations)
+                    plt.plot(batch.axis_range, simu_simpson, color='green', linewidth=3)
                 plt.yscale('log')
 
         plt.tight_layout()
 
-        plt.savefig(directory_id + ' batch simpson.png')
+        plt.savefig(str(estimated_mean_erosion) + ' batch simpson.png')
         plt.clf()
         print 'Simpson computed'
         return self
 
-    def save_cross_homozygosity(self, directory_id):
+    def save_cross_homozygosity(self, estimated_mean_erosion=True):
         my_dpi = 96
-        plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
+        plt.figure(figsize=(1920 / my_dpi, 540 / my_dpi), dpi=my_dpi)
 
         for j, batch in enumerate(self):
-            plt.subplot(2, 2, j + 1)
+            plt.subplot(1, 3, j + 1)
             for simu_params in batch.batch_params:
                 simulations = batch.simulations[simu_params.color]
 
@@ -913,14 +1026,15 @@ class Batches(list):
                     lag = map(lambda sim: sim.generations[sim.data.dichotomic_search(percent)], simulations)
                     plt.plot(batch.axis_range, lag, color=simu_params.color, alpha=10 * percent)
 
-                simu_turn_over = map(lambda sim: sim.turn_over_selection(), simulations)
-                plt.plot(batch.axis_range, simu_turn_over, color='lightgreen')
+                if estimated_mean_erosion:
+                    turn_over_derivative = map(lambda sim: sim.turn_over_params_derivative(), simulations)
+                    plt.plot(batch.axis_range, turn_over_derivative, color='orange', linewidth=3)
+                else:
+                    turn_over_derivative = map(lambda sim: sim.turn_over_derivative(), simulations)
+                    plt.plot(batch.axis_range, turn_over_derivative, color='green', linewidth=3)
 
-                turn_over_derivative = map(lambda sim: sim.turn_over_derivative(), simulations)
-                plt.plot(batch.axis_range, turn_over_derivative, color='darkgreen')
                 plt.yscale('linear')
 
-            plt.title('{0} for different {1}'.format('Cross-homozygosity', batch.axis_str))
             plt.xlabel(batch.axis_str)
             plt.ylabel('Cross-homozygosity')
             plt.yscale('log')
@@ -931,68 +1045,50 @@ class Batches(list):
 
         plt.tight_layout()
 
-        plt.savefig(directory_id + ' batch cross homozygosity.png')
+        plt.savefig(str(estimated_mean_erosion) + 'batch cross homozygosity.png')
         plt.clf()
         print 'Cross homozygosity computed'
         return self
 
-    def save_erosion_var(self, directory_id):
-        my_dpi = 96
-        plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
-
-        for j, batch in enumerate(self):
-            plt.subplot(2, 2, j + 1)
-            for simu_params in batch.batch_params:
-                simulations = batch.simulations[simu_params.color]
-
-                simu_erosion_var = map(lambda sim: sim.estimated_erosion_var(), simulations)
-
-                batch.plot_series(map(lambda sim: sim.data.hotspots_erosion_var(), simulations),
-                                  simu_params.color,
-                                  'Hotspots erosion variance')
-                plt.plot(batch.axis_range, simu_erosion_var, color='green')
-                plt.yscale('linear')
-
-        plt.tight_layout()
-
-        plt.savefig(directory_id + ' batch erosion var.png')
-        plt.clf()
-        print 'Erosion Variance computed'
-        return self
+    def pickle(self):
+        pickle.dump(self, open("batches.p", "wb"))
 
 
 if __name__ == '__main__':
-    dir_id = id_generator(8)
+    '''
+    dir_id = "67FB8030"
     set_dir("/tmp/" + dir_id)
-    model_parameters = ModelParams(mutation_rate_prdm9=1.0 * 10 ** -6,
-                                   erosion_rate_hotspot=1.0 * 10 ** -5,
+    batches = pickle.load(open("batches.p", "rb"))
+    batches.pop()
+    batches.save_figure([1])
+    model_parameters = ModelParams(mutation_rate_prdm9=1.0 * 10 ** -5,
+                                   erosion_rate_hotspot=1.0 * 10 ** -4,
                                    population_size=10 ** 5,
                                    recombination_rate=1.0 * 10 ** -3,
                                    fitness_param=0.1,
                                    fitness='polynomial')
-    batch_parameters = BatchParams(drift=True, linearized=False, color="blue", scaling=10)
-    batch_parameters.append_simu_params(dict(red="linearized"))
-    '''
+    batch_parameters = BatchParams(drift=True, linearized=False, color="blue", scaling=20)
     batches = Batches()
-    for axis in ["population", "erosion", "mutation", "fitness"]:
+    for axis in ["population", "erosion", "mutation"]:
         batches.append(BatchSimulation(model_parameters.copy(), batch_parameters.copy(), axis=axis,
-                                       nbr_of_simulations=14, scale=10 ** 2))
+                                       nbr_of_simulations=16, scale=10 ** 2))
     for batch_simulation in batches:
-        batch_simulation.run(nbr_of_cpu=7, directory_id=dir_id)
+        batch_simulation.run(nbr_of_cpu=8, directory_id=dir_id)
     for batch_simulation in batches:
         batch_simulation.save_figure(directory_id=dir_id)
+    batches.pickle()
     batches.save_figure(np.logspace(-0.5, 0.5, 5), directory_id=dir_id)
-    '''
     phasediagram = PhaseDiagram(model_parameters, batch_parameters, "population", "mutation", nbr_of_simulations=14, scale=10 ** 2)
     phasediagram.run(nbr_of_cpu=7)
     phasediagram.save_figure(interpolation=True)
     phasediagram.save_figure(interpolation=False)
     '''
-    dir_id = "713549A8"
+    dir_id = "1F0F8599"
     set_dir("/tmp/" + dir_id)
     phasediagram = pickle.load(open("PhaseDiagram.p", "rb"))
     phasediagram.save_figure(interpolation=True, num=100)
     phasediagram.save_figure(interpolation=False)
+    '''
     dir_id = "3FCA8AF6"
     set_dir("/tmp/" + dir_id)
     lst = os.listdir(os.getcwd())
