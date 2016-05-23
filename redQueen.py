@@ -278,22 +278,22 @@ class ModelParams(object):
             else:
                 return 1.0 / (2 * x)
 
-    def ratio_parameter(self, balance=1.):
-        return balance * 2 * self.erosion_rate_hotspot * self.recombination_rate
+    def ratio_parameter(self):
+        return 2 * self.erosion_rate_hotspot * self.recombination_rate
 
-    def bound_mean_erosion(self, balance=1.):
-        return brentq(lambda x: self.variation_mean_erosion(x, balance), 0, 1)
+    def bound_mean_erosion(self):
+        return brentq(lambda x: self.variation_mean_erosion(x), 0, 1)
 
-    def lx_bar(self, x, balance=1):
+    def lx_bar(self, x):
         if x == 0.:
             return 0.
         else:
-            b = self.coefficient_fitness(x) / self.ratio_parameter(balance)
+            b = self.coefficient_fitness(x) / self.ratio_parameter()
             return x * b * (1 - 2 * x + self.erosion_limit(x)) / 2
 
-    def variation_mean_erosion(self, x, balance=1.):
-        rate_in = self.mutation_rate_prdm9 * (1 - x) * self.fixation_new_variant(x) * 4
-        rate_out = self.ratio_parameter(0.5) * x
+    def variation_mean_erosion(self, x):
+        rate_in = self.mutation_rate_prdm9 * (1 - x) * (1 - self.erosion_limit(x)) * self.coefficient_fitness(x) * 2
+        rate_out = self.erosion_rate_hotspot * self.recombination_rate * x
         return rate_in - rate_out
 
     @staticmethod
@@ -953,19 +953,17 @@ class PhaseDiagram(object):
 
 
 class Batches(list):
-    def save_figure(self, k_range=np.logspace(-1, 1, 5)):
-        self.save_erosion(k_range)
-        self.save_simpson(False)
-        self.save_cross_homozygosity(False)
+    def save_figure(self):
+        self.save_erosion()
         self.save_simpson(True)
-        self.save_cross_homozygosity(True)
+        self.save_simpson(False)
 
-    def save_erosion(self, k_range=np.logspace(-1, 1, 5)):
+    def save_erosion(self):
         my_dpi = 96
-        plt.figure(figsize=(1920 / my_dpi, 540 / my_dpi), dpi=my_dpi)
+        plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
 
         for j, batch in enumerate(self):
-            plt.subplot(1, 3, j + 1)
+            plt.subplot(2, 2, j + 1)
             for simu_params in batch.batch_params:
                 simulations = batch.simulations[simu_params.color]
 
@@ -974,25 +972,23 @@ class Batches(list):
                 batch.plot_series(
                     map(lambda sim: np.array(sim.data.hotspots_erosion_bound()), simulations), simu_params.color,
                     'Mean Hotspot Erosion', title=False)
-                for k_value in k_range:
-                    plt.text(0.5, 0.5, "k = %s" % k_value, fontsize=12, verticalalignment='top')
-                    mean_erosion = map(lambda model_param: model_param.bound_mean_erosion(k_value), models_params)
-                    plt.plot(batch.axis_range, mean_erosion, color='orange', linewidth=3)
+                mean_erosion = map(lambda model_param: model_param.bound_mean_erosion(), models_params)
+                plt.plot(batch.axis_range, mean_erosion, color='orange', linewidth=3)
                 plt.yscale('linear')
 
         plt.tight_layout()
 
-        plt.savefig(' batch erosion mean.png')
+        plt.savefig('batch erosion mean.png')
         plt.clf()
         print 'Erosion Mean computed'
         return self
 
     def save_simpson(self, estimated_mean_erosion=True):
         my_dpi = 96
-        plt.figure(figsize=(1920 / my_dpi, 540 / my_dpi), dpi=my_dpi)
+        plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
 
         for j, batch in enumerate(self):
-            plt.subplot(1, 3, j + 1)
+            plt.subplot(2, 2, j + 1)
             for simu_params in batch.batch_params:
                 simulations = batch.simulations[simu_params.color]
 
@@ -1054,13 +1050,25 @@ class Batches(list):
         pickle.dump(self, open("batches.p", "wb"))
 
 
-if __name__ == '__main__':
-    '''
-    dir_id = "67FB8030"
+def load_batches(dir_id):
     set_dir("/tmp/" + dir_id)
-    batches = pickle.load(open("batches.p", "rb"))
-    batches.pop()
-    batches.save_figure([1])
+    lst = os.listdir(os.getcwd())
+    batches = Batches()
+    for pickle_file in lst:
+        if pickle_file[-2:] == ".p":
+            batch_simulation = pickle.load(open(pickle_file, "rb"))
+            # batch_simulation.save_figure(directory_id=dir_id)
+            # set_dir("/" + dir_id + " " + batch_simulation.axis_str)
+            # for sims in batch_simulation.simulations.values():
+            #     map(lambda sim: sim.save_figure(), sims)
+            # os.chdir('..')
+            batches.append(batch_simulation)
+    print 'Batches loaded'
+    batches.save_figure()
+
+
+def make_batches():
+    set_dir("/tmp/" + id_generator(8))
     model_parameters = ModelParams(mutation_rate_prdm9=1.0 * 10 ** -5,
                                    erosion_rate_hotspot=1.0 * 10 ** -4,
                                    population_size=10 ** 5,
@@ -1073,34 +1081,35 @@ if __name__ == '__main__':
         batches.append(BatchSimulation(model_parameters.copy(), batch_parameters.copy(), axis=axis,
                                        nbr_of_simulations=16, scale=10 ** 2))
     for batch_simulation in batches:
-        batch_simulation.run(nbr_of_cpu=8, directory_id=dir_id)
+        batch_simulation.run(nbr_of_cpu=8)
     for batch_simulation in batches:
-        batch_simulation.save_figure(directory_id=dir_id)
+        batch_simulation.save_figure()
     batches.pickle()
-    batches.save_figure(np.logspace(-0.5, 0.5, 5), directory_id=dir_id)
-    phasediagram = PhaseDiagram(model_parameters, batch_parameters, "population", "mutation", nbr_of_simulations=14, scale=10 ** 2)
-    phasediagram.run(nbr_of_cpu=7)
-    phasediagram.save_figure(interpolation=True)
-    phasediagram.save_figure(interpolation=False)
-    '''
-    dir_id = "1F0F8599"
+    batches.save_figure()
+
+
+def load_diagram(dir_id):
     set_dir("/tmp/" + dir_id)
     phasediagram = pickle.load(open("PhaseDiagram.p", "rb"))
     phasediagram.save_figure(interpolation=True, num=100)
     phasediagram.save_figure(interpolation=False)
-    '''
-    dir_id = "3FCA8AF6"
-    set_dir("/tmp/" + dir_id)
-    lst = os.listdir(os.getcwd())
-    batches = Batches()
-    for pickle_file in lst:
-        if pickle_file[-2:] == ".p":
-            batch_simulation = pickle.load(open(pickle_file, "rb"))
-            batch_simulation.save_figure(directory_id=dir_id)
-            # set_dir("/" + dir_id + " " + batch_simulation.axis_str)
-            # for sims in batch_simulation.simulations.values():
-            #     map(lambda sim: sim.save_figure(), sims)
-            # os.chdir('..')
-            batches.append(batch_simulation)
-    batches.save_figure(np.logspace(-0.5, 0.5, 5), directory_id=dir_id)
-    '''
+
+
+def make_diagram():
+    set_dir("/tmp/" + id_generator(8))
+    model_parameters = ModelParams(mutation_rate_prdm9=1.0 * 10 ** -5,
+                                   erosion_rate_hotspot=1.0 * 10 ** -4,
+                                   population_size=10 ** 5,
+                                   recombination_rate=1.0 * 10 ** -3,
+                                   fitness_param=0.1,
+                                   fitness='polynomial')
+    batch_parameters = BatchParams(drift=True, linearized=False, color="blue", scaling=20)
+    phasediagram = PhaseDiagram(model_parameters, batch_parameters, "population", "mutation",
+                                nbr_of_simulations=14, scale=10 ** 2)
+    phasediagram.run(nbr_of_cpu=7)
+    phasediagram.save_figure(interpolation=True)
+    phasediagram.save_figure(interpolation=False)
+
+if __name__ == '__main__':
+    make_batches()
+
