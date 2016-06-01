@@ -25,6 +25,8 @@
 
 \maketitle 
 
+\newcommand{\Ne}{N_\mathrm{e}}
+
 %\tableofcontents             
 
 \section{Abstract}
@@ -48,7 +50,7 @@ We are interested in a mathematical modelling of the turnover of PRDM9 variants 
 
 	\begin{figure}[H]
 	  \centering
-       \includegraphics[width=12.0cm]{Images/RedQueen.png}\\
+       \includegraphics[width=12.0cm]{Images/red-queen.png}\\
 		\caption{ \textbf{PRDM9 dynamic}. 
 		\label{fig:redqueen}}
 	\end{figure}
@@ -56,7 +58,7 @@ We are interested in a mathematical modelling of the turnover of PRDM9 variants 
 \section{Population genetic model of the red queen}
 
 
-The population is composed of $N_\mathrm{e}$ diploid individuals, kept constant over time.
+The population is composed of $\Ne$ diploid individuals, kept constant over time.
 
 
 The locus PRDM9 mutates at constant rate $u$ per generation per locus and each new variant binds a new sets of sequence targets. Thus $u$ can be understood as a functional mutation rate, with each mutation producing a new PRDM9 variant with new hotspots.
@@ -65,7 +67,7 @@ The locus PRDM9 mutates at constant rate $u$ per generation per locus and each n
 We consider that PRDM9 is binding it's target in *trans*, meaning there is no linkage between the locus of PRDM9 and any of the target. The sequence targets of PRDM9 mutates at constant rate $v$ per generation. The sequence targets recombine at constant rate $r_0$ per generation. The recombination at the sequence target is favoured by the binding of PRDM9.
 
 
-At each generation, $K$ is the number of PRDM9 variants in the population. $\forall i \in \{ 1, \, \dots, \, K \}$, $n_i$ is the number of $i^{th}$ PRDM9 variant in the population. Consequently, $x_i = n_i / 2 N_\mathrm{e}$ is the frequency of the $i^{th}$ PRDM9 variant.
+At each generation, $K$ is the number of PRDM9 variants in the population. $\forall i \in \{ 1, \, \dots, \, K \}$, $n_i$ is the number of $i^{th}$ PRDM9 variant in the population. Consequently, $x_i = n_i / 2 \Ne$ is the frequency of the $i^{th}$ PRDM9 variant.
 
 
 For each variant, $L_i$ is the overall erosion of the sequence targets, with $L_i=1$ meaning no erosion and $L_i=0$ meaning totally eroded. $\overline{\omega_i}$ is fitness of this variant. At the population level, $\overline{\omega}=\sum_{i} x_i \overline{\omega_i}$ is the mean fitness.
@@ -85,24 +87,24 @@ For each new generation, the simulation is decomposed in three steps, computed i
 
 \subsection{Mutation and creation of new variants of PRDM9} 
 
-Per locus, PRDM9 mutates at constant rate $u$, and we have $2 N_\mathrm{e}$ loci in the population. Thus the number of new variants is Poission distributed with mean $2 N_\mathrm{e} u$. the new variants are introduced in the population at a frequency $1 / 2 N_\mathrm{e}$
+Per locus, PRDM9 mutates at constant rate $u$, and we have $2 \Ne$ loci in the population. Thus the number of new variants is Poission distributed with mean $2 \Ne u$. the new variants are introduced in the population at a frequency $1 / 2 \Ne$
 
 \begin{equation}
-  K(t+1) - K(t) \sim \operatorname{Pois} \left(2 N_\mathrm{e} u \right)
+  K(t+1) - K(t) \sim \operatorname{Pois} \left(2 \Ne u \right)
 \end{equation}
 
 
 \subsection{Erosion of the recombination hotspots} 
 
-PRDM9 activates it's targets in *trans*. The number of new mutation occuring in the population at the targets is $2 N_\mathrm{e} v$, each of them are driven by a selection coefficient $2 r _0  x_i$, where $x_i$ is the probabity of activation by the variant $i$.
+PRDM9 activates it's targets in *trans*. The number of new mutation occuring in the population at the targets is $2 \Ne v$, each of them are driven by a selection coefficient $2 r _0  x_i$, where $x_i$ is the probabity of activation by the variant $i$.
 Since the strenght of erosion is proportionnal to the targets being not eroded, we model the erosion as an exponential decay.
 
 \begin{equation}
   \begin{aligned}
- L_i (t+1) &=  L_i (t)\operatorname{exp} \left( - 2 N_\mathrm{e} v
- \dfrac{1 - \operatorname{e}^{-2 r _0  x_i}}{1 - \operatorname{e}^{-4 N_\mathrm{e} r _0  x_i}} \right)  \\
+ L_i (t+1) &=  L_i (t)\operatorname{exp} \left( - 2 \Ne v
+ \dfrac{1 - \operatorname{e}^{-2 r _0  x_i}}{1 - \operatorname{e}^{-4 \Ne r _0  x_i}} \right)  \\
  &\simeq
-    L_i (t)\operatorname{exp} \left( - 4 N_\mathrm{e} v
+    L_i (t)\operatorname{exp} \left( - 4 \Ne v
  r _0  x_i \right), \;
  \forall i \in \{ 1, \, \dots, \, K \} \\ \\
  \end{aligned}
@@ -111,7 +113,7 @@ Since the strenght of erosion is proportionnal to the targets being not eroded, 
 
 \subsection{Drift and selection} 
 
-The new generation of $2 N_\mathrm{e}$ PRDM9 alleles is drawn from a multinomial distribution, generating a drift. The probability of drawing variant $i$ is equal to it's frequency $x_i$ time it's relative fitness  $\tfrac{\overline{\omega_i}}{\overline{\omega}}$. The probabilities sum to $1$ by definition of $\overline{\omega}$.
+The new generation of $2 \Ne$ PRDM9 alleles is drawn from a multinomial distribution, generating a drift. The probability of drawing variant $i$ is equal to it's frequency $x_i$ time it's relative fitness  $\tfrac{\overline{\omega_i}}{\overline{\omega}}$. The probabilities sum to $1$ by definition of $\overline{\omega}$.
 
 \begin{equation}
   \left(
@@ -121,7 +123,7 @@ The new generation of $2 N_\mathrm{e}$ PRDM9 alleles is drawn from a multinomial
   \dots, \,
   n_{K(t)}(t+1)
   \right)
-  \sim \operatorname{Multinomial} \left(2 N_\mathrm{e}, \,
+  \sim \operatorname{Multinomial} \left(2 \Ne, \,
   \dfrac{x_1  \overline{\omega_1}}{\overline{\omega}}, \,
   \dots, \,
   \dfrac{x_i  \overline{\omega_i}}{\overline{\omega}}, \,
@@ -186,7 +188,7 @@ Assuming there is no mutation of PRDM9, and by discarding the drift altogether, 
   \left\{
       \begin{aligned}
         \mathrm{\Delta}L_i &= 
-        - 4 N_\mathrm{e} v r _0  x_i L_i \mathrm{\Delta}t, \;
+        - 4 \Ne v r _0  x_i L_i \mathrm{\Delta}t, \;
              \forall i \in \{ 1, \, \dots, \, K \} \\
         \mathrm{\Delta}x_i &= \dfrac{f'(\overline{L})}{f(\overline{L})} \left[ \tfrac{L_i - \overline{L}}{2} \right]x_i  \mathrm{\Delta}t , \;
          \forall i \in \{ 1, \, \dots, \, K \}\\
@@ -204,7 +206,7 @@ Assuming there is no mutation of PRDM9, and by discarding the drift altogether, 
     \right.
 \end{equation}
 
-with $\rho = 4 N_\mathrm{e} v r _0$
+with $\rho = 4 \Ne v r _0$
 
 \section{Dynamic of the mean erosion}
 We denote $\overline{x^{j} L^{k}}=\sum_i x_i^{j} L_i^{k} x_i =\sum_i x_i^{j+1} L_i^{k}$
@@ -227,12 +229,12 @@ The first term of the equation is the same sign of $f'(\overline{L})$. If positi
 
 \subsection{Adding mutation of PRDM9}
 
-One can add an additional term for mutations of PRDM9 as follows. Variants mutate at a rate $2 N_\mathrm{e} u$, and a the erosion of a new variant is $1$, being previously $\overline{L}$ on average. Taking altogether, $\overline{L}$ increase at a rate  $2 N_\mathrm{e} u (1 - \overline{L})$
+One can add an additional term for mutations of PRDM9 as follows. Variants mutate at a rate $2 \Ne u$, and a the erosion of a new variant is $1$, being previously $\overline{L}$ on average. Taking altogether, $\overline{L}$ increase at a rate  $2 \Ne u (1 - \overline{L})$
 
 \begin{equation}
   \begin{aligned}
     \dfrac{\mathrm{d} \overline{L} }{\mathrm{d}t} &=
-    \dfrac{f'(\overline{L})}{f(\overline{L})} (\overline{L^2} - \overline{L}^2) - \rho \overline{L X} + 2 N_\mathrm{e} u (1 - \overline{L})\\
+    \dfrac{f'(\overline{L})}{f(\overline{L})} (\overline{L^2} - \overline{L}^2) - \rho \overline{L X} + 2 \Ne u (1 - \overline{L})\\
   \end{aligned}
 \end{equation}
 
@@ -281,27 +283,6 @@ We focus on the simpson entropy $R$. It equals $K(t)$ if all the variants have e
   \end{aligned}
 \end{equation}
 
-\subsection{Kinetic argument}
-
-We denote $K_e$ as the efficient number of PRDM9 variants.  
-We assume $x_i=K^{-1}$ is constant, where $K$ is number of alleles.  
-In this case, the new variants contribute to $K_e$ at a rate $2 N_e \dfrac{f'(\overline{L})}{f(\overline{L})} [ 1 - \overline{L} ]$ and the erosion of the settled variants lead to a decrease at a rate $4 N_e v r_0$
-
-\begin{equation}
-  \begin{aligned}
-    \dfrac{\mathrm{d} K_e }{\mathrm{d}t} =
-    2 N_e u \dfrac{f'(\overline{L})}{f(\overline{L})} [ 1 - \overline{L} ] - 4 N_e v r_0 = 0 \\
-  \end{aligned}
-\end{equation}
-
-
-Moreover, if we assume $f$ is polynomial $x: x^{\alpha}$, we have:
-\begin{equation}
-  \begin{aligned}
-    \dfrac{1 - \overline{L}}{\overline{L}} =  \dfrac{4 v r_0}{ u \alpha} \\
-    \iff \overline{L} =  \dfrac{u \alpha}{2 v r_0 +  u \alpha} \\
-  \end{aligned}
-\end{equation}
 
 \section{Trajectory for a single allele}
 
@@ -342,7 +323,7 @@ We get a close solution for the frequency $x$ as a function of $l$. But we could
 \subsection{Chart}
 	\begin{figure}[H]
 	  \centering
-       \includegraphics[width=9.0cm]{Images/SingleAllele.png}\\
+       \includegraphics[width=9.0cm]{Images/single-allele.png}\\
 		\caption{ \textbf{A hypothetical abundance phylogenetic tree}. 
 		\label{fig:singleallele}
 		Left panel:  
@@ -385,7 +366,7 @@ In particular, we get the simpson diversity R,
 \begin{equation}
   \begin{aligned}
     R &= \overline{x}^{-1} \\
-    &=  \dfrac{ \int_{1}^{l_{\infty}} l^{-1} \mathrm{d} l }{ \int_{1}^{l_{\infty}} \left( \dfrac{f'(\overline{L})}{2 \rho f(\overline{L})} (1-l + \overline{L} \mathrm{log}(l)) + x_{\mathrm{initial}}  \right) l^{-1} \mathrm{d} l } 
+    &=  \dfrac{ \int_{1}^{l_{\infty}} l^{-1} \mathrm{d} l }{ \int_{1}^{l_{\infty}} \left( \dfrac{f'(\overline{L})}{2 \rho f(\overline{L})} (1-l + \overline{L} \ln(l)) + x_{\mathrm{initial}}  \right) l^{-1} \mathrm{d} l } 
     \\
     &= \dfrac{4 \rho f(\overline{L})}{f'(\overline{L})\left[ 1 + l_{\infty} - 2 \overline{L}  \right]} 
     \\
@@ -406,16 +387,34 @@ Also, we get the landscape erosion V,
   \end{aligned}
 \end{equation}
 
+
+\section{Estimation of $\overline{L}$}
+\subsection{Estimation of interval}
+
+\begin{equation}
+  \begin{aligned}
+    \tau_{\mathrm{inter}}^1 &= \int_{1}^{l_{\infty}} x \mathrm{d} t = \dfrac{1 - l_{\infty}}{\overline{L} \rho} \\
+    \tau_{\mathrm{inter}}^2 &= \dfrac{1}{2 \Ne v \dfrac{f'(\overline{L})}{f(\overline{L})} (1-\overline{L})  }
+  \end{aligned}
+\end{equation}
+
+\begin{equation}
+  \begin{aligned}
+    \tau_{\mathrm{inter}}^1 = \tau_{\mathrm{inter}}^2 \Rightarrow 
+    \dfrac{f'(\overline{L})}{f(\overline{L})} \dfrac{(1- \overline{L})(1- l_{\infty})}{\overline{L}} = \dfrac{v r_o}{2 u}
+  \end{aligned}
+\end{equation}
+
 \section{Longevity of PRDM9}
 \subsection{For a single allele}
 
 \begin{equation}
   \begin{aligned}
     \dfrac{1}{\overline{L}} \left( \dfrac{\mathrm{d}l}{\mathrm{d}t} \right)_{\overline{L}}
-    &= \dfrac{f'(\overline{L})}{2 f(\overline{L})} [ \overline{L}-1 + \overline{L} \mathrm{log}(\overline{L})] \\
-    &\simeq \dfrac{\alpha}{2 \overline{L}}[\overline{L}-1 + \overline{L} \mathrm{log}(\overline{L})] = \dfrac{1}{\tau} \\
+    &= \dfrac{f'(\overline{L})}{2 f(\overline{L})} [ \overline{L}-1 + \overline{L} \ln(\overline{L})] \\
+    &\simeq \dfrac{\alpha}{2 \overline{L}}[\overline{L}-1 + \overline{L} \ln(\overline{L})] = \dfrac{1}{\tau} \\
   \end{aligned} \\
-  \Rightarrow \tau \simeq \dfrac{2 \overline{L}}{\alpha[\overline{L}-1 + \overline{L} \mathrm{log}(\overline{L})]}
+  \Rightarrow \tau \simeq \dfrac{2 \overline{L}}{\alpha[\overline{L}-1 + \overline{L} \ln(\overline{L})]}
 \end{equation}
 
 \bibliographystyle{plain}

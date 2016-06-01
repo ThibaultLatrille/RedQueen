@@ -11,6 +11,12 @@ from scipy.special import lambertw
 from scipy.optimize import brentq
 from scipy import interpolate
 
+RED = "#EB6231"
+YELLOW = "#E29D26"
+BLUE = "#5D80B4"
+LIGHTGREEN = "#6ABD9B"
+GREEN = "#8FB03E"
+
 
 def execute(x):
     return x.run()
@@ -196,6 +202,9 @@ class SimulationData(object):
     def mean_erosion(self):
         return np.mean(self.hotspots_erosion_mean())
 
+    def mean_simpson_entropy(self):
+        return np.mean(self.simpson_entropy_prdm9())
+
     def normed_cross_homozygosity(self, lag, homozygosity=0):
         if homozygosity == 0:
             homozygosity = self.cross_homozygosity(0)
@@ -281,8 +290,12 @@ class ModelParams(object):
     def ratio_parameter(self):
         return 2 * self.erosion_rate_hotspot * self.recombination_rate
 
-    def bound_mean_erosion(self):
-        return brentq(lambda x: self.variation_mean_erosion(x), 0, 1)
+    def bound_mean_erosion(self, approximated=False):
+        if approximated:
+            param = self.erosion_rate_hotspot * self.recombination_rate / (self.mutation_rate_prdm9 * self.fitness_param)
+            return 1. / (1. + np.sqrt(param))
+        else:
+            return brentq(lambda x: self.variation_mean_erosion(x), 0, 1)
 
     def lx_bar(self, x):
         if x == 0.:
@@ -498,30 +511,51 @@ class Simulation(object):
 
     def save_trajectory(self):
         my_dpi = 96
-        plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
+        plt.figure(figsize=(1920 / my_dpi, 1440 / my_dpi), dpi=my_dpi)
 
         generations = list(itertools.chain.from_iterable(map(lambda x, y: [x] * len(y),
                                                              self.generations, self.data.prdm9_frequencies)))
         xlim = [min(generations), max(generations)]
-        plt.subplot(211)
-        plt.scatter(generations, self.data.flat_frequencies())
-        plt.title('PRDM9 frequencies over time. \n')
+
+        plt.subplot(311)
+        # plt.plot((0, np.max(self.generations)), (self.data.mean_simpson_entropy(), self.data.mean_simpson_entropy()),
+        #          'k-', color=YELLOW, lw=4)
+        plt.plot(self.generations, self.data.simpson_entropy_prdm9(), color=YELLOW, lw=3)
+
+        plt.xlabel('Generations')
+        plt.ylim([1, np.max(self.data.simpson_entropy_prdm9())])
+        plt.xlim(xlim)
+        plt.ylabel('PRDM9 diversity')
+
+        plt.subplot(312)
+        for my_id in range(self.model.id):
+            array = np.zeros(len(self.generations))
+            for t in range(len(self.generations)):
+                if my_id in self.data.ids[t]:
+                    array[t] = self.data.prdm9_frequencies[t][self.data.ids[t].tolist().index(my_id)]
+
+            plt.plot(self.generations, array, color=BLUE, lw=3)
+        # plt.scatter(generations, self.data.flat_frequencies(), color=BLUE, lw=0)
         plt.xlabel('Generations')
         plt.ylim([0, 1])
         plt.xlim(xlim)
-        plt.ylabel('PRDM9 frequency')
+        plt.ylabel('PRDM9 frequencies')
 
-        plt.subplot(212)
-        plt.scatter(generations, self.data.flat_erosion())
-        plt.title('Hotspots erosion over time. \n')
+        plt.subplot(313)
+        plt.scatter(generations, self.data.flat_erosion(), color=BLUE, lw=0)
+        plt.plot(self.generations, self.data.hotspots_erosion_mean(), color=YELLOW, lw=3)
+        # plt.plot((0, np.max(self.generations)), (self.data.mean_erosion(), self.data.mean_erosion()), 'k-',
+        #          color=LIGHTGREEN, lw=4)
+
         plt.xlabel('Generations')
-        plt.ylabel('Hotspot erosion')
+        plt.ylabel('Hotspot activity')
         plt.ylim([0, 1])
         plt.xlim(xlim)
 
         plt.tight_layout()
 
-        plt.savefig('trajectory.png')
+        plt.savefig('trajectory.png', format="png")
+        plt.savefig('trajectory.svg', format="svg")
         print "Trajectory computed"
         plt.clf()
         return str(self)
@@ -720,7 +754,7 @@ class BatchSimulation(object):
 
     def plot_series(self, series, color, caption, title=True):
         mean = map(lambda serie: np.mean(serie), series)
-        plt.plot(self.axis_range, mean, color=color)
+        plt.plot(self.axis_range, mean, color=color, linewidth=2)
         sigma = map(lambda serie: np.sqrt(np.var(serie)), series)
         y_max = np.add(mean, sigma)
         y_min = np.subtract(mean, sigma)
@@ -956,7 +990,6 @@ class Batches(list):
     def save_figure(self):
         self.save_erosion()
         self.save_simpson(True)
-        self.save_simpson(False)
 
     def save_erosion(self):
         my_dpi = 96
@@ -964,21 +997,22 @@ class Batches(list):
 
         for j, batch in enumerate(self):
             plt.subplot(2, 2, j + 1)
-            for simu_params in batch.batch_params:
-                simulations = batch.simulations[simu_params.color]
+            simulations = batch.simulations['blue']
 
-                models_params = map(lambda sim: sim.model_params, simulations)
+            models_params = map(lambda sim: sim.model_params, simulations)
 
-                batch.plot_series(
-                    map(lambda sim: np.array(sim.data.hotspots_erosion_bound()), simulations), simu_params.color,
-                    'Mean Hotspot Erosion', title=False)
-                mean_erosion = map(lambda model_param: model_param.bound_mean_erosion(), models_params)
-                plt.plot(batch.axis_range, mean_erosion, color='orange', linewidth=3)
-                plt.yscale('linear')
+            batch.plot_series(
+                map(lambda sim: np.array(sim.data.hotspots_erosion_bound()), simulations),
+                    BLUE,
+                    'Mean activty of the hotspots',
+                    title=False)
+            mean_erosion = map(lambda model_param: model_param.bound_mean_erosion(), models_params)
+            plt.plot(batch.axis_range, mean_erosion, color=YELLOW, linewidth=3)
+            plt.yscale('linear')
 
         plt.tight_layout()
 
-        plt.savefig('batch erosion mean.png')
+        plt.savefig('batch erosion mean.svg', format="svg")
         plt.clf()
         print 'Erosion Mean computed'
         return self
@@ -989,22 +1023,21 @@ class Batches(list):
 
         for j, batch in enumerate(self):
             plt.subplot(2, 2, j + 1)
-            for simu_params in batch.batch_params:
-                simulations = batch.simulations[simu_params.color]
+            simulations = batch.simulations['blue']
 
-                batch.plot_series(map(lambda sim: sim.data.simpson_entropy_prdm9(), simulations),
-                                  simu_params.color, 'Diversity', title=False)
-                if estimated_mean_erosion:
-                    simu_simpson = map(lambda sim: sim.estimated_params_simpson(), simulations)
-                    plt.plot(batch.axis_range, simu_simpson, color='orange', linewidth=3)
-                else:
-                    simu_simpson = map(lambda sim: sim.estimated_simpson(), simulations)
-                    plt.plot(batch.axis_range, simu_simpson, color='green', linewidth=3)
-                plt.yscale('log')
+            batch.plot_series(map(lambda sim: sim.data.simpson_entropy_prdm9(), simulations),
+                              BLUE, 'Diversity', title=False)
+            if estimated_mean_erosion:
+                simu_simpson = map(lambda sim: sim.estimated_params_simpson(), simulations)
+                plt.plot(batch.axis_range, simu_simpson, color=YELLOW, linewidth=3)
+            else:
+                simu_simpson = map(lambda sim: sim.estimated_simpson(), simulations)
+                plt.plot(batch.axis_range, simu_simpson, color=YELLOW, linewidth=3)
+            plt.yscale('log')
 
         plt.tight_layout()
 
-        plt.savefig(str(estimated_mean_erosion) + ' batch simpson.png')
+        plt.savefig(str(estimated_mean_erosion) + ' batch simpson.svg', format="svg")
         plt.clf()
         print 'Simpson computed'
         return self
@@ -1064,6 +1097,7 @@ def load_batches(dir_id):
             # os.chdir('..')
             batches.append(batch_simulation)
     print 'Batches loaded'
+    print batches[0]
     batches.save_figure()
 
 
@@ -1110,6 +1144,20 @@ def make_diagram():
     phasediagram.save_figure(interpolation=True)
     phasediagram.save_figure(interpolation=False)
 
-if __name__ == '__main__':
-    make_batches()
 
+def make_trajectory():
+    set_dir("/tmp/")
+    model_parameters = ModelParams(mutation_rate_prdm9=1.0 * 10 ** -5,
+                                   erosion_rate_hotspot=1.0 * 10 ** -4,
+                                   population_size=10 ** 4,
+                                   recombination_rate=1.0 * 10 ** -3,
+                                   fitness_param=0.1,
+                                   fitness='polynomial')
+    simulation_params = SimulationParams(drift=True, linearized=False, color="blue", scaling=10)
+    simulation = Simulation(model_parameters, simulation_params, )
+    simulation.run()
+    simulation.save_trajectory()
+
+if __name__ == '__main__':
+    # load_batches("0B7A4A63")
+    make_trajectory()
