@@ -192,11 +192,12 @@
 	
 	\item $\lp(t)$ is the proportion of active hotspots associated to PRDM9.\\
 		
-	\item Assume there is no drift. 
-		
-	\item Assume $ u N_e \gg 1$.
+	\item Ignore drift. 
+			
+	\item Linearise the fitness function.
 	
-	\item Linearise the fitness function around the mean activity $\Lb$.
+	\item Approximate $\Lb$ as a constant parameter.
+
 
 	\end{enumerate}
 \vspace{15pt}
@@ -224,27 +225,42 @@
 	\end{enumerate}
 \vspace{15pt}
 \[
-      \begin{aligned}
-          \xp(\lp) &=\dfrac{f'(\Lb)}{2 \rho f(\Lb)} (1-\lp + \Lb \mathrm{log}(\lp)) + \xp_{\mathrm{initial}} \\
-         \Rightarrow  \xp(\Linf) & \simeq  1-\Linf + \Lb \mathrm{log}(\Linf) = 0  \\
-      \end{aligned}
+          \xp(\lp) =\dfrac{f'(\Lb)}{2 \rho f(\Lb)} (1-\lp + \Lb \mathrm{log}(\lp)) + \xp_{\mathrm{initial}} 
+\]
+\vspace{5pt}
+\[
+         \Rightarrow  \xp(\Linf)  \simeq  1-\Linf + \Lb \mathrm{log}(\Linf) = 0 
 \]
 \end{frame}
 
 
 \begin{frame}
-\vspace{2cm}
+\vspace{1.5cm}
 	\begin{enumerate}
+		
+	\item $\xp(t)$ is the frequency of PRDM9.\\
+	
+	\item $\lp(t)$ is the proportion of active hotspots associated to PRDM9.\\
 		
 	\item $\Lb$ is the mean activity of the hotspots.\\
 	
 	\item $\Linf$ is the minimum activity of the hotspots.\\
-		
-	\item $f$ is the fitness function.
 	\end{enumerate}
+\vspace{5pt}
+\[
+  \left\{
+      \begin{aligned}
+          \xp(\lp) &= \dfrac{f'(\Lb)}{2 \rho f(\Lb)} (1-\lp + \Lb \mathrm{log}(\lp)) + \xp_{\mathrm{initial}}  \\
+         0 &= 1-\Linf + \Lb \mathrm{log}(\Linf) \\
+        \dfrac{v r_o}{2 u} &= \dfrac{f'(\Lb)}{f(\Lb)} \dfrac{(1- \Lb)(1- \Linf)}{\Lb}  \\
+      \end{aligned}
+    \right.
+\]
+\vspace{5pt}
+\Large
 \[
     \Rightarrow 
-    \dfrac{f'(\Lb)}{f(\Lb)} \dfrac{(1- \Lb)(1- \Linf)}{\Lb} = \dfrac{v r_o}{2 u}
+    g(\Lb) = \dfrac{v r_o}{2 u}
 \]
 \end{frame}
 
