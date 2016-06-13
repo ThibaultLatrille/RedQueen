@@ -16,4 +16,6 @@
 *.snm
 *.toc
 *.dvi
+*.bbl
+*.blg
 .idea
