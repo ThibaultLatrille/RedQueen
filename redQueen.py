@@ -360,14 +360,15 @@ class ModelParams(object):
             return (1. - np.exp(-selection)) / (1. - np.exp(-2. * self.population_size * selection))
 
     def estimated_turn_over(self, mean_erosion):
-        return self.estimated_simpson(mean_erosion) / (4 * self.fixation_new_variant(mean_erosion) * self.mutation_rate_prdm9 * self.population_size)
+        return self.estimated_simpson(mean_erosion) / (2 * self.fixation_new_variant(mean_erosion) *
+                                                       self.mutation_rate_prdm9 * self.population_size)
 
     def estimated_params_turn_over(self):
         return self.estimated_turn_over(self.params_mean_erosion())
 
     def series_turn_over(self):
         param = self.mutation_rate_prdm9 / (self.fitness_param * self.recombination_rate * self.erosion_rate_hotspot)
-        return 2 * 3 * np.sqrt(2 * param)
+        return 12 * np.sqrt(2 * param)
 
     def frequencies_wrt_erosion(self, mean_erosion):
         l_limit = self.erosion_limit(mean_erosion)
@@ -872,90 +873,6 @@ class BatchSimulation(object):
         plt.clf()
         return self
 
-
-class PhaseDiagram(object):
-    def __init__(self,
-                 model_params,
-                 batch_params,
-                 axis1="null",
-                 axis2="null",
-                 nbr_of_simulations=5,
-                 scale=10 ** 2):
-        batch = BatchSimulation(model_params, batch_params, axis1, nbr_of_simulations, scale)
-        self.axis_x = axis2
-        self.axis_y = axis1
-        self.batch_params = batch_params
-        self.axis1 = batch.axis_range
-        self.axis2 = BatchSimulation(model_params, batch_params, axis2, nbr_of_simulations, scale).axis_range
-        self.batches = []
-        for axis_current in self.axis1:
-            model_params_copy = model_params.copy()
-            setattr(model_params_copy, batch.variable_hash(), axis_current)
-            self.batches.append(BatchSimulation(model_params_copy, batch_params, axis2, nbr_of_simulations, scale))
-
-    def __str__(self):
-        return "PhaseDiagram"
-
-    def run(self, nbr_of_cpu=4, directory_id=None):
-        for batch in self.batches:
-            batch.run(nbr_of_cpu=nbr_of_cpu, directory_id=directory_id)
-        self.pickle()
-
-    def pickle(self):
-        pickle.dump(self, open(str(self) + ".p", "wb"))
-
-    def save_figure(self, interpolation, num=30):
-        self.save_pcolor(lambda sim: np.mean(sim.data.simpson_entropy_prdm9()),
-                         "Simpson entropy of PRDM9 (polymorphism)", interpolation, num)
-        self.save_pcolor(lambda sim: np.mean(sim.data.hotspots_erosion_mean()),
-                         "Mean Erosion of the hotspots", interpolation, num)
-        self.save_pcolor(lambda sim: sim.generations[sim.data.dichotomic_search(0.5)],
-                         "Cross-homozygosity of PRDM9 (turn-over)", interpolation, num)
-
-    def save_pcolor(self, function, name, interpolation=True, num=30):
-        for simu_params in self.batch_params:
-            my_dpi = 96
-            plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
-            intensities = []
-            for batch in self.batches:
-                simulations = batch.simulations[simu_params.color]
-                intensity = map(function, simulations)
-                intensities.append(intensity)
-                # batch.save_figure()
-
-            intensities = np.array(intensities)
-            if interpolation:
-                f = interpolate.interp2d(self.axis2, self.axis1, intensities, kind='cubic')
-                axis2 = np.logspace(np.log10((np.min(self.axis2))), np.log10((np.max(self.axis2))), num)
-                axis1 = np.logspace(np.log10((np.min(self.axis1))), np.log10((np.max(self.axis1))), num)
-                intensities = f(axis2, axis1)
-                axis_x, axis_y = np.meshgrid(axis2, axis1)
-            else:
-                axis_x, axis_y = np.meshgrid(self.axis2, self.axis1)
-            plt.pcolor(axis_x, axis_y, intensities, cmap='RdBu', shading='faceted', snap=False)
-            plt.colorbar()
-            plt.xscale('log')
-            plt.xlabel(self.label(self.axis_x))
-            plt.ylabel(self.label(self.axis_y))
-            plt.yscale('log')
-            plt.title(name)
-            plt.tight_layout()
-
-            plt.savefig(str(self) + " " + name + str(interpolation) + " " + simu_params.color + '.png')
-            plt.clf()
-        print name + ' computed'
-        return self
-
-    @staticmethod
-    def label(axis):
-        return {"fitness": "The fitness parameter",
-                "mutation": "Mutation rate of PRDM9",
-                "erosion": "Mutation rate of the hotspots",
-                "population": "The population size",
-                "recombination": "The recombination rate of the hotspots",
-                "scaling": "The scaling factor"}[axis]
-
-
 class Batches(list):
     def save_figure(self):
         self.save_erosion()
@@ -1106,29 +1023,6 @@ def make_batches():
         batch_simulation.run(nbr_of_cpu=8)
     batches.pickle()
     batches.save_figure()
-
-
-def load_diagram(dir_id):
-    set_dir("/tmp/" + dir_id)
-    phasediagram = pickle.load(open("PhaseDiagram.p", "rb"))
-    phasediagram.save_figure(interpolation=True, num=100)
-    phasediagram.save_figure(interpolation=False)
-
-
-def make_diagram():
-    set_dir("/tmp/" + id_generator(8))
-    model_parameters = ModelParams(mutation_rate_prdm9=1.0 * 10 ** -5,
-                                   erosion_rate_hotspot=1.0 * 10 ** -4,
-                                   population_size=10 ** 5,
-                                   recombination_rate=1.0 * 10 ** -3,
-                                   fitness_param=0.1,
-                                   fitness='polynomial')
-    batch_parameters = BatchParams(drift=True, linearized=False, color="blue", scaling=20)
-    phasediagram = PhaseDiagram(model_parameters, batch_parameters, "population", "mutation",
-                                nbr_of_simulations=14, scale=10 ** 2)
-    phasediagram.run(nbr_of_cpu=7)
-    phasediagram.save_figure(interpolation=True)
-    phasediagram.save_figure(interpolation=False)
 
 
 def make_trajectory():
