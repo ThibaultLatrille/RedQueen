@@ -402,17 +402,15 @@ class ModelParams(object):
 
 
 class SimulationParams(object):
-    def __init__(self, drift=True, linearized=True, color="blue", scaling=10):
+    def __init__(self, drift=True, linearized=True, scaling=10):
         self.scaling = scaling
         self.drift = drift
         self.linearized = linearized
-        self.color = color
 
     def __str__(self):
         return "scale=%.1e" % self.scaling + \
                "_drift=%s" % self.drift + \
-               "_linear=%s" % self.linearized + \
-               "_color=%s" % self.color
+               "_linear=%s" % self.linearized
 
     def caption(self):
         caption = self.caption_for_attr('drift')
@@ -430,32 +428,6 @@ class SimulationParams(object):
                 return "  The simulation use a LINEARIZED APPROXIMATION for the fitness. \n"
             else:
                 return "  The simulation DOESN'T APPROXIMATE the fitness. \n"
-
-    def copy(self):
-        return copy.copy(self)
-
-
-class BatchParams(list):
-    def __init__(self, **kwargs):
-        super(BatchParams, self).__init__()
-        simu_params = SimulationParams(**kwargs)
-        self.append(simu_params)
-        self.caption_str = simu_params.color.upper() + " : " + simu_params.caption()
-
-    def append_simu_params(self, switch_paremeters_dico):
-        for color, params in switch_paremeters_dico.iteritems():
-            assert color not in [i.color for i in self], "The color is already used"
-            copy_self = copy.copy(self[0])
-            setattr(copy_self, params, not getattr(self[0], params))
-            copy_self.color = color
-            self.append(copy_self)
-            self.caption_str += copy_self.color.upper() + " : " + copy_self.caption_for_attr(params)
-
-    def __str__(self):
-        return ", ".join(map(lambda x: x.color, self))
-
-    def caption(self):
-        return self.caption_str
 
     def copy(self):
         return copy.copy(self)
@@ -593,7 +565,7 @@ class Simulation(object):
 class BatchSimulation(object):
     def __init__(self,
                  model_params,
-                 batch_params,
+                 simu_params,
                  axis="null",
                  nbr_of_simulations=20,
                  scale=10 ** 2):
@@ -611,11 +583,9 @@ class BatchSimulation(object):
         self.scale = scale
         self.nbr_of_simulations = nbr_of_simulations
         self.model_params = model_params.copy()
-        self.batch_params = batch_params.copy()
+        self.simu_params = simu_params.copy()
 
-        self.simulations = {}
-        for simu_params in self.batch_params:
-            self.simulations[simu_params.color] = []
+        self.simulations = []
 
         if self.axis == "scaling":
             self.axis_range = np.logspace(np.log10(1. / np.sqrt(scale)),
@@ -628,16 +598,9 @@ class BatchSimulation(object):
                 np.log10(float(getattr(self.model_params, self.variable_hash())) * np.sqrt(scale)),
                 nbr_of_simulations)
         for axis_current in self.axis_range:
-            for simu_params in self.batch_params:
-                model_params_copy = self.model_params.copy()
-                if self.axis == "scaling":
-                    model_params_copy.mutation_rate_prdm9 /= axis_current
-                    model_params_copy.erosion_rate_hotspot /= axis_current
-                    model_params_copy.population_size *= axis_current
-                    model_params_copy.recombination_rate /= axis_current
-                else:
-                    setattr(model_params_copy, self.variable_hash(), axis_current)
-                self.simulations[simu_params.color].append(Simulation(model_params_copy, simu_params.copy()))
+            model_params_copy = self.model_params.copy()
+            setattr(model_params_copy, self.variable_hash(), axis_current)
+            self.simulations.append(Simulation(model_params_copy, simu_params.copy()))
 
     def variable_hash(self):
         return {"fitness": "fitness_param",
@@ -649,20 +612,19 @@ class BatchSimulation(object):
 
     def caption(self):
         return "Batch of %s simulations. \n" % self.nbr_of_simulations + self.axis_str + \
-               "is scaled %.1e times.\n" % self.scale + self.batch_params.caption() + self.model_params.caption()
+               "is scaled %.1e times.\n" % self.scale + self.simu_params.caption() + self.model_params.caption()
 
     def run(self, nbr_of_cpu=7, directory_id=None):
         if directory_id is None:
             directory_id = id_generator(8)
         set_dir("/" + directory_id + " " + self.axis_str)
-        for key, simulations in self.simulations.iteritems():
-            if nbr_of_cpu > 1:
+        if nbr_of_cpu > 1:
+            pool = Pool(nbr_of_cpu)
+            self.simulations = pool.map(execute, self.simulations)
+            pool.close()
+        else:
+            map(lambda x: x.run(), self.simulations)
 
-                pool = Pool(nbr_of_cpu)
-                self.simulations[key] = pool.map(execute, simulations)
-                pool.close()
-            else:
-                map(lambda x: x.run(), simulations)
         self.pickle()
         os.chdir('..')
         print 'Simulation computed'
@@ -690,9 +652,9 @@ class BatchSimulation(object):
 class Batches(list):
     def save_figure(self):
         self.save_erosion()
-        self.save_simpson(True)
-        self.save_turn_over(True)
-        self.save_landscape(True)
+        self.save_simpson()
+        self.save_turn_over()
+        self.save_landscape()
 
     def save_erosion(self):
         my_dpi = 96
@@ -700,12 +662,11 @@ class Batches(list):
 
         for j, batch in enumerate(self):
             plt.subplot(2, 2, j + 1)
-            simulations = batch.simulations['blue']
 
-            models_params = map(lambda sim: sim.model_params, simulations)
+            models_params = map(lambda sim: sim.model_params, batch.simulations)
 
             batch.plot_series(
-                map(lambda sim: np.array(sim.data.hotspots_erosion_array()), simulations),
+                map(lambda sim: np.array(sim.data.hotspots_erosion_array()), batch.simulations),
                     BLUE, 'Mean activity of the hotspots',
                     title=False)
             mean_erosion = map(lambda model_param: model_param.params_mean_erosion(), models_params)
@@ -719,79 +680,61 @@ class Batches(list):
         print 'Erosion Mean computed'
         return self
 
-    def save_simpson(self, estimated_mean_erosion=True):
+    def save_simpson(self):
         my_dpi = 96
         plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
 
         for j, batch in enumerate(self):
             plt.subplot(2, 2, j + 1)
-            simulations = batch.simulations['blue']
 
-            batch.plot_series(map(lambda sim: sim.data.simpson_entropy_prdm9(), simulations),
+            batch.plot_series(map(lambda sim: sim.data.simpson_entropy_prdm9(), batch.simulations),
                               BLUE, 'Diversity of PRDM9', title=False)
-            if estimated_mean_erosion:
-                simu_simpson = map(lambda sim: sim.estimated_params_simpson(), simulations)
-                plt.plot(batch.axis_range, simu_simpson, color=YELLOW, linewidth=3)
-                series_simpson = map(lambda sim: sim.series_simpson(), simulations)
-                plt.plot(batch.axis_range, series_simpson, color=GREEN, linewidth=2)
-            else:
-                simu_simpson = map(lambda sim: sim.estimated_simpson(), simulations)
-                plt.plot(batch.axis_range, simu_simpson, color=RED, linewidth=3)
+
+            simu_simpson = map(lambda sim: sim.estimated_params_simpson(), batch.simulations)
+            plt.plot(batch.axis_range, simu_simpson, color=YELLOW, linewidth=3)
+
             plt.yscale('log')
 
         plt.tight_layout()
 
-        plt.savefig(str(estimated_mean_erosion) + ' batch-simpson.svg', format="svg")
+        plt.savefig('batch-simpson.svg', format="svg")
         plt.clf()
         print 'Simpson computed'
         return self
 
-    def save_landscape(self, estimated_mean_erosion=True):
+    def save_landscape(self):
         my_dpi = 96
         plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
 
         for j, batch in enumerate(self):
             plt.subplot(2, 2, j + 1)
-            simulations = batch.simulations['blue']
 
-            batch.plot_series(map(lambda sim: sim.data.hotspots_landscape(), simulations),
+            batch.plot_series(map(lambda sim: sim.data.hotspots_landscape(), batch.simulations),
                               BLUE, 'Landscape of hotspots', title=False)
-            if estimated_mean_erosion:
-                simu_simpson = map(lambda sim: sim.estimated_params_landscape(), simulations)
-                plt.plot(batch.axis_range, simu_simpson, color=YELLOW, linewidth=3)
-                series_landscape = map(lambda sim: sim.series_landscape(), simulations)
-                plt.plot(batch.axis_range, series_landscape, color=GREEN, linewidth=2)
-            else:
-                simu_simpson = map(lambda sim: sim.estimated_landscape(), simulations)
-                plt.plot(batch.axis_range, simu_simpson, color=RED, linewidth=3)
+            simu_simpson = map(lambda sim: sim.estimated_params_landscape(), batch.simulations)
+            plt.plot(batch.axis_range, simu_simpson, color=YELLOW, linewidth=3)
+
             plt.yscale('log')
 
         plt.tight_layout()
 
-        plt.savefig(str(estimated_mean_erosion) + ' batch-landscape.svg', format="svg")
+        plt.savefig('batch-landscape.svg', format="svg")
         plt.clf()
         print 'Lanscape computed'
         return self
 
-    def save_turn_over(self, estimated_mean_erosion=True):
+    def save_turn_over(self):
         my_dpi = 96
         plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
 
         for j, batch in enumerate(self):
             plt.subplot(2, 2, j + 1)
-            simulations = batch.simulations['blue']
 
-            lag = map(lambda sim: sim.generations[sim.data.dichotomic_search(0.5)], simulations)
+            lag = map(lambda sim: sim.generations[sim.data.dichotomic_search(0.5)], batch.simulations)
             plt.plot(batch.axis_range, lag, color=BLUE)
 
-            if estimated_mean_erosion:
-                estimated_turn_over = map(lambda sim: sim.estimated_params_turn_over(), simulations)
-                plt.plot(batch.axis_range, estimated_turn_over, color=YELLOW, linewidth=3)
-                series_turn_over = map(lambda sim: sim.series_turn_over(), simulations)
-                plt.plot(batch.axis_range, series_turn_over, color=GREEN, linewidth=2)
-            else:
-                estimated_turn_over = map(lambda sim: sim.estimated_turn_over(), simulations)
-                plt.plot(batch.axis_range, estimated_turn_over, color=RED, linewidth=3)
+            estimated_turn_over = map(lambda sim: sim.estimated_params_turn_over(), batch.simulations)
+            plt.plot(batch.axis_range, estimated_turn_over, color=YELLOW, linewidth=3)
 
             plt.yscale('linear')
 
@@ -805,7 +748,7 @@ class Batches(list):
 
         plt.tight_layout()
 
-        plt.savefig(str(estimated_mean_erosion) + 'batch-turn-over.svg', format="svg")
+        plt.savefig('batch-turn-over.svg', format="svg")
         plt.clf()
         print 'Turn-over computed'
         return self
@@ -828,10 +771,10 @@ def make_batches():
                                    recombination_rate=1.0 * 10 ** -3,
                                    fitness_param=0.1,
                                    fitness='polynomial')
-    batch_parameters = BatchParams(drift=True, linearized=True, color="blue", scaling=30)
+    simu_params = SimulationParams(drift=True, linearized=True, scaling=30)
     batches = Batches()
     for axis in ["population", "erosion", "mutation", "fitness"]:
-        batches.append(BatchSimulation(model_parameters.copy(), batch_parameters.copy(), axis=axis,
+        batches.append(BatchSimulation(model_parameters.copy(), simu_params.copy(), axis=axis,
                                        nbr_of_simulations=16, scale=10 ** 4))
     for batch_simulation in batches:
         batch_simulation.run(nbr_of_cpu=8)
@@ -847,7 +790,7 @@ def make_trajectory():
                                    recombination_rate=1.0 * 10 ** -3,
                                    fitness_param=0.1,
                                    fitness='polynomial')
-    simulation_params = SimulationParams(drift=True, linearized=False, color="blue", scaling=10)
+    simulation_params = SimulationParams(drift=True, linearized=False, scaling=10)
     simulation = Simulation(model_parameters, simulation_params, )
     simulation.run()
     simulation.save_trajectory()
