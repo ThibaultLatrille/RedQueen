@@ -9,7 +9,6 @@ import cPickle as pickle
 import itertools
 from scipy.special import lambertw
 from scipy.optimize import brentq
-from scipy import interpolate
 
 RED = "#EB6231"
 YELLOW = "#E29D26"
@@ -510,19 +509,7 @@ class Simulation(object):
             if int(10 * t) % self.t_max == 0:
                 print "Computation at {0}%".format(float(100 * t) / self.t_max)
 
-        self.save_figure()
         return self
-
-    def plot_histogram(self, lst, x):
-        assert len(lst) > 0, "Lst is empty"
-        if (not lst) or lst.count(lst[0]) == len(lst):
-            plt.hist(lst, color=self.simu_params.color, alpha=0.3)
-        else:
-            s_density = gaussian_kde(lst)(x)
-            plt.plot(x, s_density, color=self.simu_params.color)
-            plt.fill_between(x, s_density, np.zeros(100), color=self.simu_params.color, alpha=0.3)
-        plt.text(0.5, 0.5, "Mean = {0:.1e}  \nVar = {1:.1e}".format(np.mean(lst), np.var(lst)), fontsize=12,
-                 verticalalignment='top')
 
     def save_trajectory(self):
         my_dpi = 96
@@ -567,96 +554,6 @@ class Simulation(object):
         plt.savefig('trajectory.svg', format="svg")
         print "Trajectory computed"
         plt.clf()
-        return str(self)
-
-    def save_figure(self):
-        mean_erosion = self.data.mean_erosion()
-        params_mean_erosion = self.model_params.params_mean_erosion()
-        my_dpi = 96
-        plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
-        plt.subplot(331)
-        plt.text(0.05, 0.98, self.caption(), fontsize=10, verticalalignment='top')
-        theta = np.arange(0.0, 1.0, 0.01)
-        plt.plot(theta, self.model_params.fitness(theta), color=self.simu_params.color)
-        plt.title('The fitness function')
-        plt.xlabel('x')
-        plt.ylabel('w(x)')
-
-        plt.subplot(332)
-        plt.plot(self.generations, self.data.simpson_entropy_prdm9(), color=self.simu_params.color)
-        simpson = self.model_params.estimated_simpson(mean_erosion)
-        params_simpson = self.model_params.estimated_simpson(params_mean_erosion)
-        plt.plot((self.generations[0], self.generations[-1]), (simpson, simpson), 'k-', color="green")
-        plt.plot((self.generations[0], self.generations[-1]), (params_simpson, params_simpson), 'k-', color="orange")
-        plt.title('Efficient nbr of PRDM9 alleles over time. \n')
-        plt.xlabel('Generation')
-        plt.ylabel('Number of alleles')
-        plt.yscale('log')
-
-        plt.subplot(333)
-        plt.plot(self.generations, self.data.hotspots_erosion_mean(), color=self.simu_params.color)
-        plt.plot((self.generations[0], self.generations[-1]), (params_mean_erosion, params_mean_erosion), 'k-',
-                 color="orange")
-        plt.title('Mean erosion of the hotspots over time. \n')
-        plt.xlabel('Generation')
-        plt.ylabel('Mean erosion')
-        plt.yscale('linear')
-
-        plt.subplot(334)
-        plt.hexbin(self.data.flat_erosion(), self.data.flat_fitness(), self.data.flat_longevity(),
-                   gridsize=200, bins='log')
-        plt.title('PRDM9 fitness vs hotspot erosion')
-        plt.xlabel('hotspot erosion')
-        plt.ylabel('PRMD9 fitness')
-
-        plt.subplot(335)
-        plt.hexbin(self.data.flat_erosion(), self.data.flat_frequencies(), self.data.flat_longevity(),
-                   gridsize=200, bins='log')
-        plt.plot(*self.model_params.frequencies_wrt_erosion(mean_erosion), color="green")
-        plt.plot(*self.model_params.frequencies_wrt_erosion(params_mean_erosion), color="orange")
-        plt.title('PRMD9 frequency vs hotspot erosion')
-        plt.xlabel('hotspot erosion')
-        plt.ylabel('PRMD9 frequency')
-
-        plt.subplot(336)
-        lag_max = self.data.dichotomic_search(0.01)
-        num = min(30, lag_max)
-        longevities = np.linspace(0, self.generations[lag_max], num)
-        lags = np.linspace(0, lag_max, num)
-        ch_0 = self.data.cross_homozygosity(0)
-        plt.plot(longevities, map(lambda lag: self.data.cross_homozygosity(int(lag)) / ch_0, lags))
-        generation_5 = self.generations[self.data.dichotomic_search(0.5)]
-        plt.plot((generation_5, generation_5), (0, 1), 'k-', color="black")
-        plt.title('Cross correlation of homozygosity')
-        plt.xlabel('Generations')
-        plt.ylabel('Cross correlation of homozygosity')
-
-        plt.subplot(337)
-        x = np.linspace(0, 1, 100)
-        self.plot_histogram(self.data.flat_frequencies(), x)
-        plt.title('PRDM9 frequencies histogram')
-        plt.xlabel('PRDM9 Frequencies')
-        plt.ylabel('Frequency')
-
-        plt.subplot(338)
-        x = np.linspace(0, 1, 100)
-        self.plot_histogram(self.data.flat_erosion(), x)
-        plt.title('Erosion of the hotspots histogram')
-        plt.xlabel('Erosion of the hotspots')
-        plt.ylabel('Frequency')
-
-        plt.subplot(339)
-        x = np.linspace(0, np.max(self.data.flat_longevity()), 100)
-        self.plot_histogram(self.data.flat_longevity(), x)
-        plt.title('Longevity of PRDM9 alleles histogram')
-        plt.xlabel('Longevity')
-        plt.ylabel('Frequency')
-
-        plt.tight_layout()
-
-        plt.savefig(str(self) + '.png')
-        plt.clf()
-        print str(self)
         return str(self)
 
     def pickle(self):
