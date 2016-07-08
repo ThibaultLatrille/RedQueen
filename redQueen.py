@@ -46,7 +46,7 @@ def flatten(array):
 
 class Model(object):
     def __init__(self, mutation_rate_prdm9=1.0 * 10 ** -5, mutation_rate_hotspot=1.0 * 10 ** -7,
-                 population_size=10 ** 4, recombination_rate=1.0 * 10 ** -3, fitness_param=1.,
+                 population_size=10 ** 4, recombination_rate=1.0 * 10 ** -3, alpha=1.,
                  fitness='linear', drift=True, linearized=True):
         # Initialisation of the parameters for approximation
         # If drift == True, a multinomial random drift is taken into account
@@ -60,19 +60,19 @@ class Model(object):
         self.recombination_rate = recombination_rate
         self.population_size = float(population_size)
 
-        # Initialisation of the scaled parameters
-        self.scaled_mutation_rate, self.scaled_erosion_rate = [], []
-        self.scaling_parameters()
-
         # Initialisation of the fitness function
         fitness_hash = {"linear": 1, "polynomial": 2, "sigmoid": 3}
         assert fitness in fitness_hash.keys(), "Parameter 'fitness' must be a string: ['linear','sigmoid','polynomial']"
         self.fitness_family = fitness_hash[fitness]
-        self.fitness_param = fitness_param
+        self.alpha = alpha
         if self.fitness_family == 1:
-            self.fitness_param = 1.
+            self.alpha = 1.
         elif self.fitness_family == 3:
             self.sigmoid_slope = 2
+
+        # Initialisation of the scaled parameters
+        self.mu, self.rho, self.epsilon = 0, 0, 0
+        self.scaling_parameters()
 
         # Initialisation of the array of initial alleles 
         nbr_of_alleles = 10
@@ -85,11 +85,14 @@ class Model(object):
         self.hotspots_activity = np.random.sample(nbr_of_alleles)
 
     def scaling_parameters(self):
-        self.scaled_mutation_rate = 2 * self.population_size * self.mutation_rate_prdm9
-        self.scaled_erosion_rate = 2 * self.population_size * self.mutation_rate_hotspot * self.recombination_rate
-        assert self.scaled_erosion_rate < 0.5, "The scaled erosion rate is too large, decrease either the " \
+        # Mu is the scaled mutation rate
+        self.mu = 2 * self.population_size * self.mutation_rate_prdm9
+        # Rho is the scaled erosion rate
+        self.rho = 4 * self.population_size * self.mutation_rate_hotspot * self.recombination_rate
+        self.epsilon = np.sqrt(self.rho / (self.mu * self.alpha))
+        assert self.rho < 0.5, "The scaled erosion rate is too large, decrease either the " \
                                                "recombination rate, the erosion rate or the population size"
-        assert self.scaled_erosion_rate > 0.0000000001, "The scaled erosion rate is too low, increase either the " \
+        assert self.rho > 0.0000000001, "The scaled erosion rate is too low, increase either the " \
                                                         "recombination rate, the erosion rate or the population size"
 
     def forward(self):
@@ -98,7 +101,7 @@ class Model(object):
 
     def mutation(self):
         # The number of new alleles is poisson distributed
-        new_alleles = np.random.poisson(self.scaled_mutation_rate)
+        new_alleles = np.random.poisson(self.mu)
         # Initialize new alleles in the population only if necessary
         if new_alleles > 0:
             self.prdm9_polymorphism -= np.random.multinomial(new_alleles, sum_to_one(self.prdm9_polymorphism))
@@ -111,7 +114,7 @@ class Model(object):
         prdm9_frequencies = sum_to_one(self.prdm9_polymorphism)
 
         # Erosion of the hotspots
-        self.hotspots_activity *= np.exp(- self.scaled_erosion_rate * prdm9_frequencies)
+        self.hotspots_activity *= np.exp(-self.rho * prdm9_frequencies)
 
         # Compute the fitness for each allele
         if self.fitness_family == 0:
@@ -119,7 +122,7 @@ class Model(object):
         else:
             if self.linearized:
                 mean_activity = np.sum(prdm9_frequencies * self.hotspots_activity)
-                self.prdm9_fitness = self.log_fitness(mean_activity) * (self.hotspots_activity - mean_activity)
+                self.prdm9_fitness = self.derivative_log_fitness(mean_activity) * (self.hotspots_activity - mean_activity) / 2
                 distribution_vector = prdm9_frequencies + self.prdm9_fitness * prdm9_frequencies
                 if np.max(distribution_vector) > 1.:
                     distribution_vector = sum_to_one(np.clip(distribution_vector, 0., 1.))
@@ -148,23 +151,23 @@ class Model(object):
     def fitness(self, x):
         if self.fitness_family == 3:
             return np.power(x, self.sigmoid_slope) / (
-                np.power(x, self.sigmoid_slope) + np.power(self.fitness_param, self.sigmoid_slope))
+                np.power(x, self.sigmoid_slope) + np.power(self.alpha, self.sigmoid_slope))
         elif self.fitness_family == 2:
-            return np.power(x, self.fitness_param)
+            return np.power(x, self.alpha)
         else:
             return x
 
-    def log_fitness(self, x):
+    def derivative_log_fitness(self, x):
         if x == 0:
             return float("inf")
         else:
             if self.fitness_family == 3:
-                return (self.sigmoid_slope / 2) * np.power(self.fitness_param, self.sigmoid_slope) / (
-                    x * (np.power(x, self.sigmoid_slope) + np.power(self.fitness_param, self.sigmoid_slope)))
+                return self.sigmoid_slope * np.power(self.alpha, self.sigmoid_slope) / (
+                    x * (np.power(x, self.sigmoid_slope) + np.power(self.alpha, self.sigmoid_slope)))
             elif self.fitness_family == 2:
-                return self.fitness_param * 1.0 / (2. * x)
+                return self.alpha * 1.0 / x
             else:
-                return 1.0 / (2 * x)
+                return 1.0 / x
 
     @staticmethod
     def activity_limit(mean_activity):
@@ -177,33 +180,30 @@ class Model(object):
         return brentq(lambda x: self.mean_activity_equation(x), 0, 1)
 
     def mean_activity_equation(self, x):
-        rate_in = self.mutation_rate_prdm9 * (1 - x) * (1 - self.activity_limit(x)) * self.log_fitness(x) * 2
-        rate_out = self.mutation_rate_hotspot * self.recombination_rate * x
-        return rate_in - rate_out
+        return self.derivative_log_fitness(x) * (1 - x) * (1 - self.activity_limit(x)) - (x * self.rho / self.mu)
 
     def mean_activity_small_load(self):
-        param = self.mutation_rate_hotspot * self.recombination_rate / (
-            self.mutation_rate_prdm9 * self.fitness_param * 2)
-        return 1 - np.sqrt(param)
+        return 1 - self.epsilon / np.sqrt(2)
+
+    def activity_limit_small_load(self):
+        return 1 - np.sqrt(2) * self.epsilon
 
     def prdm9_diversity_estimation(self):
         mean_activity = self.mean_activity_estimation()
         if mean_activity == 1.:
             return self.population_size
         else:
-            denom = 1 - 2 * mean_activity + self.activity_limit(mean_activity)
-            simpson = (2 * self.mutation_rate_hotspot * self.recombination_rate * self.population_size) / (
-                self.log_fitness(mean_activity) * denom)
-            return max(1., simpson)
+            diff = 1 - 2 * mean_activity + self.activity_limit(mean_activity)
+            diversity = 4 * self.rho / (self.derivative_log_fitness(mean_activity) * diff)
+            return max(1., diversity)
 
     def prdm9_diversity_small_load(self):
-        return max(1., 4 * 3. * self.mutation_rate_prdm9 * self.population_size)
+        return max(1., 12 * self.rho / (self.alpha * self.epsilon**2))
 
     def landscape_variance_estimation(self):
         mean_activity = self.mean_activity_estimation()
-        b = self.log_fitness(mean_activity)
-        a = self.mutation_rate_hotspot * self.recombination_rate * self.population_size
-        landscape = mean_activity * b * (1 - 2 * mean_activity + self.activity_limit(mean_activity)) / (2 * a)
+        diff = 1 - 2 * mean_activity + self.activity_limit(mean_activity)
+        landscape = mean_activity * diff * self.derivative_log_fitness(mean_activity) / (4 * self.rho)
         return min(1., landscape)
 
     def landscape_variance_small_load(self):
@@ -215,25 +215,15 @@ class Model(object):
         elif mean_activity == 1.:
             return 1. / self.population_size
         else:
-            selection = self.log_fitness(mean_activity) * (1. - mean_activity)
+            selection = self.derivative_log_fitness(mean_activity) * (1. - mean_activity)
             return (1. - np.exp(-selection)) / (1. - np.exp(-2. * self.population_size * selection))
 
     def turn_over_estimation(self):
         mean_activity = self.mean_activity_estimation()
-        return self.prdm9_diversity_estimation() / (2 * self.probability_fixation(mean_activity) *
-                                              self.mutation_rate_prdm9 * self.population_size)
+        return self.prdm9_diversity_estimation() / (self.mu * self.probability_fixation(mean_activity))
 
     def turn_over_small_load(self):
-        param = self.mutation_rate_prdm9 / (self.fitness_param * self.recombination_rate * self.mutation_rate_hotspot)
-        return 12 * np.sqrt(2 * param)
-
-    def frequencies_wrt_erosion(self, mean_activity):
-        l_limit = self.activity_limit(mean_activity)
-        l = np.linspace(l_limit, 1)
-        x = 1 - l + mean_activity * np.log(l)
-        x *= self.log_fitness(mean_activity) / (
-            self.mutation_rate_hotspot * self.recombination_rate * self.population_size)
-        return l, np.clip(x, 0., 1.)
+        return self.prdm9_diversity_small_load() / (self.mu * self.alpha * (1. - self.mean_activity_small_load()))
 
     def __str__(self):
         name = "u=%.1e" % self.mutation_rate_prdm9 + \
@@ -241,7 +231,7 @@ class Model(object):
                "_r=%.1e" % self.recombination_rate + \
                "_n=%.1e" % self.population_size
         if self.fitness_family == 3 or self.fitness_family == 2:
-            name += "_f=%.1e" % self.fitness_param
+            name += "_f=%.1e" % self.alpha
         name += "_drift=%s" % self.drift + \
                 "_linear=%s" % self.linearized
         return name
@@ -252,9 +242,9 @@ class Model(object):
                   "Recombination rate at the hotspots: %.1e. \n" % self.recombination_rate + \
                   "Population size: %.1e. \n" % self.population_size
         if self.fitness_family == 3:
-            caption += "Inflexion point of the fitness function PRDM9=%.1e. \n" % self.fitness_param
+            caption += "Inflexion point of the fitness function PRDM9=%.1e. \n" % self.alpha
         if self.fitness_family == 2:
-            caption += "Exponent of the polynomial fitness function PRDM9=%.1e. \n" % self.fitness_param
+            caption += "Exponent of the polynomial fitness function PRDM9=%.1e. \n" % self.alpha
         if self.drift:
             caption += "  The simulation take into account DRIFT. \n"
         else:
@@ -269,7 +259,7 @@ class Model(object):
         return copy.copy(self)
 
 
-class DataSnapshot(object):
+class DataSnapshots(object):
     def __init__(self):
         self.prdm9_frequencies, self.hotspots_activity, self.prdm9_fitness = [], [], []
 
@@ -343,12 +333,12 @@ class DataSnapshot(object):
 
 
 class Simulation(object):
-    def __init__(self, model, scaling=10):
+    def __init__(self, model, loops=10):
         self.t_max = 0
         self.nbr_of_steps = 0.
-        self.scaling = scaling
+        self.loops = loops
         self.model = model
-        self.data = DataSnapshot()
+        self.data = DataSnapshots()
         self.generations = []
 
     def __str__(self):
@@ -364,8 +354,10 @@ class Simulation(object):
         while len(initial_variants & set(self.model.ids)) > 0:
             self.model.forward()
             t += 1
-        self.nbr_of_steps = 10000 / len(self.model.ids)
-        self.t_max = 10 * (int(max(int(self.scaling * t), self.nbr_of_steps)) / 10 + 1)
+
+        self.nbr_of_steps = max(100, 10000 / len(self.model.ids))
+        self.t_max = 10 * (int(max(int(self.loops * t), self.nbr_of_steps)) / 10 + 1)
+
         print "Burn-in Completed"
 
     def run(self):
@@ -431,8 +423,8 @@ class Simulation(object):
 
 
 class SimulationsAlongParameter(object):
-    def __init__(self, model, parameter="null", nbr_of_simulations=20, scale=10 ** 2):
-        parameter_name_dict = {"fitness": "fitness_param",
+    def __init__(self, model, parameter="null", nbr_of_simulations=20, scale=10 ** 2, loops=10):
+        parameter_name_dict = {"fitness": "alpha",
                                "mutation": "mutation_rate_prdm9",
                                "erosion": "mutation_rate_hotspot",
                                "population": "population_size",
@@ -444,6 +436,7 @@ class SimulationsAlongParameter(object):
         self.parameter_name = parameter_name_dict[parameter]
         self.scale = scale
         self.nbr_of_simulations = nbr_of_simulations
+        self.loops = loops
         self.model = model.copy()
 
         self.simulations = []
@@ -459,7 +452,7 @@ class SimulationsAlongParameter(object):
             model_copy = self.model.copy()
             setattr(model_copy, self.parameter_name, parameter_focal)
             model_copy.scaling_parameters()
-            self.simulations.append(Simulation(model_copy))
+            self.simulations.append(Simulation(model_copy, loops=self.loops))
 
     def caption(self):
         return "Batch of %s simulations. \n" % self.nbr_of_simulations + self.parameter_name + \
@@ -488,8 +481,7 @@ class SimulationsAlongParameter(object):
                              "mutation": "Mutation rate of PRDM9",
                              "erosion": "Mutation rate of the hotspots",
                              "population": "The population size",
-                             "recombination": "The recombination rate of the hotspots",
-                             "scaling": "The scaling factor"}[self.parameter]
+                             "recombination": "The recombination rate of the hotspots"}[self.parameter]
         mean = map(lambda serie: np.mean(serie), series)
         plt.plot(self.parameter_range, mean, color=color, linewidth=2)
         sigma = map(lambda serie: np.sqrt(np.var(serie)), series)
@@ -504,12 +496,17 @@ class SimulationsAlongParameter(object):
             plt.xscale('log')
 
 
-class SimulationsBatch(list):
+class Batch(list):
     def save_figures(self):
         self.save_figure('mean_activity', False, 'linear')
         self.save_figure('prdm9_diversity', False, 'log')
         self.save_figure('landscape_variance', False, 'log')
         self.save_figure('turn_over', False, 'log')
+
+        self.save_figure('mean_activity', True, 'linear')
+        self.save_figure('prdm9_diversity', True, 'log')
+        self.save_figure('landscape_variance', True, 'log')
+        self.save_figure('turn_over', True, 'log')
 
     def save_figure(self, summary_statistic="mean_activity", small_load_estimation=False, yscale='log'):
         caption = {"mean_activity": "The mean activity of the hotspots",
@@ -530,6 +527,7 @@ class SimulationsBatch(list):
             if summary_statistic == 'turn_over':
                 lag = map(lambda sim: sim.generations[sim.data.dichotomic_search(0.5)], batch.simulations)
                 plt.plot(batch.parameter_range, lag, color=BLUE)
+                plt.xscale('log')
             else:
                 batch.plot_series(
                     map(lambda sim: np.array(getattr(sim.data, summary_statistic + "_array")()), batch.simulations),
@@ -540,52 +538,39 @@ class SimulationsBatch(list):
 
         plt.tight_layout()
 
-        plt.savefig('batch-' + summary_statistic + '.svg', format="svg")
-        plt.savefig('batch-' + summary_statistic + '.png', format="png")
+        plt.savefig("%s-batch-" % small_load_estimation + summary_statistic + '.svg', format="svg")
+        plt.savefig("%s-batch-" % small_load_estimation + summary_statistic + '.png', format="png")
         plt.clf()
         print summary_statistic + ' computed'
         return self
 
     def pickle(self):
-        pickle.dump(self, open("SimulationsBatch.p", "wb"))
+        pickle.dump(self, open("Batch.p", "wb"))
 
 
-def load_batches(dir_id):
+def load_batch(dir_id):
     set_dir("/tmp/" + dir_id)
-    simulation_batch = pickle.load(open("SimulationsBatch.p", "rb"))
+    simulation_batch = pickle.load(open("Batch.p", "rb"))
     simulation_batch.save_figures()
 
 
-def make_batches():
+def make_batch():
     set_dir("/tmp/" + id_generator(8))
-    model = Model(mutation_rate_prdm9=1.0 * 10 ** -4,
+    model = Model(mutation_rate_prdm9=1.0 * 10 ** -6,
                   mutation_rate_hotspot=1.0 * 10 ** -6,
                   population_size=10 ** 5,
                   recombination_rate=1.0 * 10 ** -3,
-                  fitness_param=0.1,
+                  alpha=0.1,
                   fitness='polynomial', drift=True, linearized=True)
-    batch = SimulationsBatch()
+    batch = Batch()
     for parameter in ["population", "erosion", "mutation", "fitness"]:
-        batch.append(SimulationsAlongParameter(model.copy(), parameter=parameter, nbr_of_simulations=8, scale=10 ** 4))
+        batch.append(SimulationsAlongParameter(model.copy(), parameter=parameter,
+                                               nbr_of_simulations=16, scale=10 ** 4, loops=30))
     for simulation_along_parameter in batch:
         simulation_along_parameter.run(nbr_of_cpu=8)
     batch.pickle()
     batch.save_figures()
 
-
-def make_trajectory():
-    set_dir("/tmp/")
-    model = Model(mutation_rate_prdm9=1.0 * 10 ** -5,
-                  mutation_rate_hotspot=1.0 * 10 ** -4,
-                  population_size=10 ** 4,
-                  recombination_rate=1.0 * 10 ** -3,
-                  fitness_param=0.1,
-                  fitness='polynomial', drift=True, linearized=False)
-    simulation = Simulation(model, scaling=10)
-    simulation.run()
-    simulation.save_trajectory()
-
-
 if __name__ == '__main__':
-    # load_batches("F89C751F")
-    make_batches()
+    # load_batch("80D91100")
+    make_batch()
