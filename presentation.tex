@@ -24,10 +24,6 @@
 %comment out to revert to previous/default definitions
 \setbeamertemplate{footline}{}
 
-\author{Latrille Thibault, Laurent Duret, Nicolas Lartillot}
-\title{The red queen in the kingdom of recombination.}  
-\institute{Laboratoire de Biométrie et Biologie Évolutive (LBBE), UMR CNRS 5558, Lyon}
-
 \sloppy 
 
 \definecolor{RED}{HTML}{EB6231}
@@ -35,262 +31,144 @@
 \definecolor{BLUE}{HTML}{5D80B4}
 \definecolor{LIGHTGREEN}{HTML}{6ABD9B}
 \definecolor{GREEN}{HTML}{8FB03E}
+\definecolor{PURPLE}{HTML}{BE1E2D}
 
 \newcommand{\Ne}{N_\mathrm{e}}
-\newcommand{\Lb}{\bm{\textcolor{GREEN}{\overline{L}}}}
-\newcommand{\Linf}{\bm{\textcolor{RED}{L_{\infty}}}}
-\newcommand{\xp}{\bm{\textcolor{BLUE}{x}}}
-\newcommand{\lp}{\bm{\textcolor{YELLOW}{l}}}
+\newcommand{\Rp}{\theta}
+\newcommand{\R}{\bm{\textcolor{GREEN}{R}}}
+\newcommand{\Rt}{\bm{\textcolor{GREEN}{\R_{t}}}}
+\newcommand{\xp}{\bm{\textcolor{BLUE}{x_t}}}
+\newcommand{\lp}{\bm{\textcolor{YELLOW}{\Rp_t}}}
+\newcommand{\xpi}{\bm{\textcolor{BLUE}{x_{i,t}}}}
+\newcommand{\lpi}{\bm{\textcolor{YELLOW}{\Rp_{i,t}}}}
+\newcommand{\Rmin}{\bm{\textcolor{RED}{R_{\infty}}}}
+\newcommand{\D}{\bm{\textcolor{PURPLE}{D}}}
+\newcommand{\dd}{\mathrm{d}}
+
 
 \begin{document}
 
-\frame{\titlepage} 
-
-\begin{frame}
-\vspace{2cm}
-	$\bullet$ $ K(t)$ is the number of variants in the population.
-	
-	$\bullet$ $\forall i \in \{ 1, \, \dots, \, K(t) \}$:
-		
-	$\hspace{0.3cm}  \bullet$ $x_i(t)$ is the frequency of the $i^{th}$ PRDM9 variant.\\
-	
-	$\hspace{0.3cm} \bullet$ $l_i(t)$ is the proportion of active hotspots  associated to the $i^{th}$ PRDM9 variant.\\
-	
-	$\bullet$ $N_e$ is the population size.\\
-	
-	$\bullet$ $v$ is the mutation rate at the hotspot.\\
-	
-	$\bullet$ $r_0$ is the recombination rate.\\
-		\begin{enumerate}
-	\item Substitution from active to inactive at a rate $ 2 N_e v  l_i(t) $ \\
-	\item Selection at a rate $2 r_0 x_i(t) $
-	\end{enumerate}
-\[
-      \begin{aligned}
-        \dfrac{\mathrm{d}l_i(t)}{\mathrm{d}t} &= 
-        - 4 N_e v r_0 x_i(t) l_i(t) \\
-      \end{aligned}
-\]
-\end{frame}
-
-\begin{frame}
-\vspace{2cm}
-	$\bullet$ $ K(t)$ is the number of variants in the population.
-	
-	$\bullet$ $\forall i \in \{ 1, \, \dots, \, K(t) \}$:
-		
-	$\hspace{0.3cm}  \bullet$ $x_i(t)$ is the frequency of the $i^{th}$ PRDM9 variant.\\
-	
-	$\hspace{0.3cm} \bullet$ $l_i(t)$ is the proportion of active hotspots  associated to the $i^{th}$ PRDM9 variant.\\
-	
-	$\bullet$ $N_e$ is the population size.\\
-	
-	$\bullet$ $u$ is the mutation rate of PRDM9.\\
-
-	$\bullet$ $\overline{\omega_i}=\sum_j x_j(t) f \left( \tfrac{l_i(t) + l_j(t)}{2} \right)$ is the fitness of the $i^{th}$ PRDM9 variant.\\
-	
-	$\bullet$ $\overline{\omega}=\sum_{i} x_i(t) \overline{\omega_i}$ is the mean fitness in the population.\\
-		\begin{enumerate}
-	\item New variant from a Poisson distribution at a rate $ 2 N_e u $ per generation. \\
-	\item The probability of drawing variant $i$ in the new generation is $ \tfrac{x_i(t) \overline{\omega_i}}{\overline{\omega}} $
-		\end{enumerate}
-\end{frame}
-
-\begin{frame}
-\vspace{2cm}
-	Let $x_i$ be the frequency of the $i^{th}$ PRDM9 variant.\\
-
-    \[ K_e = \dfrac{1}{\displaystyle \sum_i x_i^2}   \]
-\end{frame}
-
-\begin{frame}
-\vspace{2cm}
-	$ N_e $ is the population size. \\ 
-	$ u $ is the mutation rate of PRDM9. \\
-	\begin{enumerate}
-		\item $ N_e u \ll 1 \Rightarrow  K_e \simeq 1$ (single allele succession)
-		\item $ N_e u \gg 1 \Rightarrow  K_e > 1 $ (polymorphism)
-		
-		\item $K_e \nearrow$ with $N_e$ and $u$.
-		
-		\item $K_e \rightsquigarrow$ with the mutation ($v$) and recombination rate at the hotspots ($r_o$)
-		
-		\item $K_e \rightsquigarrow$ with the fitness function.
-	\end{enumerate}
-\end{frame}
-
-
-\begin{frame}
-\vspace{2cm}
-	Let $x_i$ be the frequency of the $i^{th}$ PRDM9 variant.\\
-	Let $l_i$ be the fraction of hot hotspots (still not eroded) associated with the $i^{th}$ PRDM9 variant.\\
-
-    \[ \Lb =  \sum_i x_i l_i   \]
-\end{frame}
-
 \begin{frame}
 \vspace{2cm}
 	\begin{enumerate}
-			
-		\item $\Lb \rightsquigarrow$ with the population size ($N_e$).
-				
-		\item $\Lb \nearrow$ with the mutation rate of PRDM9. ($u$).
+	\item $K_t$ is the number of PRDM9 alleles in the population.
 		
-		\item $\Lb \searrow$ with the mutation ($v$) and recombination rate at the hotspots ($r_o$).
-
-		\item 	The fitness function can be linearised around the mean erosion $\Lb$.
-	\end{enumerate}
-\end{frame}
-
-\begin{frame}
-\vspace{2cm}
-	$\tau$ is the number of generations needed to replace all PRDM9 variants. \\
-	It is such that the homozygosity between $x_i(t)$ and $x_i(t+\tau)$ vanishes.
-\end{frame}
-
-\begin{frame}
-\vspace{2cm}
-	\begin{enumerate}
-		\item $\tau \searrow$ and $\rightsquigarrow$ with the population size ($N_e$).
-			
-		\item $\tau \searrow$ and $\nearrow$ with the mutation rate of PRDM9. ($u$).
-		
-		\item $\tau \searrow$ with the mutation ($v$) and recombination rate at the hotspots ($r_o$).
-	\end{enumerate}
-\end{frame}
-
-\begin{frame}
-\vspace{2cm}
-	\begin{enumerate}
-	\item $\forall i \in \{ 1, \, \dots, \, K \} $, $K$ is the number of variants in the population.
-		
-	\item $x_i$ is the frequency of the $i^{th}$ PRDM9 variant.\\
+	\item $\xpi$ is the frequency of the $i^{th}$ PRDM9 allele.\\
 	
-	\item $l_i$ is the proportion of hot hotspots associated to the $i^{th}$ PRDM9 variant.\\
+	\item $\lpi$ is the recombination rate associated to the $i^{th}$ PRDM9 allele.\\
 		
 	\item Assume there is no drift. 
 	
-	\item Linearise the fitness function around the mean erosion $\Lb = \sum_i l_i x_i$.
 	\end{enumerate}
 \vspace{15pt}
-\[
-  \left\{
+\begin{equation*}
+\left\{
       \begin{aligned}
-          \dfrac{\mathrm{d}x_i}{\mathrm{d}t} &= \dfrac{f'(\Lb)}{2 f(\Lb)} \left( l_i - \Lb \right) x_i \\
-        \dfrac{\mathrm{d}l_i}{\mathrm{d}t} &= 
-        - \rho x_i l_i \\
+          \dfrac{\dd \xpi}{\dd t} &= \dfrac{\alpha}{ \Rt } \left( \lpi  - \Rt  \right) \xpi, \;
+             \forall i \in \{ 1, \, \dots, \, K_{t} \} \\
+        \dfrac{\dd \lpi}{\dd t} &= 
+        - \rho \xpi \lpi, \;
+             \forall i \in \{ 1, \, \dots, \, K_{t} \} \\
+             \Rt &= \sum_{i \in K_{t}} \xpi \lpi
       \end{aligned}
-    \right.
-\]
+\right. 
+\end{equation*}
 \end{frame}
 
 \begin{frame}
 \vspace{1.5cm}
 	\begin{enumerate}
 		
-	\item $\xp(t)$ is the frequency of PRDM9.\\
+	\item $\xp$ is the frequency of PRDM9.\\
 	
-	\item $\lp(t)$ is the proportion of active hotspots associated to PRDM9.\\
+	\item $\lp$  is the recombination rate associated to PRDM9.\\
 		
-	\item Ignore drift. 
+	\item Assume there is no drift. 
 			
-	\item Linearise the fitness function.
-	
-	\item Approximate $\Lb$ as a constant parameter.
+	\item Approximate $\Rt$ as a constant parameter.
 
 
 	\end{enumerate}
 \vspace{15pt}
-	\[
-  \left\{
+\begin{equation*}
+\left\{
       \begin{aligned}
-          \dfrac{\mathrm{d}\xp(t)}{\mathrm{d}t} &= \dfrac{f'(\Lb)}{2 f(\Lb)} \left( \lp(t) - \Lb \right) \xp(t) \\
-        \dfrac{\mathrm{d}\lp(t)}{\mathrm{d}t} &= 
-        - \rho \xp(t) \lp(t) \\
+          \dfrac{\dd \xp }{\dd t} &= \dfrac{\alpha}{\R } \left( \lp  - \R \right) \xp \\
+        \dfrac{\dd \lp}{\dd t} &= 
+        - \rho \xp \lp \\
       \end{aligned}
-    \right.
-\]
+\right.
+\end{equation*}
 \end{frame}
 
 
 \begin{frame}
 \vspace{2cm}
-	\begin{enumerate}
-		
-	\item $\Lb$ is the mean activity of the hotspots.\\
-	
-	\item $\Linf$ is the minimum activity of the hotspots.\\
-		
-	\item $f$ is the fitness function.
-	\end{enumerate}
-\vspace{15pt}
-\[
-          \xp(\lp) =\dfrac{f'(\Lb)}{2 \rho f(\Lb)} (1-\lp + \Lb \mathrm{log}(\lp)) + \xp_{\mathrm{initial}} 
-\]
-\vspace{5pt}
-\[
-         \Rightarrow  \xp(\Linf)  \simeq  1-\Linf + \Lb \mathrm{log}(\Linf) = 0 
-\]
-\end{frame}
-
-
-\begin{frame}
-\vspace{1.5cm}
-	\begin{enumerate}
-		
-	\item $\xp(t)$ is the frequency of PRDM9.\\
-	
-	\item $\lp(t)$ is the proportion of active hotspots associated to PRDM9.\\
-		
-	\item $\Lb$ is the mean activity of the hotspots.\\
-	
-	\item $\Linf$ is the minimum activity of the hotspots.\\
-	\end{enumerate}
-\vspace{5pt}
-\[
-  \left\{
-      \begin{aligned}
-          \xp(\lp) &= \dfrac{f'(\Lb)}{2 \rho f(\Lb)} (1-\lp + \Lb \mathrm{log}(\lp)) + \xp_{\mathrm{initial}}  \\
-         0 &= 1-\Linf + \Lb \mathrm{log}(\Linf) \\
-        \dfrac{v r_o}{2 u} &= \dfrac{f'(\Lb)}{f(\Lb)} \dfrac{(1- \Lb)(1- \Linf)}{\Lb}  \\
-      \end{aligned}
-    \right.
-\]
+\begin{align*}
+  & \left\{
+  \begin{aligned}
+   \Delta T & \simeq \dfrac{1 - \Rmin }{\rho \R } \\
+   \Delta T &  \simeq  \left( 2 \alpha \Ne u \dfrac{ 1-\R }{\R}  \right)^{-1} \\
+   0 &\simeq  1-\Rmin  + \R  \operatorname{log}(\Rmin ) 
+  \end{aligned}
+  \right.
+\end{align*}
+\begin{align*}
+   \vspace{1.5cm}
+   \Rightarrow &
+   \left\{
+  \begin{aligned}
+   & \dfrac{(1- \R )(1- \Rmin )}{\R^2 }  \simeq \dfrac{2  v r_0}{ \alpha u} \\
+    & 0 \simeq  1-\Rmin  + \R  \operatorname{log}(\Rmin ) 
+  \end{aligned}
+  \right.
+\end{align*}
+\begin{align*}
+    \Rightarrow &
+    \R \simeq 1 -  \sqrt{\dfrac{2 v r_0}{ \alpha u}}
+\end{align*}
 \vspace{5pt}
 \Large
-\[
-    \Rightarrow 
-    g(\Lb) = \dfrac{v r_o}{2 u}
-\]
 \end{frame}
 
 \begin{frame}
-\vspace{2cm}
-\[
-  K_e(\Lb) \simeq 
-  \dfrac{4 \rho f(\Lb)}{f'(\Lb)\left[ 1 + \Linf - 2 \Lb  \right]}
-\]
-\end{frame}
-
-\begin{frame}
-\vspace{2cm}
-\[
-  \tau (\Lb) \sim \dfrac{2 f'(\Lb)}{f(\Lb)[\Lb-1 + \Lb \mathrm{log}(\Lb)]}
-\]
-\end{frame}
-
-\begin{frame}
+\vspace{6cm}
 \large
-\vspace{3.5cm}
-\begin{equation}
-N_e u \gg 1 \Rightarrow  K_e > 1 
-\end{equation}\\
-\begin{equation}
-1-\Linf + \Lb \mathrm{log}(\Linf) = 0
-\end{equation}\\
-\begin{equation}
-\dfrac{f'(\Lb)}{f(\Lb)} \dfrac{(1- \Lb)(1- \Linf)}{\Lb} = \dfrac{v r_o}{2 u}
-\end{equation}
+\begin{align*} 
+\D &=  \left( \sum_{i \in K_t} x_{i,t}^2 \right)^{-1}  = \left( \int_{0}^{\infty } x_{t}^2 \dd  t  \right)^{-1}  \int_{0}^{\infty } x_{t} \dd  t  \simeq 12 \Ne u 
+\end{align*}
+\vspace{5pt}
+\Large
+\end{frame}
+
+\begin{frame}
+\vspace{7.2cm}
+\large
+\begin{align*} 
+\Delta T &= \dfrac{1}{\tau_{\mathrm{mutation}} p_{\mathrm{invasion}}}= \left( 2 \alpha \Ne u \dfrac{ 1-\R }{\R}  \right)^{-1}
+\end{align*}
+\vspace{5pt}
+\Large
+\end{frame}
+
+\begin{frame}
+\vspace{6cm}
+\large
+\begin{align*} 
+ \Delta T &= \Delta T  \sum_{i \in K_t} x_{i,t} \simeq \int_{0}^{\infty } x_{t} \dd  t = \dfrac{1 - \Rmin }{\rho \R }
+\end{align*}
+\vspace{5pt}
+\large
+\end{frame}
+
+\begin{frame}
+\vspace{7cm}
+\large
+\begin{align*} 
+ 0 \simeq  1-\Rmin  + \R  \operatorname{log}(\Rmin ) 
+\end{align*}
+\vspace{5pt}
+\Large
 \end{frame}
 
 \end{document}
