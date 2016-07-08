@@ -6,11 +6,12 @@
 
 *~
 /tmp
+/Biblio
 *.aux
 *.log
 *.synctex.gz
 *.swp
-*.pdf
+/*.pdf
 *.out
 *.nav
 *.snm
