@@ -64,34 +64,55 @@ We are interested in a mathematical modelling of the turnover of PRDM9 variants 
 
 \subsection*{Population genetic model}
 
-\subsection*{PRDM9 mutation}
-
+We built a Wright-Fisher population genetic model.
 The population is composed of $\Ne$ diploid individuals, kept constant over time.
+
+\subsection*{PRDM9 mutation}
 
 The locus PRDM9 mutates at constant rate $u$ per generation per locus and each new variant binds a new sets of sequence targets. Thus $u$ can be understood as a functional mutation rate, with each mutation producing a new PRDM9 variant with new hotspots.
 
-At each generation, $K_{t}$ is the number of PRDM9 variants in the population. $\forall i \in \{ 1, \, \dots, \, K_{t} \}$, $n_{i,t}$ is the number of $i^{th}$ PRDM9 variant in the population. Consequently, $x_{i,t} = n_{i,t} / 2 \Ne$ is the frequency of the $i^{th}$ PRDM9 variant.
+At each generation, $K_{t}$ is the number of PRDM9 alleles in the population. $\forall i \in \{ 1, \, \dots, \, K_{t} \}$, $n_{i,t}$ is the number of $i^{th}$ PRDM9 allele in the population. Consequently, $x_{i,t} = n_{i,t} / 2 \Ne$ is the frequency of the $i^{th}$ PRDM9 allele.
 
 \subsection*{Erosion of the hotspots}
 
-PRDM9 activates it's targets in \textit{trans}. The number of new mutation occurring in the population at the targets is $ \Ne v$, each of them are driven by a selection coefficient $ r _0  x_{i,t}$, where $x_{i,t}$ is the probability of activation by the variant $i$.
-Since the strength of activity is proportional to the targets being not eroded, we model the activity as an exponential decay.
+Whenever a new allele appears it has access to a complete set of functional hotspots. Thus the activity is maximal, and progressively hotspots are eroded by dBGC leading to a decreasing activity. 
 
-We consider that PRDM9 is binding it's target in *trans*, meaning there is no linkage between the locus of PRDM9 and any of the target. The sequence targets of PRDM9 mutates at constant rate $v$ per generation. The sequence targets recombine at constant rate $r_0$ per generation. The recombination at the sequence target is favoured by the binding of PRDM9.
+For each allele $i$,  $\Rp _{i,t}$ is the activity at time $t$. We model the evolution of $\Rp _{i,t}$ implicitly.
 
-For each variant, $\Rp _{i,t}$ is the overall activity of the sequence targets, with $\Rp _{i,t}=1$ meaning no activity and $\Rp _{i,t}=0$ meaning totally eroded. $\overline{\omega_{i,t}}$ is fitness of this variant. At the population level, $\overline{\omega}=\sum_{i} x_{i,t} \overline{\omega_{i,t}}$ is the mean fitness.
+\begin{equation}
+\left\{
+      \begin{aligned}
+ & \dfrac{\dd \Rp _{i,t+1} }{\dd t} =  - \rho \Rp _{i,t} x_{i,t}, \;
+ \forall i \in \{ 1, \, \dots, \, K \} \\
+ & \rho = 4 \Ne v r _0
+      \end{aligned}
+\right. 
+\end{equation}
+
+
+Arguments behind this phenomenological model: 
+
+- At any given time, most hotspots associated with a given PRDM9 allele are either fully active, or fully inactive. Meaning a minor fraction of hotspots are in polymorphic state.
+
+- $\Rp _{i,t}$ can be thought as the proportion of active hotspots.
+
+- rate of substitution from active to inactive hotspots is the mutation rate ($2 \Ne v$) time the fixation probability of mutant hotspots ($2 r_0$)
 
 \subsection*{Selection of PRDM9}
 
-We propose $\overline{\omega_{i,t}}=\sum_{j \in K_{t}} x_{j,t} f \left( \dfrac{\Rp _{i,t} + \Rp _{j,t}}{2} \right)$, for any function $f\colon [0,1] \rightarrow \mathbb{R}^+$. Meaning the fitness of variant $i$ is the sum over the probabilities that the second variant is $j$ (diploid individuals) time a function of the mean activity between variant $i$ and $j$. Thus we assume the variants interact linearly.
+For each allele, $\Rp _{i,t}$ is the overall activity of the sequence targets, with $\Rp _{i,t}=1$ meaning no activity and $\Rp _{i,t}=0$ meaning totally eroded.
+
+$\overline{\omega_{i,t}}$ is fitness of this allele. At the population level, $\overline{\omega}=\sum_{i} x_{i,t} \overline{\omega_{i,t}}$ is the mean fitness.
+
+We propose $\overline{\omega_{i,t}}=\sum_{j \in K_{t}} x_{j,t} f \left( \dfrac{\Rp _{i,t} + \Rp _{j,t}}{2} \right)$, for any function $f\colon [0,1] \rightarrow \mathbb{R}^+$. Meaning the fitness of allele $i$ is the sum over the probabilities that the second allele is $j$ (diploid individuals) time a function of the mean activity between allele $i$ and $j$. Thus we assume linear (additive) effect between alleles.
 
 \subsection*{Overall simulation cycle} 
 
 For each new generation, the simulation is decomposed in three steps, computed in the following order: \\
 
-1. Mutation and creation of new variants of PRDM9 
+1. Mutation and creation of new alleles of PRDM9 
 
-Per locus, PRDM9 mutates at constant rate $u$, and we have $2 \Ne$ loci in the population. Thus the number of new variants is Poisson distributed with mean $2 \Ne u$. The new variants are introduced in the population at a frequency $1 / 2 \Ne$
+Per locus, PRDM9 mutates at constant rate $u$, and we have $2 \Ne$ loci in the population. Thus the number of new alleles is Poisson distributed with mean $2 \Ne u$. The new alleles are introduced in the population at a frequency $1 / 2 \Ne$
 
 \begin{equation}
   K_{t+1} - K_{t} \sim \operatorname{Pois} \left(2 \Ne u \right)
@@ -99,18 +120,17 @@ Per locus, PRDM9 mutates at constant rate $u$, and we have $2 \Ne$ loci in the p
 
 2. Erosion of the recombination hotspots 
 
-PRDM9 activates it's targets in \textit{trans}. The number of new mutation occurring in the population at the targets is $ \Ne v$, each of them are driven by a selection coefficient $ r _0  x_{i,t}$, where $x_{i,t}$ is the probability of activation by the variant $i$.
-Since the strength of activity is proportional to the targets being not eroded, we model the activity as an exponential decay.
+The number of new mutation occurring in the population at the targets is $ \Ne v$, each of them are driven by a selection coefficient $ r _0  x_{i,t}$, where $x_{i,t}$ is the probability of activation by the allele $i$.
+Since the activity is proportional to the targets being not eroded, we model the activity as an exponential decay.
 
 \begin{align}
- \Rp _{i,t+1} &=  \Rp _{i,t}\operatorname{exp} \left( - \Ne v
- r _0  x_{i,t} \right), \;
- \forall i \in \{ 1, \, \dots, \, K \} \\ \\
+ \Rp _{i,t+1} &=  \Rp _{i,t}\operatorname{exp} \left( - \rho x_{i,t} \right), \;
+ \forall i \in \{ 1, \, \dots, \, K \}
 \end{align}
 
 3. Drift and selection
 
-The new generation of $2 \Ne$ PRDM9 alleles is drawn from a multinomial distribution, generating a drift. The probability of drawing variant $i$ is equal to it's frequency $x_{i,t}$ time it's relative fitness  $\dfrac{\overline{\omega_{i,t}}}{\overline{\omega}}$. The probabilities sum to $1$ by definition of $\overline{\omega}$.
+The new generation of $2 \Ne$ PRDM9 alleles is drawn from a multinomial distribution, generating a drift. The probability of drawing allele $i$ is equal to it's frequency $x_{i,t}$ time it's relative fitness  $\dfrac{\overline{\omega_{i,t}}}{\overline{\omega}}$. The probabilities sum to $1$ by definition of $\overline{\omega}$.
 
 \begin{align}
   & \left(
@@ -119,14 +139,14 @@ The new generation of $2 \Ne$ PRDM9 alleles is drawn from a multinomial distribu
   n_{i,t+1}, \,
   \dots, \,
   n_{K_{t+1}}
-  \right)\\ \\
-  &  \, \sim \operatorname{Multinomial} \left(2 \Ne, \,
+  \right)  \, \sim \operatorname{Multinomial} \left(2 \Ne, \,
   \dfrac{x_{1,t}  \overline{\omega_{1,t}}}{\overline{\omega}}, \,
   \dots, \,
   \dfrac{x_{i,t}  \overline{\omega_{i,t}}}{\overline{\omega}}, \,
   \dots, \,
   \dfrac{x_{K_{t}} \overline{\omega_{K_{t}}}}{\overline{\omega}}  \right)
 \end{align}
+
 
 The model was implemented numerically by Monte Carlo simulations in Python, the code is hosted at \url{https://github.com/ThibaultLatrille/RedQueen}.
 
@@ -138,11 +158,11 @@ Summary statistics are computed when the simulation reaches the limit cycle (att
 
 1. Diversity of PRDM9
 
-Diversity can be defined in several ways; for example the richness $K_{t}$, defined above as the number of variants, is a measure of PRDM9 diversity.
-One shortcoming for $K_{t}$ is that it gives equal weight to all variants, regardless of their frequencies in the population.
+Diversity can be defined in several ways; for example the richness $K_{t}$, defined above as the number of alleles, is a measure of PRDM9 diversity.
+One shortcoming for $K_{t}$ is that it gives equal weight to all alleles, regardless of their frequencies in the population.
 Thus as a measure of diversity we focused on the reciprocal of Simpson's index $D$ \cite{Hill1973}, which do obey the replication principle.
 The replication principle states that if we have N equally large, equally diverse groups of PRDM9 alleles with no alleles in common, the diversity of the pooled groups must be N times the diversity of a single group.
-$\Dt$ equals $K_{t}$ if all the variants have equal weights and is close to $1$ if an allele has appreciable abundance.
+$\Dt$ equals $K_{t}$ if all the alleles have equal weights and is close to $1$ if an allele has appreciable abundance.
 
 \begin{align}
      \D &= \avg{\Dt} = \avg{\dfrac{1}{\sum_{i \in K_{t}} x_{i,t}^2}} 
@@ -194,7 +214,7 @@ Thus as a function of $\Ne$, red-queen first unfolds as a succession of PRDM9 al
 
 \subsection*{Analytical approximations in succession regime} 
 
-In a succession regime, PRDM9 alleles don't co-segregate. There is only one allele at a time, and it's recombination rate ( $\Rp_{t}$) is decreasing proportionally to itself (biased gene conversion) at a rate $\rho = \Ne v r_0$. Thus $\Rp_{t}$ follow an exponential decrease.
+In a succession regime, PRDM9 alleles don't co-segregate. There is only one allele at a time, and it's recombination rate ( $\Rp_{t}$) is decreasing proportionally to itself (biased gene conversion) at a rate $\rho = 4 \Ne v r_0$. Thus $\Rp_{t}$ follow an exponential decrease.
 
 \begin{align} 
    \dfrac{\dd \Rp_{t}}{\dd t}  &=  - \rho \Rp_{t} \\
@@ -213,36 +233,41 @@ Moreover the mean recombination rate $\R$ of alleles between there invasion and 
 	\Rightarrow 0 &=  1-\Rmin  + \R  \operatorname{log}(\Rmin ) 
 \end{align}
 
-Using population genetic arguments, we can derive the substitution rate between $\mu_{t}$ that is the probability of fixation of a new allele that mutates at rate $u$ in a population of size $\Ne$ with selection coefficient $ s(\Rp_{t}) $. The selection coefficient is derived in appendix after linearisation and leads to the equation : 
+Using population genetic arguments, we can derive the substitution rate between two consecutive allele $\lambda_t$. This is the probability of fixation of a new allele that mutates at rate $u$ in a population of size $\Ne$ with selection coefficient $ 2 s(\Rp_{t}) $. The selection coefficient is derived in appendix after linearisation and leads to the equation : 
 
 \begin{equation}
-\mu_{t} = 2 \Ne u s(\Rp_{t}) = \Ne u \dfrac{f'(\Rp_{t})}{f(\Rp_{t} )} (1 - \Rp_{t} ) 
+ \lambda_t = 2 \Ne u 2 s(\Rp_{t}) = \mu \dfrac{f'(\Rp_{t})}{f(\Rp_{t} )} (1 - \Rp_{t} ) 
 \end{equation}
-
-And the mean time between two invasion of alleles ($\tau$) can be also derived as $\avg{\mu_{t}^{-1}}$  .
+, with $\mu = 2 \Ne u $ 
+And the mean time between two invasion of alleles ($\tau$) can be also derived as $\avg{\lambda_t^{-1}}$  .
 
 \begin{equation}
-\tau = \avg{\mu_{t}^{-1}} = \dfrac{1}{ \Ne u}\avg{\dfrac{f(\Rp_{t} )}{f'(\Rp_{t})(1 - \Rp_{t} )}}  = \dfrac{f(\R )}{ \Ne u f'(\R)(1 - \R) }
+\tau = \avg{\dfrac{1}{\lambda_t}} = \dfrac{1}{ \mu }\avg{\dfrac{f(\Rp_{t} )}{f'(\Rp_{t})(1 - \Rp_{t} )}}  = \dfrac{f(\R )}{ \mu f'(\R)(1 - \R) }
 \end{equation}
 
 And thus we get a self-consistent equation on $\R$ 
 \begin{align} 
-	& \dfrac{f'(\R )}{f(\R )} \dfrac{(1- \R )(1- \Rmin )}{\R } = \dfrac{v r_o}{ u} \\
-	\Rightarrow  & \R= g\left(\dfrac{v r_o}{ u}\right)
+	& \dfrac{f'(\R )}{f(\R )} \dfrac{(1- \R )(1- \Rmin )}{\R } = \dfrac{\rho }{ \mu} = \dfrac{2 v r_0}{u} \\
+	\Rightarrow  & \R= g\left(\dfrac{2 v r_0}{ u}\right)
 \end{align}
 
 Where $g$ is a strictly decreasing function cannot be solved explicitly but can be approximated (see section small load approximation). 
 It is important to note that $\R$ is the independent if the population size $\Ne$, as our simulation was suggesting.
 
 In the succession regime, the diversity at the PRDM9 locus $\D$ is simply equal $1$ since there is only one allele.
+\begin{equation}
+  \D = 1
+\end{equation}
 
-In the succession regime, the landscape of hotspots is $\V = \R $ ?????
+In the succession regime, the landscape of hotspots is the mean recombination rate ($\R$)
+\begin{equation}
+  \V = \R
+\end{equation}
 
 And finally, we get the turn-over time $\T$ 
 \begin{equation}
   \T =  \tau = \dfrac{1 - \Rmin }{\rho \R }
 \end{equation}
-
 
 \subsection*{Analytical approximations in polymorphic regime}
 
@@ -293,11 +318,11 @@ So far we considered $\R$ as an external parameter for a focal allele, but if ev
   & \left\{
   \begin{aligned}
     \tau &= \int_{0}^{\infty } x_{t} \dd  t = \dfrac{1 - \Rmin }{\rho \R } \\
-    \tau &= \left( 2 \Ne u \dfrac{f'(\R )}{2f(\R )} (1-\R )  \right)^{-1}
+    \tau &= \left( \mu \dfrac{f'(\R )}{f(\R )} (1-\R )  \right)^{-1}
   \end{aligned}
   \right. \\
    \Rightarrow &
-    \dfrac{f'(\R )}{f(\R )} \dfrac{(1- \R )(1- \Rmin )}{\R } = \dfrac{v r_o}{ u}
+    \dfrac{f'(\R )}{f(\R )} \dfrac{(1- \R )(1- \Rmin )}{\R } = \dfrac{\rho}{ \mu}
 \end{align}
 Again surprisingly, we get the same self-consistent equation as in succession regime.
 
@@ -314,57 +339,45 @@ In the same fashion, we get the landscape of hotspots $\V$
 
 And finally, we get the turn-over time $\T$ 
 \begin{equation}
-  \T = \dfrac{\D}{\Ne u \dfrac{f'(\R )}{2 f(\R )} (1-\R )}  =  \left( \dfrac{ f(\R )}{f'(\R )} \right)^2  \dfrac{1}{(1-\R )( 1 + \Rmin  - 2 \R   )}  \dfrac{8 v r_0}{u}
+  \T = \dfrac{\D}{\mu \dfrac{f'(\R )}{ f(\R )} (1-\R )}  = \dfrac{4 \rho }{ \mu} \left( \dfrac{ f(\R )}{f'(\R )} \right)^2  \dfrac{1}{(1-\R )( 1 + \Rmin  - 2 \R   )} 
 \end{equation}
 
 \subsection*{Small load development}
 The first approximation is to set a power law function for the fitness; $f(x)=x^{\alpha}$, thus $f'(\R)/f(\R)= \alpha / \R$.
 
-Let us define $\epsilon = \sqrt{\dfrac{v r_0}{\alpha u}}$
+Let us define $\epsilon =  \sqrt{\dfrac{ \rho }{ \alpha \mu }} = \sqrt{\dfrac{2 v r_0}{\alpha u}}$
 
-\begin{equation}
-   \dfrac{(1- \R )(1- \Rmin )}{\R^2} =  \epsilon^2
-\end{equation}
-
-\begin{align}
-    \Rmin  &=\frac{7}{4}-\frac{\sqrt{48-39  \R}}{4 \sqrt{ \R}}
-\end{align}
-
+We derived a second order development for $\R$ and $\Rmin$
 \begin{align} 
-    & \dfrac{(1- \R )(1- \Rmin )}{\R^2} =  \epsilon \\
-    & \dfrac{(1- \R )\left(\dfrac{\sqrt{48-39 \R}}{4 \sqrt{\R}} -\frac{3}{4}\right)}{\R^2} =  \epsilon \\    
+  \begin{aligned}
+    \epsilon^2  &= \dfrac{(1- \R )(1- \Rmin )}{\R^2} \\
+     0 &= 1-\Rmin  + \R  \operatorname{log}(\Rmin ) \\    
+     \end{aligned}
     \Rightarrow &
     \left\{
   \begin{aligned}
-     \R =  1 - \dfrac{1}{\sqrt{2}}\sqrt{\epsilon} + \dfrac{5}{12} \epsilon + \circ ( \epsilon)\\
-     \Rmin =  1 - \sqrt{2} \sqrt{\epsilon} + \dfrac{7}{6} \epsilon + \circ ( \epsilon)\\
+     \R =  1 - \dfrac{1}{\sqrt{2}} \epsilon + \dfrac{5}{12} \epsilon^2 + \circ ( \epsilon^2)\\
+     \Rmin =  1 - \sqrt{2} \epsilon + \dfrac{7}{6} \epsilon^2 + \circ ( \epsilon^2)\\
      \end{aligned}
   \right.
 \end{align}
 
-with $\dfrac{v r_o}{\alpha u} = \epsilon$
+Moreover, we can then get approximation of $D$, $V$ and $T$ in the polymorphic regime (see appendix).
 
+1. Estimation of $D$ in polymorphic regime
+\begin{equation}
+  \D = 24 N_e u
+\end{equation}
 
-1. Approximation of $D$
+2. Estimation of $V$ in polymorphic regime
+\begin{equation}
+  \V = \dfrac{1}{24 N_e u}
+\end{equation}
 
-\begin{align}
-  \D &= \dfrac{4\rho \alpha }{\R \left[ 1 + \Rmin  - 2 \R   \right]} \\
-   & \simeq \dfrac{12 \rho}{\epsilon} = 12 N_e u
-\end{align}
-
-2. Estimation of $V$
-
-\begin{align}
-  \V &= \dfrac{\R }{4 \rho }\left[ 1 + \Rmin  - 2 \R   \right] \\
-   &\simeq \dfrac{\epsilon}{12 \rho} = \dfrac{1}{12 N_e u}
-\end{align}
-
-3. Estimation of $ T $
-
-\begin{align}
-   \T &= \D \left( \Ne u \alpha \dfrac{1-\R }{\R }   \right)^{-1} \\
-    &\simeq 12 \sqrt{\dfrac{2 }{\alpha \epsilon }} =  12 \sqrt{\dfrac{2 u }{\alpha v r_0}}
-\end{align}
+3. Estimation of $ T $ in polymorphic regime
+\begin{equation}
+   \T =  12 \sqrt{\dfrac{ u }{\alpha v r_0}}
+\end{equation}
 
 \section*{Discussion}
 
@@ -439,14 +452,14 @@ Consequently $\overline{\omega_{t}} = f(\R_{t} )$. \textbf{Proof},
      \overline{\omega_{t}}
 \end{align}
 
-And the selection coefficient $s_{i,t}$ for the variant $i$ can be easily computed
+And the selection coefficient $s_{i,t}$ for the allele $i$ can be easily computed
 
 \begin{equation}
     s_{i,t} = \dfrac{\overline{\omega_{i,t}} - \overline{\omega_{t}}}{\overline{\omega_{t}}}
     \simeq  \dfrac{f'(\R_{t} )}{f(\R_{t} )} \left[ \dfrac{\Rp _{i,t} - \R_{t} }{2} \right]
 \end{equation}
 
-Thus the probability of drawing variant $i$ in the multinomial distribution is given by 
+Thus the probability of drawing allele $i$ in the multinomial distribution is given by 
 \begin{equation}
     x_{i,t} \dfrac{\overline{\omega_{i,t}}}{\overline{\omega_{t}}} = 
      x_{i,t} (1 + s_{i,t}) =  x_{i,t} \left(1 +  \dfrac{f'(\R_{t} )}{f(\R_{t} )} \left[ \dfrac{\Rp _{i,t} - \R_{t} }{2} \right] \right)
@@ -537,6 +550,13 @@ We make use of the three equations :
 \end{align}
 
 \section*{Small load development}
+
+
+The first approximation is to set a power law function for the fitness; $f(x)=x^{\alpha}$, thus $f'(\R)/f(\R)= \alpha / \R$.
+
+
+Let us define $\epsilon =  \sqrt{\dfrac{ \rho }{ \alpha \mu }} = \sqrt{\dfrac{2 v r_0}{\alpha u}}$
+
 Let us define $\Lr = 1 - \R $ is the recombination load and $\Lmin = 1 - \Rmin $ is the maximum recombination load.
 We make as second order development on $\epsilon$ for both $\Lr$ and $\Lmin$
 \begin{align}
@@ -625,4 +645,163 @@ We make as second order development on $\epsilon$ for both $\Lr$ and $\Lmin$
    \right.
 \end{align}
 
+1. Estimation of $D$ in polymorphic regime
+
+\begin{align}
+  \D &= \dfrac{4 \rho f(\R )}{f'(\R )\left[ 1 + \Rmin  - 2 \R   \right]} \\
+  &= \dfrac{4\rho  \R}{ \alpha\left[ 1 + \Rmin  - 2 \R   \right]} \\
+   & = 12 \dfrac{\rho}{\alpha \epsilon^2} = 24 N_e u
+\end{align}
+
+2. Estimation of $V$ in polymorphic regime
+
+\begin{align}
+ \V &=  \dfrac{f'(\R )}{4 \rho f(\R )}\R \left[ 1 + \Rmin  - 2 \R   \right] \\
+   &= \dfrac{\alpha }{4 \rho }\left[ 1 + \Rmin  - 2 \R   \right] \\
+   &= \dfrac{\alpha \epsilon^2 }{12 \rho} = \dfrac{1}{24 N_e u}
+\end{align}
+
+3. Estimation of $ T $ in polymorphic regime
+
+\begin{align}
+   \T &= \D \left( \mu \alpha \dfrac{1-\R }{\R }   \right)^{-1} \\
+    &=  12 \dfrac{\rho}{\alpha \epsilon^2 \mu} \dfrac{\sqrt{2}}{ \alpha  \epsilon } \\
+    &=  12 \dfrac{\sqrt{2}}{ \alpha  \epsilon } =  12 \sqrt{\dfrac{u }{\alpha v r_0}}
+\end{align}
+
+\part*{Figures}
+
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=0.8\textwidth]{Images/recombination.pdf}\\
+		\caption{ \textbf{ The kingdom of recombinations.} 
+}
+\end{figure*}
+
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=0.8\textwidth]{Images/dBGC.pdf}\\
+		\caption{ \textbf{ Biased Gene Conversion.} 
+}
+\end{figure*}
+
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=0.8\textwidth]{Images/wright-fisher.pdf}\\
+		\caption{ \textbf{ The Wright-Fisher simulator.} 
+}
+\end{figure*}
+
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=0.8\textwidth]{Images/simulated-trajectory.pdf}\\
+		\caption{ \textbf{ Typical simulation trajectory.} 
+}
+\end{figure*}
+
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=0.8\textwidth]{Images/polymorphism.pdf}\\
+		\caption{ \textbf{ Polymorphism or succession ?} 
+}
+\end{figure*}
+
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=0.8\textwidth]{Images/single-allele.pdf}\\
+		\caption{ \textbf{ Trajectory of a single allele} 
+}
+\end{figure*}
+
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=0.8\textwidth]{Images/tilling-argument.pdf}\\
+		\caption{ \textbf{ Tilling argument.} 
+}
+\end{figure*}
+
+\clearpage
+
+\part*{Phase diagram data}
+Each simulation starts by a burn-in, and the the data a recorded only when the steady-state is reached. The burn-in phase is finished when all initial alleles in the population are extinct and replaced by new alleles. The number of generations simulated at the steady state is $50$ times the number of generations necessary during burn-in. \\
+
+Each phase diagram is computed by running $16$ independent simulations and changing the value of only one parameter around it's central value. The range around the central value of the parameter is $10^{4}$, meaning the minimum value (the left of the diagram) is $10^2$ times lower than the central value, and maximum value (the right of the diagram) is $10^2$ times greater than the central value.\\
+
+
+The central value for all phase diagrams are :
+\begin{itemize}
+\item $\Ne=10^{5}$ : The population size
+\item $u=10^{-6}$ : The mutation rate at the PRDM9 locus
+\item $v=10^{-6}$ : The mutation rate at the hotspots locus
+\item $r_0=10^{-3}$ : The recombination rate of active targets
+\item $\alpha=10^{-1}$ : The exponent of the fitness function
+\end{itemize}
+
+In solid blue are the summary statistics averaged for each simulation.
+The range in light blue is the variance (over the simulation) of the summary statistic for each the simulation.
+
+\clearpage
+
+\section*{Self-consistent mean field approximation}
+In solid yellow are the summary statistics estimated from the parameters by self-consistent mean field approximation
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=0.8\textwidth]{Images/mean-field-mean-activity.pdf}\\
+		\caption{ \textbf{ Mean activity.} 
+}
+\end{figure*}
+
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=0.8\textwidth]{Images/mean-field-prdm9-diversity.pdf}\\
+		\caption{ \textbf{ Diversity.} 
+}
+\end{figure*}
+
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=0.8\textwidth]{Images/mean-field-landscape-variance.pdf}\\
+		\caption{ \textbf{ Landscape of erosion.} 
+}
+\end{figure*}
+
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=0.8\textwidth]{Images/mean-field-turn-over.pdf}\\
+		\caption{ \textbf{ Turn over time.} 
+}
+\end{figure*}
+
+\clearpage
+
+\section*{Small load estimation}
+In solid yellow are the summary statistics estimated  from the parameters using small load development
+
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=0.8\textwidth]{Images/small-load-mean-activity.pdf}\\
+		\caption{ \textbf{ Mean activity.} 
+}
+\end{figure*}
+
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=0.8\textwidth]{Images/small-load-prdm9-diversity.pdf}\\
+		\caption{ \textbf{ Diversity.} 
+}
+\end{figure*}
+
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=0.8\textwidth]{Images/small-load-landscape-variance.pdf}\\
+		\caption{ \textbf{ Landscape of erosion.} 
+}
+\end{figure*}
+
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=0.8\textwidth]{Images/small-load-turn-over.pdf}\\
+		\caption{ \textbf{ Turn over time.} 
+}
+\end{figure*}
 \end{document}
