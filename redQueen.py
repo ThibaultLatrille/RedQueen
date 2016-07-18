@@ -199,6 +199,7 @@ class Model(object):
 
     def prdm9_diversity_small_load(self):
         return max(1., 12 * self.rho / (self.alpha * self.epsilon**2))
+        #return max(1., 12 * self.rho / (self.alpha * self.epsilon**2) * (1 - self.epsilon/np.sqrt(2)))
 
     def landscape_variance_estimation(self):
         mean_activity = self.mean_activity_estimation()
@@ -208,6 +209,10 @@ class Model(object):
 
     def landscape_variance_small_load(self):
         return 1. / self.prdm9_diversity_small_load()
+        #landscape = 1. / (12 * self.rho / (self.alpha * self.epsilon**2)) * (1 - self.epsilon/np.sqrt(2))
+	#if landscape < 0:
+	#	landscape = 1.
+        #return min(1., landscape)
 
     def probability_fixation(self, mean_activity):
         if mean_activity == 0.:
@@ -259,6 +264,8 @@ class Model(object):
         return copy.copy(self)
 
 
+# this is a series of samples, at regular times
+# each sample specifies number of alleles (K), and their associated frequencies and activities
 class DataSnapshots(object):
     def __init__(self):
         self.prdm9_frequencies, self.hotspots_activity, self.prdm9_fitness = [], [], []
@@ -272,16 +279,19 @@ class DataSnapshots(object):
         self.ids.append(step.ids)
         self.nbr_prdm9.append(step.prdm9_polymorphism)
 
+    # mean over the population for each sample
     def mean_activity_array(self):
         return np.array(map(lambda erosion, freq: self.n_moment(erosion, freq, 1), self.hotspots_activity,
                             self.prdm9_frequencies))
 
+    # mean over the samples (mean over the simulation trajectory)
     def mean_activity(self):
         return np.mean(self.mean_activity_array())
 
     def prdm9_diversity_array(self):
         return np.array(map(lambda frequencies: 1. / np.sum(np.power(frequencies, 2)), self.prdm9_frequencies))
 
+    # mean over the samples (mean over the simulation trajectory)
     def prdm9_diversity(self):
         return np.mean(self.prdm9_diversity_array())
 
@@ -289,6 +299,7 @@ class DataSnapshots(object):
         return np.array(map(lambda erosion, freq: self.n_moment(freq, erosion, 2), self.hotspots_activity,
                             self.prdm9_frequencies))
 
+    # mean over the samples (mean over the simulation trajectory)
     def landscape_variance(self):
         return np.mean(self.landscape_variance_array())
 
@@ -331,6 +342,10 @@ class DataSnapshots(object):
         else:
             return np.sum(x * frequencies)
 
+
+# a simulation takes an instance of model as a parameter
+# creates a DataSnapshots object
+# run the model and stores states of the model at regular time intervals into snapshot object
 
 class Simulation(object):
     def __init__(self, model, loops=10):
@@ -422,6 +437,8 @@ class Simulation(object):
         pickle.dump(self, open(str(self) + ".p", "wb"))
 
 
+# a more complex simulation object
+# makes a series of simulations for regularly spaced (in log) values of key parameters of the model
 class SimulationsAlongParameter(object):
     def __init__(self, model, parameter="null", nbr_of_simulations=20, scale=10 ** 2, loops=10):
         parameter_name_dict = {"fitness": "alpha",
@@ -532,8 +549,13 @@ class Batch(list):
                 batch.plot_series(
                     map(lambda sim: np.array(getattr(sim.data, summary_statistic + "_array")()), batch.simulations),
                     BLUE, caption)
+	    method = "estimation"
             array = map(lambda model: getattr(model, summary_statistic + "_" + method)(), models)
             plt.plot(batch.parameter_range, array, color=YELLOW, linewidth=3)
+            plt.yscale(yscale)
+            method = "small_load"
+            array = map(lambda model: getattr(model, summary_statistic + "_" + method)(), models)
+            plt.plot(batch.parameter_range, array, color=GREEN, linewidth=3)
             plt.yscale(yscale)
 
         plt.tight_layout()
@@ -565,7 +587,7 @@ def make_batch():
     batch = Batch()
     for parameter in ["population", "erosion", "mutation", "fitness"]:
         batch.append(SimulationsAlongParameter(model.copy(), parameter=parameter,
-                                               nbr_of_simulations=16, scale=10 ** 4, loops=30))
+                                               nbr_of_simulations=64, scale=10 ** 4, loops=30))
     for simulation_along_parameter in batch:
         simulation_along_parameter.run(nbr_of_cpu=8)
     batch.pickle()
