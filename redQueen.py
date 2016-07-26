@@ -87,7 +87,7 @@ class Model(object):
 
     def scaling_parameters(self):
         # Mu is the scaled mutation rate
-        self.mu = 2 * self.population_size * self.mutation_rate_prdm9
+        self.mu = 4 * self.population_size * self.mutation_rate_prdm9
         # Rho is the scaled erosion rate
         self.rho = 4 * self.population_size * self.mutation_rate_hotspot * self.recombination_rate
         self.epsilon = np.sqrt(self.rho / (self.mu * self.alpha))
@@ -102,7 +102,7 @@ class Model(object):
 
     def mutation(self):
         # The number of new alleles is poisson distributed
-        new_alleles = np.random.poisson(self.mu)
+        new_alleles = np.random.poisson(2 * self.population_size * self.mutation_rate_prdm9)
         # Initialize new alleles in the population only if necessary
         if new_alleles > 0:
             self.prdm9_polymorphism -= np.random.multinomial(new_alleles, sum_to_one(self.prdm9_polymorphism))
@@ -185,13 +185,13 @@ class Model(object):
         return brentq(lambda x: self.mean_activity_equation(x), 0, 1)
 
     def mean_activity_equation(self, x):
-        return self.derivative_log_fitness(x) * (1 - x) * (1 - self.activity_limit(x)) - (x * self.rho / self.mu)
+        return self.derivative_log_fitness(x) * (1 - x) * (1 - self.activity_limit(x)) - (2. * x * self.rho / self.mu)
 
     def mean_activity_small_load(self):
-        return 1 - self.epsilon / np.sqrt(2)
+        return 1 - self.epsilon
 
     def activity_limit_small_load(self):
-        return 1 - np.sqrt(2) * self.epsilon
+        return 1 - 2. * self.epsilon
 
     def frequencies_wrt_activity(self, mean_activity, l_limit):
         l = np.linspace(l_limit, 1)
@@ -219,8 +219,7 @@ class Model(object):
             return max(1., diversity)
 
     def prdm9_diversity_small_load(self):
-        return max(1., 12 * self.rho / (self.alpha * self.epsilon**2))
-        # return max(1., 12 * self.rho / (self.alpha * self.epsilon**2) * (1 - self.epsilon/np.sqrt(2)))
+        return max(1., 6 * self.rho / (self.alpha * self.epsilon**2))
 
     def landscape_variance_estimation(self):
         mean_activity = self.mean_activity_estimation()
@@ -230,10 +229,6 @@ class Model(object):
 
     def landscape_variance_small_load(self):
         return 1. / self.prdm9_diversity_small_load()
-        # landscape = 1. / (12 * self.rho / (self.alpha * self.epsilon**2)) * (1 - self.epsilon/np.sqrt(2))
-        # if landscape < 0:
-        # landscape = 1.
-        # return min(1., landscape)
 
     def probability_fixation(self, mean_activity):
         if mean_activity == 0.:
@@ -241,7 +236,7 @@ class Model(object):
         elif mean_activity == 1.:
             return 1. / self.population_size
         else:
-            selection = self.derivative_log_fitness(mean_activity) * (1. - mean_activity)
+            selection = self.derivative_log_fitness(mean_activity) * (1. - mean_activity) / 2.
             return (1. - np.exp(-selection)) / (1. - np.exp(-2. * self.population_size * selection))
 
     def turn_over_estimation(self):
@@ -249,7 +244,7 @@ class Model(object):
         return self.prdm9_diversity_estimation() / (self.mu * self.probability_fixation(mean_activity))
 
     def turn_over_small_load(self):
-        return self.prdm9_diversity_small_load() / (self.mu * self.alpha * (1. - self.mean_activity_small_load()))
+        return self.prdm9_diversity_small_load() / (self.mu * self.alpha * (1. - self.mean_activity_small_load()) / 2.)
 
     def __str__(self):
         name = "u=%.1e" % self.mutation_rate_prdm9 + \
@@ -646,7 +641,7 @@ def make_batch():
     batch = Batch()
     for parameter in ["population", "erosion", "mutation", "fitness"]:
         batch.append(SimulationsAlongParameter(model.copy(), parameter=parameter,
-                                               nbr_of_simulations=128, scale=10 ** 4, loops=30))
+                                               nbr_of_simulations=64, scale=10 ** 4, loops=30))
     for simulation_along_parameter in batch:
         simulation_along_parameter.run(nbr_of_cpu=8)
     batch.pickle()
