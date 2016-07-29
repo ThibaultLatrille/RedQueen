@@ -439,6 +439,48 @@ Second,in the polymorphic regime, the equilibrium diversity at the PRDM9 locus, 
 The scaling relations predicted for the four summary statistics by our mean-field approximation are shown on the top of the simulation results on figures 2, 3, 4 and 5, under the small-load approximation (green) as well as for arbitrary $\epsilon$, by numerically solving the self-consistent equation \ref{selfconsistent} (orange).
 In spite of the rather bold approximations that were made, the predicted scaling is globally in accordance with the simulation results. Expectedly, the small-load approximation fails when the recombination gap becomes significant (typically, when it is larger than 0.2).
 
+\section*{Discussion}
+
+\subsection*{Main results}
+
+The fact that the equilibrium recombination activity does not depend on $N_e$ is relatively easy to understand: the two forces of the Red Queen, dBGC and selection, are both scaled by $N_e$ (see small-load argument above: comparing $4 N_e u \alpha$ and $4 N_e v r_0$.
+
+A less trivial question: how the Red-Queen dynamics scales with parameters, in particular population size. Here we see that there are in fact two regimes, with a qualitative transition between them: effective population size tunes the rate of turnover of the process for low $\Ne u$, but the variance of recombination landscapes for high $N_e u$.
+
+The transision between the two regimes occurs when $\tau$, the time between successive sweeps, becomes of the same order of magnitude as the time for an allele to sweep. This time is approx. equal to 
+\begin{eqnarray*}
+\tau_s &=& \frac{2\ln N_e}{s}
+\end{eqnarray*}
+whereas
+\begin{eqnarray*}
+\tau &=& \frac{1}{4 N_e u s}
+\end{eqnarray*}
+which will be equal when:
+\begin{eqnarray*}
+8 N_e \ln N_e u = 1
+\end{eqnarray*}
+Another derivation: when the polymorphic regime breaks down, i.e. when $\D = 24 N_e u = 1$.
+% Unless for unreasonably large or small $N_e$, these two approximations are relatively similar.
+
+How to understand the fact that the two derivations, polymorphic and sucession, give identical equations, in spite of being derived based on different arguments? How to understand the fact that polymorphism at the PRDM9 locus scales as $24 N_e u$ ?
+
+\subsection*{Testing against empirical data}
+
+Quantify the recombination gap and recombination load. To be confirmed but: mammals seem to be in the (lower part of the) polymorphic regime. In this regime, we expect that the rate of turnover of recombination landscapes should be constant across mammals, but that the variance of recombination landscapes should decrease with population size (should increase with body size).
+
+Coupling these arguments with gBGC: if $b_0$ and $v/u$ are constant across mammals, then the number of GC substitutions per gBGC episode (per hot spot) approx. constant across mammals. On the other hand, the number of gBGC episodes per My and per Mb scales linearly with $N_e u$. This predicts the following affine relation between equilibrium GC bias and $N_e u$;
+\begin{eqnarray*}
+\frac{GC^*}{AT^*} = a + b N_e u
+\end{eqnarray*}
+Note that this affine scaling is different from, and might be more reasonable than, the exponential scaling expected under constant $b_0$ and uniform and constant recombination landscapes across mammals.
+
+Another consequence: we have an estimate of the scaled selection coefficient $4 N_e s$ at the PRDM9 locus. We could use it to derive an estimate of the rate of adatpive substitution at the PRDM9 locus, relative to the neutral rate.
+In the context of classic codon models, $dN/dS$ can be seen as an empirical estimate of the relative fixation probability of non-synonymous substitutions: $\omega = \langle 2 N_e p_{fix} \rangle$. In a context of strong positive selection, $p_{fix} = 2s$ and thus $\omega = 4 N_e s$. By analogy, the relative rate of adaptive evolution or PRDM9 would be:
+ \begin{eqnarray*}
+\frac{\lambda}{\lambda_0} &=& \frac{4 N_e s}{\D} = \frac{4 N_e s}{24 N_e u} = \frac{s}{6 u} = \frac{\alpha \epsilon}{12 u}.
+\end{eqnarray*}
+Here, the rate of adaptive substitution should be divided by $D$, since we should account for the fact that each new adaptive substitution at the PRDM9 locus is due to an invasion by a new allele, which is a mutant of one out of an effective number of $D$ alleles segregating at this locus at any given time.
+
 \newpage
 
 %\bibliographystyle{plain}
