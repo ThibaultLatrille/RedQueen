@@ -12,8 +12,6 @@
 \usepackage{latexsym}
 \usepackage{psfrag}
 \usepackage{graphicx}
-\usepackage[]{aeguill}
-\usepackage{setspace}
 \usepackage{caption2}
 \usepackage{url}
 
@@ -22,7 +20,6 @@
 \usepackage{tikz}
 
 
-\usepackage{bbm}
 \newcommand\bbone{\ensuremath{\mathbbm{1}}} 
 
 \usepackage{natbib}
@@ -424,7 +421,7 @@ and, in the polymorphic regime:
 \begin{eqnarray*}
 \D &=& 24 N_e u, \\
 \V &=& \dfrac{1}{24 N_e u}, \\
-\T &=&  \frac{12}{\alpha \epsilon}
+\T &=& 12 \sqrt{\dfrac{u }{\alpha v r_0}}
 \end{eqnarray*}
 
 The small-load development conducted above leads to several important insights.
@@ -498,7 +495,7 @@ Here, the rate of adaptive substitution should be divided by $D$, since we shoul
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=1.0\textwidth]{Images/mean-activity.pdf}\\
+       \includegraphics[width=0.8\textwidth]{Images/mean-activity.pdf}\\
 \end{figure*}
 \textbf{Figure 2.} Mean activity $\R$, as a function of effective population size $N_e$ (top left), mutation rate at the targets $v$ (top right), mutation rate at the PRDM9 locus $u$ (bottom left) and selection strength $\alpha$ (bottom right). Mean-field approximation (orange) and small-load approximation (green).
 
@@ -666,7 +663,7 @@ We make use of the three equations :
 The first approximation is to set a power law function for the fitness; $f(x)=x^{\alpha}$, thus $f'(\R)/f(\R)= \alpha / \R$.
 
 
-Let us define $\epsilon =  \sqrt{\dfrac{ \rho }{ \alpha \mu }} = \sqrt{\dfrac{2 v r_0}{\alpha u}}$
+Let us define $\epsilon =  \sqrt{\dfrac{ \rho }{ \alpha \mu }} = \sqrt{\dfrac{v r_0}{\alpha u}}$
 
 Let us define $\Lr = 1 - \R $ is the recombination gap and $\Lmin = 1 - \Rmin $ is the maximum recombination gap.
 We make as second order development on $\epsilon$ for both $\Lr$ and $\Lmin$
@@ -691,93 +688,101 @@ We make as second order development on $\epsilon$ for both $\Lr$ and $\Lmin$
 &\left\{
   \begin{aligned}
          0 &= 1-\Rmin  + \R  \operatorname{log}(\Rmin ) \\
-         \epsilon^2 &=  \dfrac{(1- \R )(1- \Rmin )}{\R^2} 
+         \epsilon^2 &=  \dfrac{(1- \R )(1- \Rmin )}{2 \R^2} 
   \end{aligned}
    \right.
    \\ \Rightarrow
 &\left\{
   \begin{aligned}
          0 &= \Lmin  + ( 1- \Lr) \operatorname{log}(1 - \Lmin ) \\
-         \epsilon^2 &=  \dfrac{ \Lmin \Lr }{(1- \Lr)^2} 
+         \epsilon^2 &=  \dfrac{ \Lmin \Lr }{2(1- \Lr)^2} 
   \end{aligned}
    \right.
     \\ \Rightarrow
    &\left\{
   \begin{aligned}
        &  -\Lmin = ( 1- \Lr) \left(-\Lmin - \dfrac{\Lmin^2}{2} - \dfrac{\Lmin^3}{3} + \circ ( \Lmin^3) \right) \\
-       &   \Lmin \Lr =   (1- \Lr)^2 \epsilon^2
+       &   \Lmin \Lr =   2 (1- \Lr)^2 \epsilon^2
   \end{aligned}
    \right.
        \\ \Rightarrow
    &\left\{
   \begin{aligned}
        &  1 = ( 1- \Lr) \left(1 + \dfrac{\Lmin}{2} + \dfrac{\Lmin^2}{3} + \circ ( \Lmin^2) \right) \\
-       &   \Lmin \Lr =   (1- \Lr)^2 \epsilon^2
+       &   \Lmin \Lr =  2 (1- \Lr)^2 \epsilon^2
   \end{aligned}
    \right.
   \\ \Rightarrow
    &\left\{
   \begin{aligned}
        &  1 = [ 1- \Lra \epsilon - \Lrb \epsilon^2 + \circ ( \epsilon^2) ] \left(1 + \dfrac{\Lmina \epsilon }{2} + \dfrac{ \Lminb \epsilon^2}{2}  + \dfrac{\Lmina^2 \epsilon^2}{3} + \circ ( \epsilon^2) \right) \\
-       &   \Lmina \Lra \epsilon^2 + (\Lmina \Lrb + \Lminb \Lra)  \epsilon^3 + \circ ( \epsilon^3) =   (1- \Lra \epsilon - \Lrb \epsilon^2 + \circ ( \epsilon^2))^2 \epsilon^2
+       &   \Lmina \Lra \epsilon^2 + (\Lmina \Lrb + \Lminb \Lra)  \epsilon^3 + \circ ( \epsilon^3) =  2 (1- \Lra \epsilon - \Lrb \epsilon^2 + \circ ( \epsilon^2))^2 \epsilon^2
   \end{aligned}
    \right.
      \\ \Rightarrow
    &\left\{
   \begin{aligned}
        &  1 = 1 + \dfrac{\Lmina - 2 \Lra }{2} \epsilon + \dfrac{ 2 \Lmina^2 - 3 \Lmina \Lra + 3 \Lminb - 6 \Lrb  }{6} \epsilon^2 + \circ ( \epsilon^2)  \\
-       &   \Lmina \Lra + (\Lmina \Lrb + \Lminb \Lra)  \epsilon + \circ ( \epsilon) =   1 - 2 \Lra \epsilon + \circ ( \epsilon )
+       &   \Lmina \Lra + (\Lmina \Lrb + \Lminb \Lra)  \epsilon + \circ ( \epsilon) =   2 - 4 \Lra \epsilon + \circ ( \epsilon )
   \end{aligned}
-   \right.
+   \right. \displaybreak[3] \\ 
   \\ \Rightarrow
    &\left\{
      \begin{aligned}
        &  0 = \Lmina - 2 \Lra \\
        &  0 = 2 \Lmina^2 - 3 \Lmina \Lra + 3 \Lminb - 6 \Lrb \\
-       &  0 = 1 - \Lmina \Lra   \\
-       &  0 = \Lmina \Lrb + \Lminb \Lra + 2 \Lra \\
+       &  0 = 2 - \Lmina \Lra   \\
+       &  0 = \Lmina \Lrb + \Lminb \Lra + 4 \Lra \\
   \end{aligned}
    \right.
      \\ \Rightarrow
    &\left\{
    \begin{aligned}
-       &  \Lmina = \sqrt{2} \\
-       &  \Lminb= \dfrac{1}{\sqrt{2}} \\
-       &  \Lra = \dfrac{-7}{6}  \\
-       &  \Lrb = \dfrac{-5}{12} \\
+       &  \Lmina = 2 \\
+       &  \Lra = 1 \\
+       &  \Lminb = \dfrac{-7}{3}  \\
+       &  \Lrb = \dfrac{-5}{6} \\
   \end{aligned}
      \right.
        \\ \Rightarrow
    &\left\{
      \begin{aligned}
-     \R  &=  1 - \dfrac{1}{\sqrt{2}}\epsilon + \dfrac{5}{12} \epsilon^2 + \circ ( \epsilon^2)\\
-     \Rmin & =  1 - \sqrt{2} \epsilon + \dfrac{7}{6} \epsilon^2 + \circ ( \epsilon^2)\\
+     \R  &=  1 - \epsilon + \dfrac{5}{6} \epsilon^2 + \circ ( \epsilon^2)\\
+     \Rmin & =  1 - 2 \epsilon + \dfrac{7}{3} \epsilon^2 + \circ ( \epsilon^2)\\
   \end{aligned}
    \right.
 \end{align}
 
-1. Estimation of $D$ in polymorphic regime
+1. Estimation of $1 + \Rmin  - 2 \R$ in polymorphic regime
+
+\begin{align}
+1 + \Rmin  - 2 \R &= 1 +  1 - 2 \epsilon + \dfrac{7}{3} \epsilon^2 - 2 \left( 1 - \epsilon + \dfrac{5}{6} \epsilon^2 \right) \\
+&=  \dfrac{7}{3} \epsilon^2 - \dfrac{5}{3} \epsilon^2 \\
+& =  \dfrac{2}{3} \epsilon^2
+\end{align}
+
+2. Estimation of $D$ in polymorphic regime
 
 \begin{align}
   \D &= \dfrac{4 \rho f(\R )}{f'(\R )\left[ 1 + \Rmin  - 2 \R   \right]} \\
   &= \dfrac{4\rho  \R}{ \alpha\left[ 1 + \Rmin  - 2 \R   \right]} \\
-   & = 12 \dfrac{\rho}{\alpha \epsilon^2} = 24 N_e u
+   & =  \dfrac{6 \rho}{\alpha \epsilon^2} = 24 N_e u
 \end{align}
 
-2. Estimation of $V$ in polymorphic regime
+3. Estimation of $V$ in polymorphic regime
 
 \begin{align}
  \V &=  \dfrac{f'(\R )}{4 \rho f(\R )}\R \left[ 1 + \Rmin  - 2 \R   \right] \\
    &= \dfrac{\alpha }{4 \rho }\left[ 1 + \Rmin  - 2 \R   \right] \\
-   &= \dfrac{\alpha \epsilon^2 }{12 \rho} = \dfrac{1}{24 N_e u}
+   &= \dfrac{\alpha \epsilon^2 }{6 \rho} = \dfrac{1}{24 N_e u}
 \end{align}
 
-3. Estimation of $ T $ in polymorphic regime
+4. Estimation of $ T $ in polymorphic regime
 
 \begin{align}
-   \T &= \D \left( \mu \alpha \dfrac{1-\R }{\R }   \right)^{-1} \\
-    &=  12 \dfrac{\rho}{\alpha \epsilon^2 \mu} \dfrac{\sqrt{2}}{ \alpha  \epsilon } \\
-    &=  12 \dfrac{\sqrt{2}}{ \alpha  \epsilon } =  12 \sqrt{\dfrac{u }{\alpha v r_0}}
+   \T &= \D \left( \mu \alpha \dfrac{1-\R }{ 2 \R }   \right)^{-1} \\
+    &=   \dfrac{6 \rho}{\alpha \epsilon^2 } \dfrac{2}{ \mu \alpha \epsilon } \\
+    &=   \dfrac{12}{ \alpha  \epsilon } =  12 \sqrt{\dfrac{u }{\alpha v r_0}}
 \end{align}
 
 

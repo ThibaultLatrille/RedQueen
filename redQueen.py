@@ -82,18 +82,19 @@ class Model(object):
         self.prdm9_polymorphism = sum_to_one(np.random.sample(nbr_of_alleles))
         self.prdm9_polymorphism *= self.population_size
         self.prdm9_fitness = np.ones(nbr_of_alleles)
+        self.prdm9_longevity = np.zeros(nbr_of_alleles)
         self.hotspots_activity = np.random.sample(nbr_of_alleles)
 
     def scaling_parameters(self):
         # Mu is the scaled mutation rate
-        self.mu = 2 * self.population_size * self.mutation_rate_prdm9
+        self.mu = 4 * self.population_size * self.mutation_rate_prdm9
         # Rho is the scaled erosion rate
         self.rho = 4 * self.population_size * self.mutation_rate_hotspot * self.recombination_rate
         self.epsilon = np.sqrt(self.rho / (self.mu * self.alpha))
         assert self.rho < 0.5, "The scaled erosion rate is too large, decrease either the " \
-                                               "recombination rate, the erosion rate or the population size"
+                               "recombination rate, the erosion rate or the population size"
         assert self.rho > 0.0000000001, "The scaled erosion rate is too low, increase either the " \
-                                                        "recombination rate, the erosion rate or the population size"
+                                        "recombination rate, the erosion rate or the population size"
 
     def forward(self):
         self.mutation()
@@ -101,12 +102,13 @@ class Model(object):
 
     def mutation(self):
         # The number of new alleles is poisson distributed
-        new_alleles = np.random.poisson(self.mu)
+        new_alleles = np.random.poisson(2 * self.population_size * self.mutation_rate_prdm9)
         # Initialize new alleles in the population only if necessary
         if new_alleles > 0:
             self.prdm9_polymorphism -= np.random.multinomial(new_alleles, sum_to_one(self.prdm9_polymorphism))
             self.prdm9_polymorphism = np.append(self.prdm9_polymorphism, np.ones(new_alleles))
             self.hotspots_activity = np.append(self.hotspots_activity, np.ones(new_alleles))
+            self.prdm9_longevity = np.append(self.prdm9_longevity, np.zeros(new_alleles))
             self.ids = np.append(self.ids, range(self.id, self.id + new_alleles))
             self.id += new_alleles
 
@@ -140,6 +142,8 @@ class Model(object):
         else:
             self.prdm9_polymorphism = distribution_vector * self.population_size
 
+        self.prdm9_longevity += 1
+
         # Remove the extincted alleles from the population
         remove_extincted = np.array(map(lambda x: x > 0, self.prdm9_polymorphism), dtype=bool)
         if not remove_extincted.all():
@@ -147,6 +151,7 @@ class Model(object):
             self.hotspots_activity = self.hotspots_activity[remove_extincted]
             self.prdm9_fitness = self.prdm9_fitness[remove_extincted]
             self.ids = self.ids[remove_extincted]
+            self.prdm9_longevity = self.prdm9_longevity[remove_extincted]
 
     def fitness(self, x):
         if self.fitness_family == 3:
@@ -180,13 +185,29 @@ class Model(object):
         return brentq(lambda x: self.mean_activity_equation(x), 0, 1)
 
     def mean_activity_equation(self, x):
-        return self.derivative_log_fitness(x) * (1 - x) * (1 - self.activity_limit(x)) - (x * self.rho / self.mu)
+        return self.derivative_log_fitness(x) * (1 - x) * (1 - self.activity_limit(x)) - (2. * x * self.rho / self.mu)
 
     def mean_activity_small_load(self):
-        return 1 - self.epsilon / np.sqrt(2)
+        return 1 - self.epsilon
 
     def activity_limit_small_load(self):
-        return 1 - np.sqrt(2) * self.epsilon
+        return 1 - 2. * self.epsilon
+
+    def frequencies_wrt_activity(self, mean_activity, l_limit):
+        l = np.linspace(l_limit, 1)
+        x = 1. - l + mean_activity * np.log(l)
+        x *= self.derivative_log_fitness(mean_activity) / (2 * self.rho)
+        return l, np.clip(x, 0., 1.)
+
+    def frequencies_wrt_activity_estimation(self):
+        mean_activity = self.mean_activity_estimation()
+        l_limit = self.activity_limit(mean_activity)
+        return self.frequencies_wrt_activity(mean_activity, l_limit)
+
+    def frequencies_wrt_activity_small_load(self):
+        mean_activity = self.mean_activity_small_load()
+        l_limit = self.activity_limit_small_load()
+        return self.frequencies_wrt_activity(mean_activity, l_limit)
 
     def prdm9_diversity_estimation(self):
         mean_activity = self.mean_activity_estimation()
@@ -198,8 +219,7 @@ class Model(object):
             return max(1., diversity)
 
     def prdm9_diversity_small_load(self):
-        return max(1., 12 * self.rho / (self.alpha * self.epsilon**2))
-        #return max(1., 12 * self.rho / (self.alpha * self.epsilon**2) * (1 - self.epsilon/np.sqrt(2)))
+        return max(1., 6 * self.rho / (self.alpha * self.epsilon**2))
 
     def landscape_variance_estimation(self):
         mean_activity = self.mean_activity_estimation()
@@ -209,10 +229,6 @@ class Model(object):
 
     def landscape_variance_small_load(self):
         return 1. / self.prdm9_diversity_small_load()
-        #landscape = 1. / (12 * self.rho / (self.alpha * self.epsilon**2)) * (1 - self.epsilon/np.sqrt(2))
-	#if landscape < 0:
-	#	landscape = 1.
-        #return min(1., landscape)
 
     def probability_fixation(self, mean_activity):
         if mean_activity == 0.:
@@ -220,7 +236,7 @@ class Model(object):
         elif mean_activity == 1.:
             return 1. / self.population_size
         else:
-            selection = self.derivative_log_fitness(mean_activity) * (1. - mean_activity)
+            selection = self.derivative_log_fitness(mean_activity) * (1. - mean_activity) / 2.
             return (1. - np.exp(-selection)) / (1. - np.exp(-2. * self.population_size * selection))
 
     def turn_over_estimation(self):
@@ -228,7 +244,7 @@ class Model(object):
         return self.prdm9_diversity_estimation() / (self.mu * self.probability_fixation(mean_activity))
 
     def turn_over_small_load(self):
-        return self.prdm9_diversity_small_load() / (self.mu * self.alpha * (1. - self.mean_activity_small_load()))
+        return self.prdm9_diversity_small_load() / (self.mu * self.alpha * (1. - self.mean_activity_small_load()) / 2.)
 
     def __str__(self):
         name = "u=%.1e" % self.mutation_rate_prdm9 + \
@@ -270,7 +286,7 @@ class DataSnapshots(object):
     def __init__(self):
         self.prdm9_frequencies, self.hotspots_activity, self.prdm9_fitness = [], [], []
 
-        self.nbr_prdm9, self.ids = [], []
+        self.nbr_prdm9, self.ids, self.prdm9_longevities = [], [], []
 
     def store(self, step):
         self.prdm9_frequencies.append(sum_to_one(step.prdm9_polymorphism))
@@ -278,6 +294,7 @@ class DataSnapshots(object):
         self.hotspots_activity.append(step.hotspots_activity)
         self.ids.append(step.ids)
         self.nbr_prdm9.append(step.prdm9_polymorphism)
+        self.prdm9_longevities.append(step.prdm9_longevity)
 
     # mean over the population for each sample
     def mean_activity_array(self):
@@ -431,7 +448,50 @@ class Simulation(object):
         plt.savefig('trajectory.svg', format="svg")
         print "Trajectory computed"
         plt.clf()
+        plt.close('all')
         return str(self)
+
+    def save_figure(self):
+        self.save_estimation()
+        self.save_phase_plan()
+        plt.close('all')
+        print str(self)
+
+    def save_estimation(self):
+        my_dpi = 96
+        plt.figure(figsize=(1920 / my_dpi, 1920 / my_dpi), dpi=my_dpi)
+        mean_activity = self.model.mean_activity_estimation()
+        theta = np.linspace(0, 1, 100)
+        plt.plot(theta, np.array(map(lambda x: self.model.mean_activity_equation(x) + x, theta)), color=BLUE, linewidth=2)
+        plt.plot(theta, theta, color=RED, linewidth=2)
+        plt.plot((mean_activity, mean_activity), (0., 1.), 'k-', linewidth=3)
+        plt.title('The self-consistent estimation of theta')
+        plt.xlabel('theta')
+        plt.ylabel('g(theta)')
+        plt.ylim((0., 1.))
+        plt.tight_layout()
+
+        plt.savefig(str(self) + 'estimation.svg', format="svg")
+        plt.clf()
+
+    def save_phase_plan(self):
+        my_dpi = 96
+        plt.figure(figsize=(1920 / my_dpi, 1920 / my_dpi), dpi=my_dpi)
+
+        a = list(itertools.chain.from_iterable(self.data.hotspots_activity))
+        b = list(itertools.chain.from_iterable(self.data.prdm9_frequencies))
+        c = list(itertools.chain.from_iterable(self.data.prdm9_longevities))
+        plt.hexbin(a, b, c, gridsize=200, bins='log')
+        plt.plot(*self.model.frequencies_wrt_activity_estimation(), color=YELLOW, linewidth=3)
+        plt.plot(*self.model.frequencies_wrt_activity_small_load(), color=GREEN, linewidth=3)
+        plt.title('PRMD9 frequency vs hotspot activity')
+        plt.xlabel('hotspot activity')
+        plt.ylabel('PRMD9 frequency')
+
+        plt.tight_layout()
+
+        plt.savefig(str(self) + 'phase.svg', format="svg")
+        plt.clf()
 
     def pickle(self):
         pickle.dump(self, open(str(self) + ".p", "wb"))
@@ -487,8 +547,12 @@ class SimulationsAlongParameter(object):
             map(lambda x: x.run(), self.simulations)
 
         self.pickle()
+        self.save_figure()
         os.chdir('..')
         print 'Simulation computed'
+
+    def save_figure(self):
+        map(lambda x: x.save_figure(), self.simulations)
 
     def pickle(self):
         pickle.dump(self, open(self.parameter_name + ".p", "wb"))
@@ -515,24 +579,16 @@ class SimulationsAlongParameter(object):
 
 class Batch(list):
     def save_figures(self):
-        self.save_figure('mean_activity', False, 'linear')
-        self.save_figure('prdm9_diversity', False, 'log')
-        self.save_figure('landscape_variance', False, 'log')
-        self.save_figure('turn_over', False, 'log')
+        self.save_figure('mean_activity', 'linear')
+        self.save_figure('prdm9_diversity', 'log')
+        self.save_figure('landscape_variance', 'log')
+        self.save_figure('turn_over', 'log')
 
-        self.save_figure('mean_activity', True, 'linear')
-        self.save_figure('prdm9_diversity', True, 'log')
-        self.save_figure('landscape_variance', True, 'log')
-        self.save_figure('turn_over', True, 'log')
-
-    def save_figure(self, summary_statistic="mean_activity", small_load_estimation=False, yscale='log'):
+    def save_figure(self, summary_statistic="mean_activity", yscale='log'):
         caption = {"mean_activity": "The mean activity of the hotspots",
                    "prdm9_diversity": "The diversity of PRDM9",
                    "landscape_variance": "The hotspots landscape variance",
                    "turn_over": "The turn-over time"}[summary_statistic]
-        method = "estimation"
-        if small_load_estimation:
-            method = "small_load"
         my_dpi = 96
         plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
 
@@ -549,20 +605,17 @@ class Batch(list):
                 batch.plot_series(
                     map(lambda sim: np.array(getattr(sim.data, summary_statistic + "_array")()), batch.simulations),
                     BLUE, caption)
-	    method = "estimation"
-            array = map(lambda model: getattr(model, summary_statistic + "_" + method)(), models)
-            plt.plot(batch.parameter_range, array, color=YELLOW, linewidth=3)
-            plt.yscale(yscale)
-            method = "small_load"
-            array = map(lambda model: getattr(model, summary_statistic + "_" + method)(), models)
-            plt.plot(batch.parameter_range, array, color=GREEN, linewidth=3)
-            plt.yscale(yscale)
+            for method, color in (("estimation", YELLOW), ("small_load", GREEN)):
+                array = map(lambda model: getattr(model, summary_statistic + "_" + method)(), models)
+                plt.plot(batch.parameter_range, array, color=color, linewidth=3)
+                plt.yscale(yscale)
 
         plt.tight_layout()
 
-        plt.savefig("%s-batch-" % small_load_estimation + summary_statistic + '.svg', format="svg")
-        plt.savefig("%s-batch-" % small_load_estimation + summary_statistic + '.png', format="png")
+        plt.savefig("%s-batch" % summary_statistic + '.svg', format="svg")
+        plt.savefig("%s-batch" % summary_statistic + '.png', format="png")
         plt.clf()
+        plt.close('all')
         print summary_statistic + ' computed'
         return self
 
@@ -574,6 +627,7 @@ def load_batch(dir_id):
     set_dir("/tmp/" + dir_id)
     simulation_batch = pickle.load(open("Batch.p", "rb"))
     simulation_batch.save_figures()
+    map(lambda x: x.save_figure(), simulation_batch)
 
 
 def make_batch():
@@ -594,5 +648,5 @@ def make_batch():
     batch.save_figures()
 
 if __name__ == '__main__':
-    # load_batch("80D91100")
+    # load_batch("0E1F0873")
     make_batch()
