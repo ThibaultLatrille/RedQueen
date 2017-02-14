@@ -1,13 +1,15 @@
 from multiprocessing import Pool
 import numpy as np
 import copy
-import matplotlib.pyplot as plt
 import os
 import uuid
-import cPickle as pickle
+import pickle as pickle
 import itertools
 from scipy.special import lambertw
 from scipy.optimize import brentq
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 RED = "#EB6231"
 YELLOW = "#E29D26"
@@ -29,7 +31,7 @@ def id_generator(number_of_char):
     :param number_of_char: 'Integer'.
     :return: 'String', a random string of 'number_of_char' characters.
     """
-    return str(uuid.uuid4().get_hex().upper()[0:number_of_char])
+    return str(uuid.uuid4().hex.upper()[0:number_of_char])
 
 
 def set_dir(path):
@@ -205,7 +207,7 @@ class Model(object):
         self.prdm9_longevity += 1
 
         # Remove the extincted alleles from the population
-        remove_extincted = np.array(map(lambda x: x > 0, self.prdm9_polymorphism), dtype=bool)
+        remove_extincted = np.array([x > 0 for x in self.prdm9_polymorphism], dtype=bool)
         if not remove_extincted.all():
             self.prdm9_polymorphism = self.prdm9_polymorphism[remove_extincted]
             self.hotspots_activity = self.hotspots_activity[remove_extincted]
@@ -265,7 +267,7 @@ class Model(object):
         Mean-field derivation of the mean activity of hotspots by solving the self consistent mean field equation.
         :return: 'Float', mean activity of hotspots (R).
         """
-        return brentq(lambda x: self.self_consistent_equation(x), 0, 1)
+        return brentq(lambda x: self.self_consistent_equation(x), 0, 1, full_output=True)[0]
 
     def self_consistent_equation(self, x):
         """
@@ -467,8 +469,8 @@ class Trace(object):
         For each time point of the trace, compute the mean activity of hotspots (R).
         :return: 'Array', mean activity of hotspots (R) for each time point.
         """
-        return np.array(map(lambda erosion, freq: self.n_moment(erosion, freq, 1), self.hotspots_activity,
-                            self.prdm9_frequencies))
+        return np.array([self.n_moment(erosion, freq, 1) for erosion, freq
+                         in zip(self.hotspots_activity, self.prdm9_frequencies)])
 
     # mean over the samples (mean over the simulation trajectory)
     def mean_activity(self):
@@ -483,7 +485,7 @@ class Trace(object):
         For each time point of the trace, compute the Prdm9 diversity (D).
         :return: 'Array', Prdm9 diversity (D) for each time point.
         """
-        return np.array(map(lambda frequencies: 1. / np.sum(np.power(frequencies, 2)), self.prdm9_frequencies))
+        return np.array([1. / np.sum(np.power(frequencies, 2)) for frequencies in self.prdm9_frequencies])
 
     # mean over the samples (mean over the simulation trajectory)
     def prdm9_diversity(self):
@@ -498,8 +500,8 @@ class Trace(object):
         For each time point of the trace, compute the hotspots landscape variance (V).
         :return: 'Array', landscape variance (V) for each time point.
         """
-        return np.array(map(lambda erosion, freq: self.n_moment(freq, erosion, 2), self.hotspots_activity,
-                            self.prdm9_frequencies))
+        return np.array([self.n_moment(freq, erosion, 2) for erosion, freq
+                         in zip(self.hotspots_activity, self.prdm9_frequencies)])
 
     # mean over the samples (mean over the simulation trajectory)
     def landscape_variance(self):
@@ -533,7 +535,7 @@ class Trace(object):
         else:
             middle_lag = (lower_lag + upper_lag) / 2
             while upper_lag - lower_lag >= precision:
-                middle_lag = (lower_lag + upper_lag) / 2
+                middle_lag = int((lower_lag + upper_lag) / 2)
                 if self.cross_homozygosity(middle_lag) / ch_0 >= percent:
                     lower_lag = middle_lag
                 else:
@@ -624,9 +626,9 @@ class Simulation(object):
             t += 1
 
         self.nbr_of_steps = max(100, 10000 / len(self.model.ids))
-        self.t_max = 10 * (int(max(int(self.loops * t), self.nbr_of_steps)) / 10 + 1)
+        self.t_max = 10 * (int(max(int(self.loops * t), self.nbr_of_steps) / 10) + 1)
 
-        print "Burn-in Completed"
+        print("Burn-in Completed")
 
     def run(self):
         """
@@ -649,7 +651,7 @@ class Simulation(object):
                 self.trace.store(self.model)
 
             if int(10 * t) % self.t_max == 0:
-                print "Computation at {0}%".format(float(100 * t) / self.t_max)
+                print("Computation at {0}%".format(float(100 * t) / self.t_max))
 
         return self
 
@@ -662,8 +664,8 @@ class Simulation(object):
         my_dpi = 96
         plt.figure(figsize=(1920 / my_dpi, 1440 / my_dpi), dpi=my_dpi)
 
-        generations = list(itertools.chain.from_iterable(map(lambda x, y: [x] * len(y),
-                                                             self.generations, self.trace.prdm9_frequencies)))
+        generations = list(itertools.chain.from_iterable([[x] * len(y) for x, y in
+                                                          zip(self.generations, self.trace.prdm9_frequencies)]))
         xlim = [min(generations), max(generations)]
 
         plt.subplot(311)
@@ -691,7 +693,7 @@ class Simulation(object):
 
         plt.savefig('trajectory.png', format="png")
         plt.savefig('trajectory.svg', format="svg")
-        print "Trajectory computed"
+        print("Trajectory computed")
         plt.clf()
         plt.close('all')
         return str(self)
@@ -704,7 +706,7 @@ class Simulation(object):
         self.save_estimation()
         self.save_phase_plan()
         plt.close('all')
-        print str(self)
+        print(str(self))
 
     def save_estimation(self):
         """
@@ -716,7 +718,7 @@ class Simulation(object):
         plt.figure(figsize=(1920 / my_dpi, 1920 / my_dpi), dpi=my_dpi)
         mean_activity = self.model.mean_activity_estimation()
         theta = np.linspace(0, 1, 100)
-        plt.plot(theta, np.array(map(lambda x: self.model.self_consistent_equation(x) + x, theta)), color=BLUE, linewidth=2)
+        plt.plot(theta, np.array([self.model.self_consistent_equation(x) + x for x in theta]), color=BLUE, linewidth=2)
         plt.plot(theta, theta, color=RED, linewidth=2)
         plt.plot((mean_activity, mean_activity), (0., 1.), 'k-', linewidth=3)
         plt.title('The self-consistent estimation of theta')
@@ -836,7 +838,7 @@ class SimulationsAlongParameter(object):
         self.pickle()
         self.save_figure()
         os.chdir('..')
-        print 'Simulation computed'
+        print('Simulation computed')
         return self
 
     def save_figure(self):
@@ -867,9 +869,9 @@ class SimulationsAlongParameter(object):
                              "erosion": "Mutation rate of the hotspots",
                              "population": "The population size",
                              "recombination": "The recombination rate of the hotspots"}[self.parameter]
-        mean = map(lambda serie: np.mean(serie), series)
+        mean = [np.mean(serie) for serie in series]
         plt.plot(self.parameter_range, mean, color=color, linewidth=2)
-        sigma = map(lambda serie: 1.96*np.sqrt(np.var(serie)), series)
+        sigma = [1.96*np.sqrt(np.var(serie)) for serie in series]
         y_max = np.add(mean, sigma)
         y_min = np.subtract(mean, sigma)
         plt.fill_between(self.parameter_range, y_max, y_min, color=color, alpha=0.3)
@@ -920,18 +922,18 @@ class Batch(list):
         for j, batch in enumerate(self):
             plt.subplot(2, 2, j + 1)
 
-            models = map(lambda sim: sim.model, batch.simulations)
+            models = [sim.model for sim in batch.simulations]
 
             if summary_statistic == 'turn_over':
-                lag = map(lambda sim: sim.generations[sim.trace.dichotomic_search(0.5)], batch.simulations)
+                lag = [sim.generations[sim.trace.dichotomic_search(0.5)] for sim in batch.simulations]
                 plt.plot(batch.parameter_range, lag, color=BLUE)
                 plt.xscale('log')
             else:
                 batch.plot_series(
-                    map(lambda sim: np.array(getattr(sim.trace, summary_statistic + "_array")()), batch.simulations),
+                    [np.array(getattr(sim.trace, summary_statistic + "_array")()) for sim in batch.simulations],
                     BLUE, y_label)
             for method, color in (("estimation", YELLOW), ("small_load", GREEN)):
-                array = map(lambda model: getattr(model, summary_statistic + "_" + method)(), models)
+                array = [getattr(model, summary_statistic + "_" + method)() for model in models]
                 plt.plot(batch.parameter_range, array, color=color, linewidth=3)
                 plt.yscale(yscale)
 
@@ -941,7 +943,7 @@ class Batch(list):
         plt.savefig("%s-batch" % summary_statistic + '.png', format="png")
         plt.clf()
         plt.close('all')
-        print summary_statistic + ' computed'
+        print(summary_statistic + ' computed')
         return self
 
     def pickle(self):
@@ -954,10 +956,10 @@ class Batch(list):
 
 def load_batch(dir_id):
     """
+    Given a directory ('dir_id') containing the results of a batch simulation, load the pickle file (Batch.p) and save
+    the figure again.Could be used if changes have been made to the figure, without running the simulations again.
     :param dir_id: a string.
-    :return: Given a directory ('dir_id') containing the results of a batch simulation,
-        load the pickle file (Batch.p) and save the figure again.
-        Could be used if changes have been made to the figure, without running the simulations again.
+    :return: None.
     """
     set_dir("/tmp/" + dir_id)
     simulation_batch = pickle.load(open("Batch.p", "rb"))
@@ -983,7 +985,7 @@ def make_batch():
         batch.append(SimulationsAlongParameter(model.copy(), parameter=parameter,
                                                nbr_of_simulations=64, scale=10 ** 4, loops=30))
     for simulation_along_parameter in batch:
-        simulation_along_parameter.run(nbr_of_cpu=8)
+        simulation_along_parameter.run(nbr_of_cpu=4)
     batch.pickle()
     batch.save_figures()
 
