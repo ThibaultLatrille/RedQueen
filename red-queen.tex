@@ -190,7 +190,7 @@ The turn-over is defined as the decorrelation time of the relative cross-homozyg
 It is such that 
 
 \begin{align}
-    \avg{\dfrac{\sum_{i \in K_{t}} x_{i,t} x_{i,t+T}}{\sum_{i \in K_{t}} x_{i,t} x_{i,t}}  }  =  \dfrac{1}{2}
+   \T = \avg{\dfrac{\sum_{i \in K_{t}} x_{i,t} x_{i,t+T}}{\sum_{i \in K_{t}} x_{i,t} x_{i,t}}  }  =  \dfrac{1}{2}
 \end{align}
 
 \section*{Results}
@@ -328,7 +328,7 @@ Again surprisingly, we get the same self-consistent equation as in succession re
 
 Using the same tilling argument, we can get the diversity at the PRDM9 locus $\D$
 \begin{equation}
-  \D = \dfrac{\int_{0}^{\infty } x_{t}^2 \dd  t}{\tau} = \dfrac{4\rho f(\R )}{f'(\R )\left[ 1 + \Rmin  - 2 \R   \right]} 
+  \D = \left(\dfrac{\int_{0}^{\infty } x_{t}^2 \dd  t}{\tau}\right)^{-1} = \dfrac{4\rho f(\R )}{f'(\R )\left[ 1 + \Rmin  - 2 \R   \right]} 
 \end{equation}
 This equation is not analytically solvable as a function of the parameters, we must first numerically solve the self-consistent of $\R$ and compute $\Rmin$ to estimate $\D$.
 
@@ -537,7 +537,7 @@ We make use of the three equations :
 	&=  \dfrac{2 \rho f(\R )}{f'(\R)}  \left(  \dfrac{ -2\R + 2 + \Rmin - 1 }{2}  \right)^{-1} \\ 
     &= \dfrac{4 \rho f(\R )}{f'(\R )\left[ 1 + \Rmin  - 2 \R   \right]} \displaybreak[3] \\ 
 \V &= \dfrac{\int_{0}^{\infty } x_{t}^2  \Rp_{t} \dd  t}{ \tau }  \\
-    &=   \dfrac{1}{\tau}  \left(\int_{1}^{\Rmin } x(\Rp_{t} )^2 \Rp_{t} \dfrac{\dd t }{\dd  \Rp_{t}} \dd \Rp_{t} \right)^{-1} \\
+    &=   \dfrac{1}{\tau}  \int_{1}^{\Rmin } x(\Rp_{t} )^2 \Rp_{t} \dfrac{\dd t }{\dd  \Rp_{t}} \dd \Rp_{t} \\
     &=  \dfrac{ \rho \R }{1 - \Rmin }  \int_{1}^{\Rmin } x(\Rp_{t} )^2 \Rp_{t} \dfrac{1 }{- \rho x(\Rp_{t} ) \Rp_{t} } \dd \Rp_{t}  \\
     &=   \dfrac{ \R }{\Rmin - 1} \int_{1}^{\Rmin } x(\Rp_{t} )  \dd \Rp_{t} \\ 
     &=   \dfrac{ \R }{\Rmin - 1} \int_{1}^{\Rmin } \dfrac{f'(\R)}{2 \rho f(\R )} [ 1- \Rp_{t}  + \R  \operatorname{log}(\Rp_{t} )  ] \dd \Rp_{t} \\ 

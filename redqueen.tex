@@ -198,7 +198,7 @@ Again, a scaling factor of $M^2 r_0^2$ has been discounted here.
 {\bf Turn-over time.}
 The turn-over time is defined as the decorrelation time of the diversity at the PRDM9 locus. This can be quantitatively assessed using the \emph{cross-homozygosity}, which is defined as the fraction of homozygotes in a population that would be obtained by hybrdizing populations at time $t$ and $t+T$ in equal proportions. The cross-homozygosity reduces to the regular (or instant) homozygosity for $T=0$, and it drops to 0 for large $T$. The turnover time is defined as the time $T$ for which the cross-heterozygosity is equal to half of the instant homozygosity.
 \begin{eqnarray*}
-    \avg{\dfrac{\sum_{i \in K_{t}} x_{i,t} x_{i,t+T}}{\sum_{i \in K_{t}} x_{i,t} x_{i,t}}  }  &=&  \dfrac{1}{2}.
+    \T = \avg{\dfrac{\sum_{i \in K_{t}} x_{i,t} x_{i,t+T}}{\sum_{i \in K_{t}} x_{i,t} x_{i,t}}  }  &=&  \dfrac{1}{2}.
 \end{eqnarray*}
 
 \subsection*{}
@@ -276,7 +276,7 @@ The inverse of $\lambda$ gives an approximation to $\tau$, thus leading to our f
 Second, the mean recombination activity is simply the time average of $\theta_t$ over the time where the allele dominates the population. This time is (on average) equal to $\tau$, thus leading to the following approximation:
 \begin{eqnarray} 
 \label{Rsuccession}
-\R &\simeq& \frac{1}{\tau} \,  \int_0^\tau \, e^{-\rho t} = \frac{1 - e^{-\rho \tau} }{\rho \tau}.
+\R &\simeq& \frac{1}{\tau} \,  \int_0^\tau \, e^{-\rho t} \dd t = \frac{1 - e^{-\rho \tau} }{\rho \tau}.
 \end{eqnarray}
 Noting that the minimum activity of the resident allele, at the moment where the new allele invades the population (i.e. at time $\tau$), is equal to:
 \begin{eqnarray} 
@@ -353,7 +353,7 @@ Now, if all alleles have the same trajectory but different arrival times, they a
 
 First, using a tiling argument (see figure 7), we note that:
 \begin{eqnarray*}
-\int_0^{+\infty} \, x_t d_t  &\simeq& \tau \sum_i x_i = \tau.
+\int_0^{+\infty} \, x_t \dd t  &\simeq& \tau \sum_i x_i = \tau.
 \end{eqnarray*}
 Although $x_t$ is not analytically solvable as a function of $t$, the integral can be analytically computed (see appendix), leading to the following relation:
 \begin{eqnarray*}
@@ -645,7 +645,7 @@ We make use of the three equations :
 	&=  \dfrac{2 \rho f(\R )}{f'(\R)}  \left(  \dfrac{ -2\R + 2 + \Rmin - 1 }{2}  \right)^{-1} \\ 
     &= \dfrac{4 \rho f(\R )}{f'(\R )\left[ 1 + \Rmin  - 2 \R   \right]} \displaybreak[3] \\ 
 \V &= \dfrac{\int_{0}^{\infty } x_{t}^2  \Rp_{t} \dd  t}{ \tau }  \\
-    &=   \dfrac{1}{\tau}  \left(\int_{1}^{\Rmin } x(\Rp_{t} )^2 \Rp_{t} \dfrac{\dd t }{\dd  \Rp_{t}} \dd \Rp_{t} \right)^{-1} \\
+    &=   \dfrac{1}{\tau} \int_{1}^{\Rmin } x(\Rp_{t} )^2 \Rp_{t} \dfrac{\dd t }{\dd  \Rp_{t}} \dd \Rp_{t}  \\
     &=  \dfrac{ \rho \R }{1 - \Rmin }  \int_{1}^{\Rmin } x(\Rp_{t} )^2 \Rp_{t} \dfrac{1 }{- \rho x(\Rp_{t} ) \Rp_{t} } \dd \Rp_{t}  \\
     &=   \dfrac{ \R }{\Rmin - 1} \int_{1}^{\Rmin } x(\Rp_{t} )  \dd \Rp_{t} \\ 
     &=   \dfrac{ \R }{\Rmin - 1} \int_{1}^{\Rmin } \dfrac{f'(\R)}{2 \rho f(\R )} [ 1- \Rp_{t}  + \R  \operatorname{log}(\Rp_{t} )  ] \dd \Rp_{t} \\ 
