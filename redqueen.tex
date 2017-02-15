@@ -298,7 +298,7 @@ which can be re-expressed more compactly as:
 \label{selfconsistent} 
 R &=& g \left( \R, \dfrac{\rho}{\mu}\right).
 \end{eqnarray}
-For fixed $\dfrac{\rho}{\mu}$, $g$ is a strictly monotonous function (figure ??, in the case of a power-law fitness function), and has thus a unique solution. This solution can be obtained numerically, giving an estimate for $\R$.
+For fixed $\dfrac{\rho}{\mu}$, $g$ is a strictly monotonous function (figure 6, in the case of a power-law fitness function), and has thus a unique solution. This solution can be obtained numerically, giving an estimate for $\R$.
 
 Note that this self-consistent relation on $\R$ implies that $\R$ is independent of $\Ne$, as our simulation was suggesting. More specifically, $\R$ depends on the parameters of the model only through the compound parameter $\dfrac{\rho}{\mu} = \dfrac{v r_0}{ u}$.
 
@@ -332,14 +332,14 @@ Under the assumption of many alleles co-segregating in the population, $\Rt=\R$ 
 \end{equation}
 Here, $\R$ is now an external parameter, which will be determined in a second step, using a self-consistent argument.
 
-A numerical solution of this system of equations is shown in figure 6: starting from a low frequency and a maximal activity, a typical allele first increases in frequency. Concomitantly, its activity is progressively eroded, at an increasingly higher rate. When the activity reaches the (now externally given) $\R$, the allele frequency reaches its maximum, after which it starts to decrease, ultimately going to 0. Meanwhile, the activity converges to a strictly positive asymptotically value $\Rmin$.
+A numerical solution of this system of equations is shown in figure 7: starting from a low frequency and a maximal activity, a typical allele first increases in frequency. Concomitantly, its activity is progressively eroded, at an increasingly higher rate. When the activity reaches the (now externally given) $\R$, the allele frequency reaches its maximum, after which it starts to decrease, ultimately going to 0. Meanwhile, the activity converges to a strictly positive asymptotically value $\Rmin$.
 
 This system of equations is not analytically solvable as a function of $t$.
 On the other hand, $\Rp_{t}$ is monotonic, and $x$ can be analytically expressed as a function of $\Rp_{t}$
 \begin{equation}
 x(\Rp_{t} ) =\dfrac{f'(\R)}{2 \rho f(\R )} (1- \Rp_{t}  + \R  \operatorname{log}(\Rp_{t} )) + x_{\mathrm{initial}}
 \end{equation}
-[would be nice to show the graph where we see this function together with the bundle of realized trajectories for a simulation]
+%[would be nice to show the graph where we see this function together with the bundle of realized trajectories for a simulation]
 
 Letting $t \to \infty$, $\theta_t$ converges to $\Rmin$ and $x(\theta_t)$ to 0. In addition, since $x_{\mathrm{initial}} = 1 / N_e$ is small, we can let it go to 0, which yields a relation between $\R$ and $\Rmin$:
 \begin{eqnarray}
@@ -351,7 +351,7 @@ Note that this is the same equation as in succession regime.
 So far, we have considered $\R$ as an external parameter.
 Now, if all alleles have the same trajectory but different arrival times, they all contribute back to $\R$. Using this argument, we can get a self-consistent estimation for  $\R$. This can be done by deriving two independent relations between $\tau$, the time between successive invasions, and $\R$ and the other parameters of the model.
 
-First, using a tiling argument (see figure 7), we note that:
+First, using a tiling argument (see figure 8), we note that:
 \begin{eqnarray*}
 \int_0^{+\infty} \, x_t d_t  &\simeq& \tau \sum_i x_i = \tau.
 \end{eqnarray*}
@@ -436,47 +436,162 @@ Second,in the polymorphic regime, the equilibrium diversity at the PRDM9 locus, 
 The scaling relations predicted for the four summary statistics by our mean-field approximation are shown on the top of the simulation results on figures 2, 3, 4 and 5, under the small-load approximation (green) as well as for arbitrary $\epsilon$, by numerically solving the self-consistent equation \ref{selfconsistent} (orange).
 In spite of the rather bold approximations that were made, the predicted scaling is globally in accordance with the simulation results. Expectedly, the small-load approximation fails when the recombination gap becomes significant (typically, when it is larger than 0.2).
 
-\section*{Discussion}
+\section*{A more general derivation under the polymorphic regime}
 
-\subsection*{Main results}
+The derivation shown in the last section relies on a linearization of the fitness function, which allows us to express all quantities of interest as a function of the mean recombination activity $R$, and thus express the self-consistent mean-field argument directly on $R$. However, this linear approximation is not well suited to all fitness models. In this section, we propose an alternative, more general, derivation of the self-consistent mean-field argument, which can be used for arbitrary fitness schemes. This derivation can also be generalized to more complex models, in particular, allowing for variation in recombination rates across hot spots (next section). The whole derivation is done only under the polymorphic regime.
 
-The fact that the equilibrium recombination activity does not depend on $N_e$ is relatively easy to understand: the two forces of the Red Queen, dBGC and selection, are both scaled by $N_e$ (see small-load argument above: comparing $4 N_e u \alpha$ and $4 N_e v r_0$.
+Consider a typical PRDM9 allele, with frequency $x(t)$ and activity $\theta(t)$ at time $t$. As we have seen above, the evolution of the allele frequency and activity are coupled with each other. However, we can reparameterize the problem, so as to eliminate $x(t)$, as follows.
 
-A less trivial question: how the Red-Queen dynamics scales with parameters, in particular population size. Here we see that there are in fact two regimes, with a qualitative transition between them: effective population size tunes the rate of turnover of the process for low $\Ne u$, but the variance of recombination landscapes for high $N_e u$.
-
-The transision between the two regimes occurs when $\tau$, the time between successive sweeps, becomes of the same order of magnitude as the time for an allele to sweep. This time is approx. equal to 
+First, as seen in the last section, the activity of the allele decays at a rate proportional to the allele's frequency:
 \begin{eqnarray*}
-\tau_s &=& \frac{2\ln N_e}{s}
+\frac{d\theta}{dt} &=& - \rho x \theta.
 \end{eqnarray*}
-whereas
+This equation has general solution:
+\begin{eqnarray}
+\label{intrinsictheta}
+\theta(t) &=& e^{-\rho \int_0^t x(u) du} = e^{-\rho \xi}
+\end{eqnarray}
+where we define
 \begin{eqnarray*}
-\tau &=& \frac{1}{4 N_e u s}
+\xi = \xi(t) &=& \int_0^t x(u) du.
 \end{eqnarray*}
-which will be equal when:
+The variable $\xi$ can be seen as the \emph{intrinsic age} of the allele. It accounts for the fact that an allele ages more rapidly if it segregates at a higher frequency.  What equation \ref{intrinsictheta} tells us is that the activity of the allele at a given time point only depends on the allele's intrinsic age. We can therefore parameterize all quantitites associated with a PRDM9 allele directly as a function of its intrinsic age, thus dispensing with the need to solve $x(t)$ as a function of time. %In the following, we will alternate between the two alternative parameterizations, $\theta(t)$ or $\theta(\xi)$.
+
+
+Some elementary relations between the $x$- and $\xi$-parameterizations can be pointed out, which will be useful in the following. First, 
 \begin{eqnarray*}
-8 N_e \ln N_e u = 1
+\frac{d\xi}{dt} &=& x
 \end{eqnarray*}
-Another derivation: when the polymorphic regime breaks down, i.e. when $\D = 24 N_e u = 1$.
-% Unless for unreasonably large or small $N_e$, these two approximations are relatively similar.
-
-How to understand the fact that the two derivations, polymorphic and sucession, give identical equations, in spite of being derived based on different arguments? How to understand the fact that polymorphism at the PRDM9 locus scales as $24 N_e u$ ?
-
-\subsection*{Testing against empirical data}
-
-Quantify the recombination gap and recombination load. To be confirmed but: mammals seem to be in the (lower part of the) polymorphic regime. In this regime, we expect that the rate of turnover of recombination landscapes should be constant across mammals, but that the variance of recombination landscapes should decrease with population size (should increase with body size).
-
-Coupling these arguments with gBGC: if $b_0$ and $v/u$ are constant across mammals, then the number of GC substitutions per gBGC episode (per hot spot) approx. constant across mammals. On the other hand, the number of gBGC episodes per My and per Mb scales linearly with $N_e u$. This predicts the following affine relation between equilibrium GC bias and $N_e u$;
+and second
 \begin{eqnarray*}
-\frac{GC^*}{AT^*} = a + b N_e u
+\frac{dx}{d\xi} &=& \frac{dx}{dt} / \frac{d\xi}{dt}
+= \frac{1}{x} \frac{dx}{dt} = s.
 \end{eqnarray*}
-Note that this affine scaling is different from, and might be more reasonable than, the exponential scaling expected under constant $b_0$ and uniform and constant recombination landscapes across mammals.
+(Yet another parameterization of interest, which will be used below, is to define $z = \rho \xi$, which thus varies between $0$ and $\rho \tau$.)
 
-Another consequence: we have an estimate of the scaled selection coefficient $4 N_e s$ at the PRDM9 locus. We could use it to derive an estimate of the rate of adatpive substitution at the PRDM9 locus, relative to the neutral rate.
-In the context of classic codon models, $dN/dS$ can be seen as an empirical estimate of the relative fixation probability of non-synonymous substitutions: $\omega = \langle 2 N_e p_{fix} \rangle$. In a context of strong positive selection, $p_{fix} = 2s$ and thus $\omega = 4 N_e s$. By analogy, the relative rate of adaptive evolution or PRDM9 would be:
- \begin{eqnarray*}
-\frac{\lambda}{\lambda_0} &=& \frac{4 N_e s}{\D} = \frac{4 N_e s}{24 N_e u} = \frac{s}{6 u} = \frac{\alpha \epsilon}{12 u}.
+We have seen in the last section that the mean time between successive invasions is approximately equal to:
+\begin{eqnarray*}
+\tau &=& \int_0^\infty x(u) du = \xi(\infty),
 \end{eqnarray*}
-Here, the rate of adaptive substitution should be divided by $D$, since we should account for the fact that each new adaptive substitution at the PRDM9 locus is due to an invasion by a new allele, which is a mutant of one out of an effective number of $D$ alleles segregating at this locus at any given time.
+which shows that $\tau$ can also be interpreted as the mean intrinsic longevity of PRDM9 alleles.
+In the $\xi$-parameterization, the activity of a new-born allele is thus $\theta(0) = 1$, and the activity of a dying allele is equal to $\theta_\infty = \theta (\tau) = e^{-\rho \tau}$.
+%The fundamental meaning of the tiling argument is this: suppose we randomly sample an allele at stationarity. Then, the probability that this allele has intrinsic age $\xi$ is uniformly distributed between $0$ and $\tau$.
+
+Using this expression for $\theta$ as a function of $\xi$, we can express several key summary statistics, all of which are averages over the population at stationarity, and can therefore equivalently be seen, by the tiling argument, as averages over the trajectory of a typical PRDM9 allele.
+Thus, the mean recombination activity is given by:
+\begin{eqnarray*}
+\bar \theta = R = \sum_i x_i \theta_i &=& \frac{1}{\tau} \int \theta x dt
+= \frac{1}{\tau} \int_0^\tau \theta d\xi = \frac{1}{\tau} \int_0^\tau e^{-\rho \xi} d\xi
+= \frac{1 - e^{-\rho \tau}}{\rho \tau}.
+\end{eqnarray*}
+The diversity:
+\begin{eqnarray*}
+D^{-1} = \sum_i x_i^2 = \frac{1}{\tau} \int x^2 dt = \frac{1}{\tau} \int_0^\tau x d\xi = \frac{1}{\tau} \int_0^\tau s(\xi) \xi d \xi
+\end{eqnarray*}
+where we have integrated by parts, using the relation $dx / d\xi = s$.
+Since the turnover time is equal to $T = \tau D$, this can also be rewritten as:
+\begin{eqnarray*}
+T = (\tau \D)^{-1} &=& \frac{1}{\tau^2} \int_0^\tau s(\xi) \xi d \xi 
+= \frac{1}{(\rho \tau)^2} \int_0^{\rho \tau} s(z) z d z 
+\end{eqnarray*}
+The fitness of an allele of age $\xi$, and with activity $\theta_0 = \theta_0(\xi_0)$, can be calculated by averaging over all possible diploid background:
+\begin{eqnarray*}
+f(\theta_0) = \sum_i x_i f \left(  \frac{\theta_0 + \theta_i}{2} \right)
+&=& \int_0^\infty x(t) f\left(  \frac{\theta_0 + \theta(t)}{2} \right) dt 
+\\
+&=& \frac{1}{\tau} \int_0^\tau f \left(  \frac{\theta(\xi_0) + \theta(\xi)}{2} \right) d\xi
+\\
+&=& \frac{1}{\tau} \int_0^\tau f \left(  \frac{e^{-\rho \xi_0} + e^{-\rho \xi}}{2} \right) d\xi
+%\\
+%&=& \frac{1}{\rho \tau} \int_0^\tau f \left(  \frac{e^{-\rho \xi_0} + e^{-\rho \xi}}{2} \right) \rho d\xi
+\\
+&=& \frac{1}{\rho \tau} \int_0^{\rho \tau} f \left(  \frac{e^{-z_0} + e^{-z}}{2} \right) d z
+\end{eqnarray*}
+Similarly, the mean fitness over the population is obtained by a double averaging procedure:
+\begin{eqnarray*}
+\bar{f} &=& \int_0^\tau \int_0^\tau f \left(  \frac{ e^{-\rho \xi_1} +  e^{-\rho \xi_2}}{2} \right) d \xi_1 d \xi_2
+\\
+&=& \frac{1}{(\rho \tau)^2} \int_0^{\rho \tau} \int_0^{\rho \tau} f \left(  \frac{ e^{-z_1} +  e^{-z_2}}{2} \right) d z_1 d z_2
+\end{eqnarray*}
+From these equations, the selection coefficient acting on an allele of age $\xi$, noted $s(\xi)$, is given by:
+\begin{eqnarray*}
+s(\xi) &=& \frac{f(e^{-\rho \xi}) - \bar f}{\bar f}
+\end{eqnarray*}
+and in particular, the selection coefficient for a newborn allele is:
+\begin{eqnarray*}
+s(0) &=& \frac{f(1) - \bar f}{\bar f}
+\end{eqnarray*}
+Of note, the quantities $R$, $T$, $\bar f$ and $s$ only depend on the fitness function $f$ and the compound parameter $\rho \tau$. This parameter, $\rho \tau$, is now our key parameter to be determined through a self-consistent argument. For this, and as in the previous section, we can obtain an independent derivation for $\tau$:
+\begin{eqnarray*}
+\tau^{-1} = \lambda &=& 4 N_e u s(0),
+\end{eqnarray*}
+or, equivalently,
+\begin{eqnarray*}
+\rho \tau &=& \frac{4 N_e v r_0}{4 N_e u s(0)} = \frac{v r_0}{u s(0)}
+\end{eqnarray*}
+Using this relation, the self-consistent mean-field argument can now be most conveniently expressed on the selection coefficient $s(0)$: this selection coefficient is an integral relation that depends on $\rho \tau$, which in turn depends on $s(0)$. The self-consistent solution to this system of two equations can obtained numerically, by iterating over (1) computation of $s(0)$ by numerical integration, for a given value of $\rho \tau$, and (2) plug-in of the expression of $s(0)$ into the equation for $\rho \tau$, until numerical convergence.
+
+%Of note, the expression for $R$ does not explicitly depend on the specific fitness model, except through $\rho \tau$. %We can re-express $R$ as:
+%\begin{eqnarray*}
+%\bar \theta = &=& \frac{1 - e^{\frac{v r_0}{u s(0)}}}{\frac{v r_0}{u s(0)}}.
+%\end{eqnarray*}
+%This very general relation between mean recombination activity and mean selection acting on new alleles at stationarity can be used without solving for $s(0)$, already giving interesting insights into the red queen regime effectively experienced by realistic mammalian species.
+%In contrast, $T$ and $D$ also depend on the integral expressions for $s$, and are thus more complicated to obtain numerically. They can be easily obtained under specific fitness models for which the integral ? can be analytically computed.
+
+\subsection*{Scaling relations as a function of $N_e$}
+
+Even without any explicit or any numerical solution for $s$, the relations shown above for $R$, $\tau$, $s$, $T$ and $D$ imply the following scaling relations for all of these quantities as a function of $N_e$. First, $s$ is the solution of a self-consistent equation that depends only on $\frac{v r_o}{u}$, and therefore does not depend on $N_e$. The same thing is true more generally for $s(\xi)$ under arbirtary values of $\xi$, for $\rho \tau$, and thus also for all quantities that depend only on $\rho \tau$: in particular $R$ and $T$. Since $\rho$ itself is directly proportional to $N_e$, $\tau$ is inversely proportional to $N_e$, and thus $D$ is proportional to $N_e$. 
+We thus recover all scaling relations that were pointed out in the previous section, under arbitrary fitness models.
+
+An application: consider the threshold fitness model, parameterized by $\theta_0$ and $\alpha$.  What about the small-load development?
+
+\section*{With variation among hot spots in recombination rate}
+
+Thus far, the model assumes that all active hot spots (i.e. not yet subjected to biased gene conversion) have the same recombination rate $r_0$. In reality, there is a substantial variance across hot spots in their recombination rate. In this section, we explore a generalization of the red queen model that relaxes this uniformity assumption.
+
+Specifically, we assume that the distribution of recombination rates across the hot spots associated with a new born PRDM9 allele is a gamma distribution, of mean $r_0$ and shape parameter $a$ (with smaller value of $a$ inducing  higher variance across hot spots). The recombination rate of a given hot spot is equal to $r_0 c$, where $c$ is the relative recombination rate. The distribution of $c$ is thus a gamma of mean 1 and shape parameter $a$:
+\begin{eqnarray*}
+\phi(c) &=& \frac{b^a}{\Gamma(a)} c^{a-1} e^{-ac}.
+\end{eqnarray*}
+%\begin{eqnarray*}
+%\phi(r) &=& \frac{b^a}{\Gamma(a)} r^{a-1} e^{-br}.
+%\end{eqnarray*}
+Consider a typical PRDM9 allele. For this allele, we define $\theta_c(t)$ as the fraction of hotspots with recombination rate $r_0 c$ that are active at time $t$. The rate of erosion for this specific subset of hotspots is given by:
+\begin{eqnarray*}
+\frac{d \theta_c}{d t} &=& - \rho c x \theta.
+\end{eqnarray*}
+By a similar argument as the one used in the last section, this has solution:
+\begin{eqnarray*}
+\theta_c(t) &=& e^{-\rho c \xi(t)}
+\end{eqnarray*}
+or, more directly in the $\xi$-parameterization:
+\begin{eqnarray*}
+\theta_c(\xi) &=& e^{-\rho c \xi}
+\end{eqnarray*}
+The total (relative) recombination activity induced by a PRDM9 allele with intrinsic age $\xi$ is then obtained by averaging $\theta_r(t)$ over $r$ (under the gamma), which happens to be analytical:
+\begin{eqnarray*}
+\theta(\xi) &=& \int c \theta_c \phi(c) dc = \left( \frac{a}{a + \rho \xi} \right)^{a+1}
+\end{eqnarray*}
+The mean recombination activity over the population is then obtained by averaging over $\xi$:
+\begin{eqnarray}
+\label{powertheta}
+\theta = \frac{1}{\tau} \int_0^\tau R(\xi) d \xi &=& \frac{1}{\rho \tau} \left[ 1 - \left( \frac{a}{a + \rho \tau} \right)^a \right]
+\end{eqnarray}
+From there, the overall derivation is essentially the same as in the previous section, with the only difference that $\theta(\xi)$ is now given by equation \ref{powertheta}, instead of equation \ref{intrinsictheta}.
+Thus, the fitness of an allele of age $\xi$, as well as the mean fitness over the population, are obtained by integrating over $\xi$:
+\begin{eqnarray*}
+f(\theta_0) 
+&=& \frac{1}{\tau} \int_0^\tau f \left(  \frac{\theta(\xi_0) + \theta(\xi)}{2} \right) d\xi
+\end{eqnarray*}
+and 
+\begin{eqnarray*}
+\bar{f} &=& \int_0^\tau \int_0^\tau f \left(  \frac{\theta(\xi_1) + \theta(\xi_2)}{2} \right) d \xi_1 d \xi_2
+\end{eqnarray*}
+where equation \ref{powertheta} is used for $\theta(\xi)$ in these two integrals.
+From these expressions, the selection coefficient $s(0)$ of a new allele can be obtained, as a function of $\rho \tau$, which is itself, as before, equal to $\rho \tau = \frac{u r_0}{v s(0)}$ -- giving a self-consistent relation on $s(0)$.
+Finally, the expressions for $D$ and $T$, as integrals depending over functions of $s(\xi)$, are unchanged. As a result, the scaling relations of all of these quantities, as a function of $N_e$, are also exactly the same as before ($s$, $R$ and $T$ constant, $\tau$ inversely proportional and $D$ proportional to $N_e$).
+
+An application: give more specific expressions for $f$ and $s$ under the linearized power law, and power law with threshold, fitness models. What about the small-load development?
 
 \newpage
 
@@ -527,9 +642,21 @@ Here, the rate of adaptive substitution should be divided by $D$, since we shoul
 
 \begin{figure*}[!ht]
 	  \centering
+       \includegraphics[width=0.8\textwidth]{Images/fixedpoint.pdf}\\
+\end{figure*}
+\textbf{Figure 6.} Self-consistent solution as a fixed point, in the form $R = g(R)$, for two values of $\epsilon = \sqrt{\dfrac{v r_0}{\alpha u}}$.
+
+%\newpage
+
+%\textbf{Figure 6.} Allele frequency ($x_t$) as a function of activity ($\theta_t$).
+
+\newpage
+
+\begin{figure*}[!ht]
+	  \centering
        \includegraphics[width=0.8\textwidth]{Images/single-allele.pdf}\\
 \end{figure*}
-\textbf{Figure 5.} Trajectory of the frequency and the activity of a typical allele through time, under the deterministic and mean-field approximation (see text for details).
+\textbf{Figure 7.} Trajectory of the frequency and the activity of a typical allele through time, under the deterministic and mean-field approximation (see text for details).
 
 %\newpage
 
@@ -541,7 +668,7 @@ Here, the rate of adaptive substitution should be divided by $D$, since we shoul
 	  \centering
        \includegraphics[width=0.8\textwidth]{Images/tilling-argument.pdf}\\
 \end{figure*}
-\textbf{Figure 7.} A tiling principle. On the left, an idealized realization of the Red Queen dynamic is depicted, in which new alleles invade the population at regular time intervals, all equal to $\tau$, and have the same allele frequency trajectory (such as depicted in figure 6). Taking the sum of allele frequencies at any given time (vertical bar), which by definition is equal to 1, is then equivalent to summing the values taken by the frequency of one specific allele at regular time intervals (right). Multiplying this sum by $\tau$ amounts to approximating the integral $\int x_t d_t$ by the histogram shown on the right panel. Thus, $\int x_t dt \simeq \tau \sum x_i = \tau$. This argument can more generally be used to approximate sums of the form $\sum x_i^k \theta_i^l$ by the corresponding integrals, $\frac{1}{\tau} \left( \int x_t^k \theta_t^l dt \right)$, all of which are analytically available.
+\textbf{Figure 8.} A tiling principle. On the left, an idealized realization of the Red Queen dynamic is depicted, in which new alleles invade the population at regular time intervals, all equal to $\tau$, and have the same allele frequency trajectory (such as depicted in figure 6). Taking the sum of allele frequencies at any given time (vertical bar), which by definition is equal to 1, is then equivalent to summing the values taken by the frequency of one specific allele at regular time intervals (right). Multiplying this sum by $\tau$ amounts to approximating the integral $\int x_t d_t$ by the histogram shown on the right panel. Thus, $\int x_t dt \simeq \tau \sum x_i = \tau$. This argument can more generally be used to approximate sums of the form $\sum x_i^k \theta_i^l$ by the corresponding integrals, $\frac{1}{\tau} \left( \int x_t^k \theta_t^l dt \right)$, all of which are analytically available.
 
 \newpage
 
@@ -787,3 +914,47 @@ We make as second order development on $\epsilon$ for both $\Lr$ and $\Lmin$
 
 
 \end{document}
+
+
+\section*{Discussion}
+
+\subsection*{Main results}
+
+The fact that the equilibrium recombination activity does not depend on $N_e$ is relatively easy to understand: the two forces of the Red Queen, dBGC and selection, are both scaled by $N_e$ (see small-load argument above: comparing $4 N_e u \alpha$ and $4 N_e v r_0$.
+
+A less trivial question: how the Red-Queen dynamics scales with parameters, in particular population size. Here we see that there are in fact two regimes, with a qualitative transition between them: effective population size tunes the rate of turnover of the process for low $\Ne u$, but the variance of recombination landscapes for high $N_e u$.
+
+The transision between the two regimes occurs when $\tau$, the time between successive sweeps, becomes of the same order of magnitude as the time for an allele to sweep. This time is approx. equal to 
+\begin{eqnarray*}
+\tau_s &=& \frac{2\ln N_e}{s}
+\end{eqnarray*}
+whereas
+\begin{eqnarray*}
+\tau &=& \frac{1}{4 N_e u s}
+\end{eqnarray*}
+which will be equal when:
+\begin{eqnarray*}
+8 N_e \ln N_e u = 1
+\end{eqnarray*}
+Another derivation: when the polymorphic regime breaks down, i.e. when $\D = 24 N_e u = 1$.
+% Unless for unreasonably large or small $N_e$, these two approximations are relatively similar.
+
+%How to understand the fact that the two derivations, polymorphic and sucession, give identical equations, in spite of being derived based on different arguments? How to understand the fact that polymorphism at the PRDM9 locus scales as $24 N_e u$ ?
+
+\subsection*{Testing against empirical data}
+
+Quantify the recombination gap and recombination load. To be confirmed but: mammals seem to be in the (lower part of the) polymorphic regime. In this regime, we expect that the rate of turnover of recombination landscapes should be constant across mammals, but that the variance of recombination landscapes should decrease with population size (should increase with body size).
+
+Coupling these arguments with gBGC: if $b_0$ and $v/u$ are constant across mammals, then the number of GC substitutions per gBGC episode (per hot spot) approx. constant across mammals. On the other hand, the number of gBGC episodes per My and per Mb scales linearly with $N_e u$. This predicts the following affine relation between equilibrium GC bias and $N_e u$;
+\begin{eqnarray*}
+\frac{GC^*}{AT^*} = a + b N_e u
+\end{eqnarray*}
+Note that this affine scaling is different from, and might be more reasonable than, the exponential scaling expected under constant $b_0$ and uniform and constant recombination landscapes across mammals.
+
+Another consequence: we have an estimate of the scaled selection coefficient $4 N_e s$ at the PRDM9 locus. We could use it to derive an estimate of the rate of adatpive substitution at the PRDM9 locus, relative to the neutral rate.
+In the context of classic codon models, $dN/dS$ can be seen as an empirical estimate of the relative fixation probability of non-synonymous substitutions: $\omega = \langle 2 N_e p_{fix} \rangle$. In a context of strong positive selection, $p_{fix} = 2s$ and thus $\omega = 4 N_e s$. By analogy, the relative rate of adaptive evolution or PRDM9 would be:
+ \begin{eqnarray*}
+\frac{\lambda}{\lambda_0} &=& \frac{4 N_e s}{\D} = \frac{4 N_e s}{24 N_e u} = \frac{s}{6 u} = \frac{\alpha \epsilon}{12 u}.
+\end{eqnarray*}
+Here, the rate of adaptive substitution should be divided by $D$, since we should account for the fact that each new adaptive substitution at the PRDM9 locus is due to an invasion by a new allele, which is a mutant of one out of an effective number of $D$ alleles segregating at this locus at any given time.
+
