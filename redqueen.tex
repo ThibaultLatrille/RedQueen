@@ -497,7 +497,7 @@ T = (\tau \D)^{-1} &=& \frac{1}{\tau^2} \int_0^\tau s(\xi) \xi d \xi
 The fitness of an allele of age $\xi$, and with activity $\theta_0 = \theta_0(\xi_0)$, can be calculated by averaging over all possible diploid background:
 \begin{eqnarray*}
 f(\theta_0) = \sum_i x_i f \left(  \frac{\theta_0 + \theta_i}{2} \right)
-&=& \int_0^\infty x(t) f\left(  \frac{\theta_0 + \theta(t)}{2} \right) dt 
+&=& \frac{1}{\tau} \int_0^\infty x(t) f\left(  \frac{\theta_0 + \theta(t)}{2} \right) dt 
 \\
 &=& \frac{1}{\tau} \int_0^\tau f \left(  \frac{\theta(\xi_0) + \theta(\xi)}{2} \right) d\xi
 \\
@@ -509,7 +509,7 @@ f(\theta_0) = \sum_i x_i f \left(  \frac{\theta_0 + \theta_i}{2} \right)
 \end{eqnarray*}
 Similarly, the mean fitness over the population is obtained by a double averaging procedure:
 \begin{eqnarray*}
-\bar{f} &=& \int_0^\tau \int_0^\tau f \left(  \frac{ e^{-\rho \xi_1} +  e^{-\rho \xi_2}}{2} \right) d \xi_1 d \xi_2
+\bar{f} &=& \frac{1}{\tau^2} \int_0^\tau \int_0^\tau f \left(  \frac{ e^{-\rho \xi_1} +  e^{-\rho \xi_2}}{2} \right) d \xi_1 d \xi_2
 \\
 &=& \frac{1}{(\rho \tau)^2} \int_0^{\rho \tau} \int_0^{\rho \tau} f \left(  \frac{ e^{-z_1} +  e^{-z_2}}{2} \right) d z_1 d z_2
 \end{eqnarray*}
@@ -541,7 +541,7 @@ Using this relation, the self-consistent mean-field argument can now be most con
 \subsection*{Scaling relations as a function of $N_e$}
 
 Even without any explicit or any numerical solution for $s$, the relations shown above for $R$, $\tau$, $s$, $T$ and $D$ imply the following scaling relations for all of these quantities as a function of $N_e$. First, $s$ is the solution of a self-consistent equation that depends only on $\frac{v r_o}{u}$, and therefore does not depend on $N_e$. The same thing is true more generally for $s(\xi)$ under arbirtary values of $\xi$, for $\rho \tau$, and thus also for all quantities that depend only on $\rho \tau$: in particular $R$ and $T$. Since $\rho$ itself is directly proportional to $N_e$, $\tau$ is inversely proportional to $N_e$, and thus $D$ is proportional to $N_e$. 
-We thus recover all scaling relations that were pointed out in the previous section, under arbitrary fitness models.
+We thus recover all scaling relations that were pointed out in the previous section, in the polymorphic regime and under arbitrary fitness models.
 
 An application: consider the threshold fitness model, parameterized by $\theta_0$ and $\alpha$.  What about the small-load development?
 
@@ -549,7 +549,7 @@ An application: consider the threshold fitness model, parameterized by $\theta_0
 
 Thus far, the model assumes that all active hot spots (i.e. not yet subjected to biased gene conversion) have the same recombination rate $r_0$. In reality, there is a substantial variance across hot spots in their recombination rate. In this section, we explore a generalization of the red queen model that relaxes this uniformity assumption.
 
-Specifically, we assume that the distribution of recombination rates across the hot spots associated with a new born PRDM9 allele is a gamma distribution, of mean $r_0$ and shape parameter $a$ (with smaller value of $a$ inducing  higher variance across hot spots). The recombination rate of a given hot spot is equal to $r_0 c$, where $c$ is the relative recombination rate. The distribution of $c$ is thus a gamma of mean 1 and shape parameter $a$:
+Specifically, we assume that the distribution of recombination rates across the hot spots associated with a new born PRDM9 allele is a gamma distribution, of mean $r_0$ and shape parameter $a$ (with smaller value of $a$ inducing  higher variance across hot spots). Equivalently, the recombination rate of a given hot spot is equal to $r_0 c$, where $c$ is the relative recombination rate. The distribution of $c$ is thus a gamma of mean 1 and shape parameter $a$:
 \begin{eqnarray*}
 \phi(c) &=& \frac{b^a}{\Gamma(a)} c^{a-1} e^{-ac}.
 \end{eqnarray*}
@@ -568,14 +568,14 @@ or, more directly in the $\xi$-parameterization:
 \begin{eqnarray*}
 \theta_c(\xi) &=& e^{-\rho c \xi}
 \end{eqnarray*}
-The total (relative) recombination activity induced by a PRDM9 allele with intrinsic age $\xi$ is then obtained by averaging $\theta_r(t)$ over $r$ (under the gamma), which happens to be analytical:
+The total (relative) recombination activity induced by a PRDM9 allele with intrinsic age $\xi$ is then obtained by averaging $\theta_r(t)$ over $c$ (under the gamma), which happens to be analytical:
 \begin{eqnarray*}
-\theta(\xi) &=& \int c \theta_c \phi(c) dc = \left( \frac{a}{a + \rho \xi} \right)^{a+1}
+\label{powertheta}
+\theta(\xi) &=& \int c \theta_c(\xi) \phi(c) dc = \left( \frac{a}{a + \rho \xi} \right)^{a+1}
 \end{eqnarray*}
 The mean recombination activity over the population is then obtained by averaging over $\xi$:
 \begin{eqnarray}
-\label{powertheta}
-\theta = \frac{1}{\tau} \int_0^\tau R(\xi) d \xi &=& \frac{1}{\rho \tau} \left[ 1 - \left( \frac{a}{a + \rho \tau} \right)^a \right]
+\bar \theta = R = \frac{1}{\tau} \int_0^\tau R(\xi) d \xi &=& \frac{1}{\rho \tau} \left[ 1 - \left( \frac{a}{a + \rho \tau} \right)^a \right]
 \end{eqnarray}
 From there, the overall derivation is essentially the same as in the previous section, with the only difference that $\theta(\xi)$ is now given by equation \ref{powertheta}, instead of equation \ref{intrinsictheta}.
 Thus, the fitness of an allele of age $\xi$, as well as the mean fitness over the population, are obtained by integrating over $\xi$:
