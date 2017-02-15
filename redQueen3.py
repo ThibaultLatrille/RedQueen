@@ -902,19 +902,19 @@ class SimulationsAlongParameter(object):
         :param y_label: 'String', The label of the y-axis
         :return: None
         """
-        parameter_caption = {"fitness": "The fitness parameter",
-                             "mutation": "Mutation rate of PRDM9",
-                             "erosion": "Mutation rate of the hotspots",
-                             "population": "The population size",
-                             "recombination": "The recombination rate of the hotspots"}[self.parameter]
+        parameter_caption = {"fitness": "Strength of selection (alpha)",
+                             "mutation": "Mutation rate of PRDM9 (u)",
+                             "erosion": "Mutation rate of the hotspots (v)",
+                             "population": "The population size (Ne)",
+                             "recombination": "Recombination rate (r0)"}[self.parameter]
         mean = [np.mean(serie) for serie in series]
         plt.plot(self.parameter_range, mean, color=color, linewidth=2)
         sigma = [1.96*np.sqrt(np.var(serie)) for serie in series]
         y_max = np.add(mean, sigma)
         y_min = np.subtract(mean, sigma)
         plt.fill_between(self.parameter_range, y_max, y_min, color=color, alpha=0.3)
-        plt.xlabel(parameter_caption)
-        plt.ylabel(y_label)
+        plt.xlabel(parameter_caption, fontsize=20)
+        plt.ylabel(y_label, fontsize=20)
         if self.parameter == "fitness" and self.model.fitness_family == 3:
             plt.xscale('linear')
         else:
@@ -952,11 +952,11 @@ class Batch(list):
         :param yscale: 'String', must be 'log' or 'linear'.
         :return: self.
         """
-        y_label = {"mean_activity": "The mean activity of the hotspots",
-                   "prdm9_diversity": "The diversity of PRDM9",
-                   "selective_strength": "The selective strength of a new Prdm9",
+        y_label = {"mean_activity": "Mean recombination activity",
+                   "prdm9_diversity": "PRDM9 diversity",
+                   "selective_strength": "Landscape variance",
                    "landscape_variance": "The hotspots landscape variance",
-                   "turn_over": "The turn-over time"}[summary_statistic]
+                   "turn_over": "Turn-over time"}[summary_statistic]
         my_dpi = 96
         plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
 
