@@ -593,6 +593,45 @@ Finally, the expressions for $D$ and $T$, as integrals depending over functions 
 
 An application: give more specific expressions for $f$ and $s$ under the linearized power law, and power law with threshold, fitness models. What about the small-load development?
 
+\section*{Discussion}
+
+\subsection*{Main results}
+
+A combination of simulations and analytical approximations, which give insights into the population genetics of the Red Queen model of recombination.
+
+Many results are virtually independent of the exact fitness model
+
+First, it is often implicitly assumed (refs) that the set of hot spots associated with a typical PRDM9 allele should eventually be completely eroded when this allele dies out. However, this is generally not the case. Instead, in reasonable regimes of the Red Queen process, characterized by moderate depletion of genome-wide recombination at equilibrium, maximum erosion of the set of hot spots associated with a dying PRDM9 allele is only partial, being roughly equal to twice the equiibrium level of erosion in the small recombination gap regime.
+
+Second, there is a structural relation between recombination rate at equilibrium and selection acting on PRDM9, which does not depend at all on the exact fitness model. Only depends on the mutation parameters and the typical distribution of hot spot strength induced across the genome by a typical newborn PRDM9 allele. This relation is a simple consequence of the fact that, at equilbrium, the two processes, erosion of recombination by BGC and recruitment of new PRDM9 alleles, should balance each other, and thus occur at the same rate.
+
+In effect, this structural relation implies that, everything else being constant, a higher equilibrium recombination rate can only be the result of a stronger selection on new PRDM9 alleles. In turn, positive selection on new PRDM9 alleles, being mediated by the deleterious effects of a depleted recombination, is an indirect measure of the genetic load induced by the Red Queen. Thus, what this means is that, for a given structural regime of mutation and distribution of recombination, it is impossible to play with the fitness model so as to achieve higher recombination rates at a lesser cost in terms of genetic load -- in all cases, a small recombination gap necessarily means a heavy genetic load, and conversely, a small load mechanically impies a strongly depleted recombination landscape.
+
+This relation strongly depends on the structural mutation and recombination parameters.
+
+What about the role of the variance in the recombination landscape ??
+
+Mutation parameters: a key point, already pointed out (ref), is the mutation rate at the PRDM9 locus. The rate of invasion by new PRDM9 alleles is directly proportional to the mutation rate at the PRDM9 locus. If this rate is high, then, a much higher mean equilibrium recombination can be achieved at a lesser cost, in terms of genetic load.
+
+For sufficiently high mutation rates, a neutral model (without direct selection favoring new PRDM9 alleles) could in fact be a solution to the hot spot paradox. However, this is sensitivie to variation in effective population size: in a neutral regime, an increase in $N_e$ results in a decrease of the mean equilbirium recombination activity. In practice: possible to imagine, across mammalian species, for instance, a transition between the two regimes: a neutral regime in the lower range of effective population size, quickly replaced by a selective regime for increasing $N_e$.
+
+Empirical observations: evidence for positive selection on PRDM9 (although difficult to quantify, owing to the complex mutation process acting on this minisatellite locus), both in mouse and primates, and more broadly at the scale of metazoans (refs). On the other hand, patterns of segregation of PRDM9 alleles in mouse subspecies, or between archaic and modern humans, are compatible with random drift and lineage sorting: but this could just be lack of statistical power for detecting positive selection at the level of single alleles and/or over relatively short evolutionary spans.
+
+This, however, begs the question of why the central trans-acting factor of the red queen process of recombination turnover happens to have such a high mutation rate in the first place. An interesting possibility, already suggested (refs), is that PRDM9 has been coopted for that reason, or that the exact genetic structure of its zinc-finger domain has been progressively optimized by a higher-level adaptive process. These interesting speculations could be further investigated in the context of the present modeling framework.
+
+
+Here, we have used an additive model for the relation between recombination and PRDM9 diploid genotype. Appears to be reasonable, at least in first approximation (although, develop and refs). Many of the restults presented here, however, in particular the scaling relations, do not require this additivity assumption.
+
+A point, though, concerning genetic load: with increasing population size, and for otherwise fixed parameters, mean recombination activity stays constant, but, owing to a larger PRDM9 diversity, is spread out over a larger number of hotspots across the genome. At the level of the population, this lesser variance of recombination ladnscapes results in a fragmentation of haplotype blocks into smaller independent haplotypes, and thus. The prediction is thus that larger effective population sizes should result in less intense background selection. How this effect could play on the fitness of PRDM9 alleles should be further investigated. Intuitively, rare PRDM9 alleles should be favored precisely because they break up haplotype blocks that tend to be under strong LD at the level of the population. The fitness of a PRDM9 allele should depend, not just on the mean recombination activity in the population, but also on the variance. This would change the predictions of the model.
+
+How to get better empirical leverage concerning the fitness model?
+More information at the level of the genetic diversity at the PRDM9 locus. In turn, this leaves a footprint in the structure of recombination landscapes across mammalian species, which leaves both short-term and long-term signals that are empirically accessible: in the short-term, LD-based estimates of the distribution of recombination across genomes of mammalian species, and estimates of diversity at the PRDM9 locus. In the long-term, through gBGC, phylogenetic patterns of substitutions from and to GC across mammals (refs).
+
+Other possible developments: Here, assumption of a panmictic population. However, PRDM9 plays in a complex manner in hybrids. Thus, interesting to extend those simulation experiments and theoretical developments in the context of a meta-population model (complex of species), so as to more thoroughly investigate the potential role of PRDM9 gene as a speciation gene.
+
+Theoretical aspects: explore the weak selection regime. Those theoretical developments could be used in many other contexts, in particular for ecological red queen situations other than intra-genomic conflicts.
+
+
 \newpage
 
 %\bibliographystyle{plain}
