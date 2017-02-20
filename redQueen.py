@@ -145,7 +145,12 @@ class Model(object):
         self.mu = 4 * self.population_size * self.mutation_rate_prdm9
         # Rho is the scaled erosion rate
         self.rho = 4 * self.population_size * self.mutation_rate_hotspot * self.recombination_rate
-        self.epsilon = np.sqrt(self.rho / (self.mu * self.alpha))
+
+        if self.fitness_family == 4:
+            gamma = self.alpha * np.exp(-self.alpha) / (1 - np.exp(-self.alpha))
+        else:
+            gamma = self.alpha
+        self.epsilon = np.sqrt(self.rho / (self.mu * gamma))
         assert self.rho < 0.5, "The scaled erosion rate is too large, decrease either the " \
                                "recombination rate, the erosion rate or the population size"
         assert self.rho > 0.0000000001, "The scaled erosion rate is too low, increase either the " \
@@ -200,7 +205,7 @@ class Model(object):
             if self.linearized:
                 mean_activity = np.sum(prdm9_frequencies * self.hotspots_activity)
                 prdm9_fitness = self.derivative_log_fitness(mean_activity) * (
-                self.hotspots_activity - mean_activity) / 2
+                    self.hotspots_activity - mean_activity) / 2
                 distribution_vector = prdm9_frequencies + prdm9_fitness * prdm9_frequencies
                 if np.max(distribution_vector) > 1.:
                     distribution_vector = sum_to_one(np.clip(distribution_vector, 0., 1.))
@@ -239,7 +244,7 @@ class Model(object):
             - f(x)=(x^k)/(x^k + alpha^k) if the fitness is 'sigmoid', where k is the 'slope' (sharpness) of the sigmoid.
         """
         if self.fitness_family == 4:
-            return (1-np.exp(-self.alpha*x))/(1-np.exp(-self.alpha))
+            return (1 - np.exp(-self.alpha * x)) / (1 - np.exp(-self.alpha))
         elif self.fitness_family == 3:
             return np.power(x, self.sigmoid_slope) / (
                 np.power(x, self.sigmoid_slope) + np.power(self.alpha, self.sigmoid_slope))
@@ -294,7 +299,7 @@ class Model(object):
 
     def activity(self, eta):
         if self.hotspots_variation:
-            return np.power(self.gamma/(self.gamma+eta), self.gamma+1)
+            return np.power(self.gamma / (self.gamma + eta), self.gamma + 1)
         else:
             return np.exp(-eta)
 
@@ -342,7 +347,7 @@ class Model(object):
         :return: 'Float', mean activity of hotspots (R).
         """
         if self.hotspots_variation:
-            return (1 - np.power(self.gamma/(self.gamma+self.eta), self.gamma)) / self.eta
+            return (1 - np.power(self.gamma / (self.gamma + self.eta), self.gamma)) / self.eta
         else:
             return (1 - np.exp(-self.eta)) / self.eta
 
@@ -362,7 +367,11 @@ class Model(object):
         if x == 0.:
             return float("inf")
         else:
-            return self.rho / (self.s_general(x, 0) * self.mu) - x
+            s = self.s_general(x, 0)
+            if s == 0.:
+                return float("inf")
+            else:
+                return self.rho / (self.s_general(x, 0) * self.mu) - x
 
     def self_consistent_equation(self, x):
         """
@@ -500,7 +509,7 @@ class Model(object):
          General derivation of the turn-over time defined as the decorrelation time of the relative cross-homozygosity
          :return: 'Float', turn-over time (T).
          """
-        return self.eta * self.prdm9_diversity_general() / self.rho
+        return self.eta * self.prdm9_diversity_general() / (2 * self.rho)
 
     def turn_over_estimation(self):
         """
@@ -508,7 +517,7 @@ class Model(object):
         :return: 'Float', turn-over time (T).
         """
         mean_activity = self.mean_activity_estimation()
-        return self.prdm9_diversity_estimation() / (self.mu * self.probability_fixation(mean_activity))
+        return self.prdm9_diversity_estimation() / (2 * self.mu * self.probability_fixation(mean_activity))
 
     def turn_over_small_load(self):
         """
@@ -516,7 +525,7 @@ class Model(object):
         using the small-load development (low erosion).
         :return: 'Float', turn-over time (T).
         """
-        return self.prdm9_diversity_small_load() / (self.mu * self.alpha * (1. - self.mean_activity_small_load()) / 2.)
+        return self.prdm9_diversity_small_load() / (self.mu * self.alpha * (1. - self.mean_activity_small_load()))
 
     def __str__(self):
         """
@@ -1146,20 +1155,20 @@ def make_batch():
     :return: None.
     """
     set_dir("/tmp/" + id_generator(8))
-    model = Model(mutation_rate_prdm9=1.0 * 10 ** -6,
-                  mutation_rate_hotspot=1.0 * 10 ** -6,
+    model = Model(mutation_rate_prdm9=3.0 * 10 ** -6,
+                  mutation_rate_hotspot=3.0 * 10 ** -7,
                   population_size=10 ** 5,
                   recombination_rate=1.0 * 10 ** -3,
-                  alpha=1,
+                  alpha=10,
                   fitness='poisson', drift=True, linearized=False)
     batch = Batch()
     for parameter in ["population", "erosion", "mutation", "fitness"]:
         batch.append(SimulationsAlongParameter(model.copy(), parameter=parameter,
-                                               nbr_of_simulations=64, scale=10 ** 4, loops=40))
+                                               nbr_of_simulations=8, scale=10 ** 4, loops=20))
     for simulation_along_parameter in batch:
         simulation_along_parameter.run(nbr_of_cpu=4)
     batch.pickle()
-    batch.save_figures(small_load=False, hotspots_variation=True)
+    batch.save_figures(small_load=False, hotspots_variation=False)
 
 
 if __name__ == '__main__':
