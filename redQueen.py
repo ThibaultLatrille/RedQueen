@@ -93,7 +93,7 @@ class Model(object):
         :param drift: 'Boolean', True if genetic drift is taken into account.
         :param linearized: 'Boolean', True if the fitness function is linearized.
         :param hotspots_variation: 'Boolean', True if variation of the recombination rates across the hotspots
-        :param variation_parameter: 'Float', The shape of the gamme distribution.
+        :param gamma: 'Float', The shape of the gamma distribution.
         """
         # Initialisation of the parameters for approximation
         # If drift == True, a multinomial random drift is taken into account
@@ -145,16 +145,18 @@ class Model(object):
         self.mu = 4 * self.population_size * self.mutation_rate_prdm9
         # Rho is the scaled erosion rate
         self.rho = 4 * self.population_size * self.mutation_rate_hotspot * self.recombination_rate
-
-        if self.fitness_family == 4:
-            gamma = self.alpha * np.exp(-self.alpha) / (1 - np.exp(-self.alpha))
-        else:
-            gamma = self.alpha
-        self.epsilon = np.sqrt(self.rho / (self.mu * gamma))
         assert self.rho < 0.5, "The scaled erosion rate is too large, decrease either the " \
                                "recombination rate, the erosion rate or the population size"
         assert self.rho > 0.0000000001, "The scaled erosion rate is too low, increase either the " \
                                         "recombination rate, the erosion rate or the population size"
+        if self.fitness_family == 4:
+            gamma = self.alpha * np.exp(-self.alpha) / (1 - np.exp(-self.alpha))
+        else:
+            gamma = self.alpha
+        if gamma == 0:
+            self.epsilon = 0.5
+        else:
+            self.epsilon = min(np.sqrt(self.rho / (self.mu * gamma)), 0.5)
         self.compute_eta()
 
     def compute_eta(self):
@@ -244,7 +246,7 @@ class Model(object):
             - f(x)=(x^k)/(x^k + alpha^k) if the fitness is 'sigmoid', where k is the 'slope' (sharpness) of the sigmoid.
         """
         if self.fitness_family == 4:
-            return (1 - np.exp(-self.alpha * x)) / (1 - np.exp(-self.alpha))
+            return (1. - np.exp(-self.alpha * x)) / (1. - np.exp(-self.alpha))
         elif self.fitness_family == 3:
             return np.power(x, self.sigmoid_slope) / (
                 np.power(x, self.sigmoid_slope) + np.power(self.alpha, self.sigmoid_slope))
@@ -263,7 +265,7 @@ class Model(object):
             return float("inf")
         else:
             if self.fitness_family == 4:
-                return self.alpha * np.exp(-self.alpha * x) / (1 - np.exp(-self.alpha))
+                return self.alpha * np.exp(-self.alpha * x) / (1 - np.exp(-self.alpha * x))
             elif self.fitness_family == 3:
                 return self.sigmoid_slope * np.power(self.alpha, self.sigmoid_slope) / (
                     x * (np.power(x, self.sigmoid_slope) + np.power(self.alpha, self.sigmoid_slope)))
@@ -371,7 +373,7 @@ class Model(object):
             if s == 0.:
                 return float("inf")
             else:
-                return self.rho / (self.s_general(x, 0) * self.mu) - x
+                return self.rho / (s * self.mu) - x
 
     def self_consistent_equation(self, x):
         """
@@ -379,7 +381,10 @@ class Model(object):
         :param x: 'Float', in the interval [0,1].
         :return: 'Float', g(x).
         """
-        return self.derivative_log_fitness(x) * (1 - x) * (1 - self.activity_limit(x)) - (2. * x * self.rho / self.mu)
+        if x == 0.:
+            return float("inf")
+        else:
+            return self.derivative_log_fitness(x) * (1 - x) * (1 - self.activity_limit(x)) - (2. * x * self.rho / self.mu)
 
     def mean_activity_small_load(self):
         """
@@ -803,9 +808,7 @@ class Simulation(object):
                 self.generations.append(t)
                 self.trace.store(self.model)
 
-            if int(10 * t) % self.t_max == 0:
-                print("Computation at {0}%".format(float(100 * t) / self.t_max))
-
+        print(self)
         return self
 
     def save_trajectory(self):
@@ -846,7 +849,6 @@ class Simulation(object):
 
         plt.savefig('trajectory.png', format="png")
         plt.savefig('trajectory.svg', format="svg")
-        print("Trajectory computed")
         plt.clf()
         plt.close('all')
         return str(self)
@@ -1109,11 +1111,13 @@ class Batch(list):
                     plt.plot(batch.parameter_range, array, color=color, linewidth=3, label='$\gamma={0}$'.format(gamma))
                     plt.yscale(yscale)
             else:
-                methods = [("estimation", YELLOW), ("general", RED)]
+                print("parameter range", batch.parameter_range)
+                methods = [("general", RED), ("estimation", YELLOW)]
                 if small_load:
                     methods.append(("small_load", GREEN))
                 for method, color in methods:
-                    array = [getattr(model, summary_statistic + "_" + method)() for model in models]
+                    array = [float(getattr(model, summary_statistic + "_" + method)()) for model in models]
+                    print(method, array)
                     plt.plot(batch.parameter_range, array, color=color, linewidth=3, label=legend_label[method])
                     plt.yscale(yscale)
 
@@ -1144,7 +1148,7 @@ def load_batch(dir_id):
     """
     set_dir("/tmp/" + dir_id)
     simulation_batch = pickle.load(open("Batch.p", "rb"))
-    simulation_batch.save_figures()
+    simulation_batch.save_figures(small_load=False, hotspots_variation=False)
     map(lambda x: x.save_figure(), simulation_batch)
 
 
@@ -1164,9 +1168,9 @@ def make_batch():
     batch = Batch()
     for parameter in ["population", "erosion", "mutation", "fitness"]:
         batch.append(SimulationsAlongParameter(model.copy(), parameter=parameter,
-                                               nbr_of_simulations=8, scale=10 ** 4, loops=20))
+                                               nbr_of_simulations=8, scale=10 ** 2, loops=10))
     for simulation_along_parameter in batch:
-        simulation_along_parameter.run(nbr_of_cpu=4)
+        simulation_along_parameter.run(nbr_of_cpu=8)
     batch.pickle()
     batch.save_figures(small_load=False, hotspots_variation=False)
 
