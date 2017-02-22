@@ -123,7 +123,7 @@ class Model(object):
             self.sigmoid_slope = 2
 
         # Initialisation of the scaled parameters
-        self.mu, self.rho, self.epsilon, self.eta = 0, 0, 0, 0
+        self.mu, self.rho, self.eta = 0, 0, 0
         self.scaling_parameters()
 
         # Initialisation of the array of initial alleles 
@@ -149,14 +149,6 @@ class Model(object):
                                "recombination rate, the erosion rate or the population size"
         assert self.rho > 0.0000000001, "The scaled erosion rate is too low, increase either the " \
                                         "recombination rate, the erosion rate or the population size"
-        if self.fitness_family == 4:
-            gamma = self.alpha * np.exp(-self.alpha) / (1 - np.exp(-self.alpha))
-        else:
-            gamma = self.alpha
-        if gamma == 0:
-            self.epsilon = 0.5
-        else:
-            self.epsilon = min(np.sqrt(self.rho / (self.mu * gamma)), 0.5)
         self.compute_eta()
 
     def compute_eta(self):
@@ -353,13 +345,6 @@ class Model(object):
         else:
             return (1 - np.exp(-self.eta)) / self.eta
 
-    def mean_activity_estimation(self):
-        """
-        Mean-field derivation of the mean activity of hotspots by solving the self consistent mean field equation.
-        :return: 'Float', mean activity of hotspots (R).
-        """
-        return brentq(lambda x: self.self_consistent_equation(x), 0, 1, full_output=True)[0]
-
     def self_consistent_equation_general(self, x):
         """
         Self-consistent general equation for the age of the allele (\rho*\tau).
@@ -375,6 +360,13 @@ class Model(object):
             else:
                 return self.rho / (s * self.mu) - x
 
+    def mean_activity_estimation(self):
+        """
+        Mean-field derivation of the mean activity of hotspots by solving the self consistent mean field equation.
+        :return: 'Float', mean activity of hotspots (R).
+        """
+        return brentq(lambda x: self.self_consistent_equation(x), 0, 1, full_output=True)[0]
+
     def self_consistent_equation(self, x):
         """
         Self-consistent mean-field equation for the mean activity of hotspots.
@@ -386,12 +378,18 @@ class Model(object):
         else:
             return self.derivative_log_fitness(x) * (1 - x) * (1 - self.activity_limit(x)) - (2. * x * self.rho / self.mu)
 
+    def fitness_small_load(self):
+        if self.fitness_family == 4:
+            return self.alpha * np.exp(-self.alpha) / (1 - np.exp(-self.alpha))
+        else:
+            return self.alpha
+
     def mean_activity_small_load(self):
         """
         Mean-field derivation of the mean activity of hotspots, using the small-load development (low erosion).
         :return: 'Float', mean activity of hotspots (R).
         """
-        return 1 - self.epsilon
+        return max(0.5, 1 - np.sqrt(self.rho / (self.mu * self.fitness_small_load())))
 
     def activity_limit_small_load(self):
         """
@@ -399,7 +397,7 @@ class Model(object):
         small-load development (low erosion).
         :return: 'Float', the activity limit of hotspots (R_{\infty}).
         """
-        return 1 - 2. * self.epsilon
+        return max(0, 1 - 2 * np.sqrt(self.rho / (self.mu * self.fitness_small_load())))
 
     def frequencies_wrt_activity(self, mean_activity, l_limit):
         """
@@ -458,7 +456,7 @@ class Model(object):
         using the small-load development (low erosion).
         :return: 'Float', Prdm9 diversity (D).
         """
-        return max(1., 6 * self.rho / (self.alpha * self.epsilon ** 2))
+        return max(1., 24 * self.population_size * self.mutation_rate_prdm9)
 
     def selective_strength_general(self):
         """
@@ -480,7 +478,7 @@ class Model(object):
         Mean-field derivation of the selective strength of a new Prdm9, using the small-load development (low erosion).
         :return: 'Float', selective strength of a new Prdm9 (S).
         """
-        return 2 * self.population_size * self.alpha * self.epsilon
+        return 2 * np.sqrt(self.fitness_small_load() * self.rho / self.mu)
 
     def landscape_variance_general(self):
         """
@@ -530,7 +528,7 @@ class Model(object):
         using the small-load development (low erosion).
         :return: 'Float', turn-over time (T).
         """
-        return self.prdm9_diversity_small_load() / (self.mu * self.alpha * (1. - self.mean_activity_small_load()))
+        return self.prdm9_diversity_small_load() * np.sqrt(1./(self.rho * self.mu * self.fitness_small_load()))
 
     def __str__(self):
         """
@@ -900,7 +898,6 @@ class Simulation(object):
         c = list(itertools.chain.from_iterable(self.trace.prdm9_longevities))
         plt.hexbin(a, b, c, gridsize=200, bins='log')
         plt.plot(*self.model.frequencies_wrt_activity_estimation(), color=YELLOW, linewidth=3)
-        plt.plot(*self.model.frequencies_wrt_activity_small_load(), color=GREEN, linewidth=3)
         plt.title('PRMD9 frequency vs hotspot activity')
         plt.xlabel('hotspot activity')
         plt.ylabel('PRMD9 frequency')
@@ -1011,33 +1008,6 @@ class SimulationsAlongParameter(object):
         """
         pickle.dump(self, open(self.parameter_name + ".p", "wb"))
 
-    def plot_series(self, series, color, y_label, legend):
-        """
-        Plot the mean and variance
-        :param series: 'String',
-        :param color: 'String', color in hex format (e.g. #6ABD9B)
-        :param y_label: 'String', The label of the y-axis
-        :param legend: 'String', The label of the legend
-        :return: None
-        """
-        parameter_caption = {"fitness": r'$\mathrm{Strength\ of\ selection\ }(\alpha )$',
-                             "mutation": r'$\mathrm{Mutation\ rate\ of\ PRDM9\ }(u)$',
-                             "erosion": r'$\mathrm{Mutation\ rate\ of\ the\ hotspots\ }(v)$',
-                             "population": r'$\mathrm{The\ population\ size\ }(N_{e})$',
-                             "recombination": r'$\mathrm{Recombination\ rate\ }(r_{0})$'}[self.parameter]
-        mean = [np.mean(serie) for serie in series]
-        plt.scatter(self.parameter_range, mean, c=color, label=legend)
-        plt.fill_between(self.parameter_range,
-                         [np.percentile(serie, 10) for serie in series],
-                         [np.percentile(serie, 90) for serie in series], facecolor=color, alpha=0.3)
-        plt.xlabel(parameter_caption, fontsize=15)
-        plt.ylabel(y_label, fontsize=15)
-        plt.xlim(min(self.parameter_range), max(self.parameter_range))
-        if self.parameter == "fitness" and self.model.fitness_family == 3:
-            plt.xscale('linear')
-        else:
-            plt.xscale('log')
-
 
 class Batch(list):
     """
@@ -1080,27 +1050,42 @@ class Batch(list):
                    "prdm9_diversity": r'$\mathrm{PRDM9\ diversity\ }(D)$',
                    "selective_strength": r'$\mathrm{Selective\ strength\ }(S)$',
                    "landscape_variance": r'$\mathrm{Landscape\ variance\ }(V)$',
-                   "turn_over": r'$\mathrm{Turn-over\ time} (T)$'}[summary_statistic]
+                   "turn_over": r'$\mathrm{Turn\ over\ time\ } (T)$'}[summary_statistic]
         legend_label = {"simulation": r'$\mathrm{Simulation}$',
                         "estimation": r'$\mathrm{Mean\ field\ linearized\ } \omega$',
                         "small_load": r'$\mathrm{Small\ load\ regime}$',
                         "general": r'$\mathrm{Mean\ field}$'}
+        parameter_caption = {"fitness": r'$\mathrm{Strength\ of\ selection\ }(\alpha )$',
+                             "mutation": r'$\mathrm{Mutation\ rate\ of\ PRDM9\ }(u)$',
+                             "erosion": r'$\mathrm{Mutation\ rate\ of\ the\ hotspots\ }(v)$',
+                             "population": r'$\mathrm{The\ population\ size\ }(N_{e})$',
+                             "recombination": r'$\mathrm{Recombination\ rate\ }(r_{0})$'}
         my_dpi = 96
         plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
 
-        for j, batch in enumerate(self):
+        for j, simu_along_param in enumerate(self):
             plt.subplot(2, 2, j + 1)
 
-            models = [sim.model for sim in batch.simulations]
-
+            models = [sim.model for sim in simu_along_param.simulations]
             if summary_statistic == 'turn_over':
-                lag = [sim.generations[sim.trace.dichotomic_search(0.5)] for sim in batch.simulations]
-                plt.plot(batch.parameter_range, lag, color=BLUE, label=legend_label["simulation"])
-                plt.xscale('log')
+                lag = [sim.generations[sim.trace.dichotomic_search(0.5)] for sim in simu_along_param.simulations]
+                plt.plot(simu_along_param.parameter_range, lag, color=BLUE, label=legend_label["simulation"])
             else:
-                batch.plot_series(
-                    [getattr(sim.trace, summary_statistic + "_array")() for sim in batch.simulations],
-                    BLUE, y_label, legend_label["simulation"])
+                series = [getattr(sim.trace, summary_statistic + "_array")() for sim in simu_along_param.simulations]
+                mean = [np.mean(serie) for serie in series]
+                plt.scatter(simu_along_param.parameter_range, mean, c=BLUE, label=legend_label["simulation"])
+                plt.fill_between(simu_along_param.parameter_range,
+                                 [np.percentile(serie, 10) for serie in series],
+                                 [np.percentile(serie, 90) for serie in series], facecolor=BLUE, alpha=0.3)
+
+            plt.ylabel(y_label, fontsize=15)
+            plt.xlabel(parameter_caption[simu_along_param.parameter], fontsize=15)
+            plt.xlim(min(simu_along_param.parameter_range), max(simu_along_param.parameter_range))
+
+            if simu_along_param.parameter == "fitness" and simu_along_param.model.fitness_family == 3:
+                plt.xscale('linear')
+            else:
+                plt.xscale('log')
 
             if hotspots_variation:
                 for gamma, color in [(0.1, RED), (0.5, YELLOW), (1, LIGHTGREEN), (5, GREEN)]:
@@ -1108,17 +1093,15 @@ class Batch(list):
                         model.gamma = gamma
                         model.hotspots_variation = True
                     array = [getattr(model, summary_statistic + "_general")() for model in models]
-                    plt.plot(batch.parameter_range, array, color=color, linewidth=3, label='$\gamma={0}$'.format(gamma))
+                    plt.plot(simu_along_param.parameter_range, array, color=color, linewidth=3, label='$\gamma={0}$'.format(gamma))
                     plt.yscale(yscale)
             else:
-                print("parameter range", batch.parameter_range)
                 methods = [("general", RED), ("estimation", YELLOW)]
                 if small_load:
                     methods.append(("small_load", GREEN))
                 for method, color in methods:
                     array = [float(getattr(model, summary_statistic + "_" + method)()) for model in models]
-                    print(method, array)
-                    plt.plot(batch.parameter_range, array, color=color, linewidth=3, label=legend_label[method])
+                    plt.plot(simu_along_param.parameter_range, array, color=color, linewidth=3, label=legend_label[method])
                     plt.yscale(yscale)
 
         plt.tight_layout()
@@ -1148,8 +1131,8 @@ def load_batch(dir_id):
     """
     set_dir("/tmp/" + dir_id)
     simulation_batch = pickle.load(open("Batch.p", "rb"))
-    simulation_batch.save_figures(small_load=False, hotspots_variation=False)
-    map(lambda x: x.save_figure(), simulation_batch)
+    simulation_batch.save_figures(small_load=True, hotspots_variation=False)
+    # map(lambda x: x.save_figure(), simulation_batch)
 
 
 def make_batch():
@@ -1159,11 +1142,11 @@ def make_batch():
     :return: None.
     """
     set_dir("/tmp/" + id_generator(8))
-    model = Model(mutation_rate_prdm9=3.0 * 10 ** -6,
-                  mutation_rate_hotspot=3.0 * 10 ** -7,
+    model = Model(mutation_rate_prdm9=1.0 * 10 ** -5,
+                  mutation_rate_hotspot=1.0 * 10 ** -7,
                   population_size=10 ** 5,
                   recombination_rate=1.0 * 10 ** -3,
-                  alpha=10,
+                  alpha=20,
                   fitness='poisson', drift=True, linearized=False)
     batch = Batch()
     for parameter in ["population", "erosion", "mutation", "fitness"]:
@@ -1172,9 +1155,9 @@ def make_batch():
     for simulation_along_parameter in batch:
         simulation_along_parameter.run(nbr_of_cpu=8)
     batch.pickle()
-    batch.save_figures(small_load=False, hotspots_variation=False)
+    batch.save_figures(small_load=True, hotspots_variation=False)
 
 
 if __name__ == '__main__':
-    # load_batch("876C133F")
-    make_batch()
+    load_batch("2C0E3CC3")
+    # make_batch()
