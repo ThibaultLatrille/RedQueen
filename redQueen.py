@@ -8,6 +8,8 @@ import itertools
 from scipy.special import lambertw
 from scipy.optimize import brentq
 from scipy.integrate import quad, dblquad
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 RED = "#EB6231"
