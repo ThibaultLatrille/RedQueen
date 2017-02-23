@@ -435,7 +435,9 @@ class Model(object):
         General derivation of the Prdm9 diversity computed as \sum_i x_i^{-2} where x_i is the frequency of allele i.
         :return: 'Float', Prdm9 diversity (D).
         """
-        return max(1., - self.rho * self.eta / quad(lambda z: z * self.s_general(self.eta, z), 0, self.eta)[0])
+        d = - self.rho * self.eta / quad(lambda z: z * self.s_general(self.eta, z), 0, self.eta)[0]
+        x = self.mutation_rate_prdm9 * self.eta / (self.rho * 2)
+        return max(1., d/(1 + d*x))
 
     def prdm9_diversity_estimation(self):
         """
@@ -447,8 +449,9 @@ class Model(object):
             return self.population_size
         else:
             diff = 1 - 2 * mean_activity + self.activity_limit(mean_activity)
-            diversity = 4 * self.rho / (self.derivative_log_fitness(mean_activity) * diff)
-            return max(1., diversity)
+            d = 4 * self.rho / (self.derivative_log_fitness(mean_activity) * diff)
+            x = 1. / (2 * self.selective_strength_estimation())
+            return max(1., d/(1 + d*x))
 
     def prdm9_diversity_small_load(self):
         """
@@ -456,7 +459,9 @@ class Model(object):
         using the small-load development (low erosion).
         :return: 'Float', Prdm9 diversity (D).
         """
-        return max(1., 24 * self.population_size * self.mutation_rate_prdm9)
+        d = 24 * self.population_size * self.mutation_rate_prdm9
+        x = 1. / (2 * self.selective_strength_small_load())
+        return max(1., d/(1 + d*x))
 
     def selective_strength_general(self):
         """
@@ -478,7 +483,7 @@ class Model(object):
         Mean-field derivation of the selective strength of a new Prdm9, using the small-load development (low erosion).
         :return: 'Float', selective strength of a new Prdm9 (S).
         """
-        return 2 * np.sqrt(self.fitness_small_load() * self.rho / self.mu)
+        return 2 * self.population_size * np.sqrt(self.fitness_small_load() * self.rho / self.mu)
 
     def landscape_variance_general(self):
         """
@@ -1079,13 +1084,21 @@ class Batch(list):
                                  [np.percentile(serie, 90) for serie in series], facecolor=BLUE, alpha=0.3)
 
             plt.ylabel(y_label, fontsize=15)
-            plt.xlabel(parameter_caption[simu_along_param.parameter], fontsize=15)
             plt.xlim(min(simu_along_param.parameter_range), max(simu_along_param.parameter_range))
+            plt.xscale('log')
 
-            if simu_along_param.parameter == "fitness" and simu_along_param.model.fitness_family == 3:
-                plt.xscale('linear')
+            if simu_along_param.parameter == "fitness":
+                if simu_along_param.model.fitness_family == 1:
+                    plt.xlabel(parameter_caption[simu_along_param.parameter] + r'$\mathrm{\ (linear)}$', fontsize=15)
+                elif simu_along_param.model.fitness_family == 2:
+                    plt.xlabel(parameter_caption[simu_along_param.parameter] + r'$\mathrm{\ (power law)}$', fontsize=15)
+                elif simu_along_param.model.fitness_family == 3:
+                    plt.xlabel(parameter_caption[simu_along_param.parameter] + r'$\mathrm{\ (sigmoid)}$', fontsize=15)
+                    plt.xscale('linear')
+                elif simu_along_param.model.fitness_family == 4:
+                    plt.xlabel(parameter_caption[simu_along_param.parameter] + r'$\mathrm{\ (poisson)}$', fontsize=15)
             else:
-                plt.xscale('log')
+                plt.xlabel(parameter_caption[simu_along_param.parameter], fontsize=15)
 
             if hotspots_variation:
                 for gamma, color in [(0.1, RED), (0.5, YELLOW), (1, LIGHTGREEN), (5, GREEN)]:
@@ -1131,7 +1144,7 @@ def load_batch(dir_id):
     """
     set_dir("/tmp/" + dir_id)
     simulation_batch = pickle.load(open("Batch.p", "rb"))
-    simulation_batch.save_figures(small_load=True, hotspots_variation=False)
+    simulation_batch.save_figures(small_load=False, hotspots_variation=False)
     # map(lambda x: x.save_figure(), simulation_batch)
 
 
@@ -1142,16 +1155,16 @@ def make_batch():
     :return: None.
     """
     set_dir("/tmp/" + id_generator(8))
-    model = Model(mutation_rate_prdm9=1.0 * 10 ** -5,
-                  mutation_rate_hotspot=1.0 * 10 ** -7,
+    model = Model(mutation_rate_prdm9=3.0 * 10 ** -6,
+                  mutation_rate_hotspot=3.0 * 10 ** -7,
                   population_size=10 ** 5,
                   recombination_rate=1.0 * 10 ** -3,
-                  alpha=20,
-                  fitness='poisson', drift=True, linearized=False)
+                  alpha=0.01,
+                  fitness='polynomial', drift=True, linearized=False)
     batch = Batch()
     for parameter in ["population", "erosion", "mutation", "fitness"]:
         batch.append(SimulationsAlongParameter(model.copy(), parameter=parameter,
-                                               nbr_of_simulations=8, scale=10 ** 2, loops=10))
+                                               nbr_of_simulations=16, scale=10 ** 2, loops=10))
     for simulation_along_parameter in batch:
         simulation_along_parameter.run(nbr_of_cpu=8)
     batch.pickle()
@@ -1159,5 +1172,5 @@ def make_batch():
 
 
 if __name__ == '__main__':
-    load_batch("2C0E3CC3")
-    # make_batch()
+    # load_batch("A6C3FD9D")
+    make_batch()
