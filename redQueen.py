@@ -444,9 +444,7 @@ class Model(object):
         General derivation of the Prdm9 diversity computed as \sum_i x_i^{-2} where x_i is the frequency of allele i.
         :return: 'Float', Prdm9 diversity (D).
         """
-        d = - self.rho * self.eta / quad(lambda z: z * self.s_general(self.eta, z), 0, self.eta)[0]
-        x = self.mutation_rate_prdm9 * self.eta / (self.rho * 2)
-        return max(1., d / (1 + d * x))
+        return max(1., - self.rho * self.eta / quad(lambda z: z * self.s_general(self.eta, z), 0, self.eta)[0])
 
     def prdm9_diversity_estimation(self):
         """
@@ -458,9 +456,7 @@ class Model(object):
             return self.population_size
         else:
             diff = 1 - 2 * mean_activity + self.activity_limit(mean_activity)
-            d = 4 * self.rho / (self.derivative_log_fitness(mean_activity) * diff)
-            x = 1. / (2 * self.selective_strength_estimation())
-            return max(1., d / (1 + d * x))
+            return max(1., 4 * self.rho / (self.derivative_log_fitness(mean_activity) * diff))
 
     def prdm9_diversity_small_load(self):
         """
@@ -468,9 +464,7 @@ class Model(object):
         using the small-load development (low erosion).
         :return: 'Float', Prdm9 diversity (D).
         """
-        d = 24 * self.population_size * self.mutation_rate_prdm9
-        x = 1. / (2 * self.selective_strength_small_load())
-        return max(1., d / (1 + d * x))
+        return max(1., 24 * self.population_size * self.mutation_rate_prdm9)
 
     def selective_strength_general(self):
         """
@@ -1127,8 +1121,11 @@ class Batch(list):
         plt.tight_layout()
         plt.legend()
 
-        plt.savefig("%s" % summary_statistic + '.svg', format="svg")
-        plt.savefig("%s" % summary_statistic + '.png', format="png")
+        # plt.savefig("%s-batch" % summary_statistic + '.svg', format="svg")
+        if hotspots_variation:
+            plt.savefig("GammaDistri-%s" % summary_statistic + '.png', format="png")
+        else:
+            plt.savefig("%s" % summary_statistic + '.png', format="png")
         plt.clf()
         plt.close('all')
         print(summary_statistic + ' drawn')
@@ -1164,7 +1161,7 @@ if __name__ == '__main__':
                         help="The mutation rate of Prdm9 (multiplied by 10e-6)")
     parser.add_argument('-v', '--mutation_rate_hotspot', required=False, type=float, default=10.0,
                         dest="v", metavar="<Hotspots mutation rate>",
-                        help="The mutation rate of hotspots (multiplied by 10e-6)")
+                        help="The mutation rate of hotspots (multiplied by 10e-7)")
     parser.add_argument('-f', '--fitness', required=False, type=str, default='power',
                         dest="f", metavar="<fitness>",
                         help="The fitness either 'linear', 'sigmoid', 'power' or 'poisson'")
