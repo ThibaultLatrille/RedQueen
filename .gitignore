@@ -13,6 +13,7 @@
 *.synctex.gz
 *.swp
 /*.pdf
+*.p
 *.out
 *.nav
 *.snm
