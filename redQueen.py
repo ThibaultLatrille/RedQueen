@@ -1,3 +1,4 @@
+import argparse
 from multiprocessing import Pool
 import numpy as np
 import copy
@@ -8,6 +9,9 @@ import itertools
 from scipy.special import lambertw
 from scipy.optimize import brentq
 from scipy.integrate import quad, dblquad
+import matplotlib as mpl
+
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 RED = "#EB6231"
@@ -376,7 +380,8 @@ class Model(object):
         if x == 0.:
             return float("inf")
         else:
-            return self.derivative_log_fitness(x) * (1 - x) * (1 - self.activity_limit(x)) - (2. * x * self.rho / self.mu)
+            return self.derivative_log_fitness(x) * (1 - x) * (1 - self.activity_limit(x)) - (
+            2. * x * self.rho / self.mu)
 
     def fitness_small_load(self):
         if self.fitness_family == 4:
@@ -435,9 +440,7 @@ class Model(object):
         General derivation of the Prdm9 diversity computed as \sum_i x_i^{-2} where x_i is the frequency of allele i.
         :return: 'Float', Prdm9 diversity (D).
         """
-        d = - self.rho * self.eta / quad(lambda z: z * self.s_general(self.eta, z), 0, self.eta)[0]
-        x = self.mutation_rate_prdm9 * self.eta / (self.rho * 2)
-        return max(1., d/(1 + d*x))
+        return max(1., - self.rho * self.eta / quad(lambda z: z * self.s_general(self.eta, z), 0, self.eta)[0])
 
     def prdm9_diversity_estimation(self):
         """
@@ -449,9 +452,7 @@ class Model(object):
             return self.population_size
         else:
             diff = 1 - 2 * mean_activity + self.activity_limit(mean_activity)
-            d = 4 * self.rho / (self.derivative_log_fitness(mean_activity) * diff)
-            x = 1. / (2 * self.selective_strength_estimation())
-            return max(1., d/(1 + d*x))
+            return max(1., 4 * self.rho / (self.derivative_log_fitness(mean_activity) * diff))
 
     def prdm9_diversity_small_load(self):
         """
@@ -459,9 +460,7 @@ class Model(object):
         using the small-load development (low erosion).
         :return: 'Float', Prdm9 diversity (D).
         """
-        d = 24 * self.population_size * self.mutation_rate_prdm9
-        x = 1. / (2 * self.selective_strength_small_load())
-        return max(1., d/(1 + d*x))
+        return max(1., 24 * self.population_size * self.mutation_rate_prdm9)
 
     def selective_strength_general(self):
         """
@@ -533,7 +532,7 @@ class Model(object):
         using the small-load development (low erosion).
         :return: 'Float', turn-over time (T).
         """
-        return self.prdm9_diversity_small_load() * np.sqrt(1./(self.rho * self.mu * self.fitness_small_load()))
+        return self.prdm9_diversity_small_load() * np.sqrt(1. / (self.rho * self.mu * self.fitness_small_load()))
 
     def __str__(self):
         """
@@ -1101,12 +1100,13 @@ class Batch(list):
                 plt.xlabel(parameter_caption[simu_along_param.parameter], fontsize=15)
 
             if hotspots_variation:
-                for gamma, color in [(0.1, RED), (0.5, YELLOW), (1, LIGHTGREEN), (5, GREEN)]:
+                for gamma, color in [(0.5, RED), (1, YELLOW), (2.5, LIGHTGREEN), (5, GREEN)]:
                     for model in models:
                         model.gamma = gamma
                         model.hotspots_variation = True
                     array = [getattr(model, summary_statistic + "_general")() for model in models]
-                    plt.plot(simu_along_param.parameter_range, array, color=color, linewidth=3, label='$\gamma={0}$'.format(gamma))
+                    plt.plot(simu_along_param.parameter_range, array, color=color, linewidth=3,
+                             label='$\gamma={0}$'.format(gamma))
                     plt.yscale(yscale)
             else:
                 methods = [("general", RED), ("estimation", YELLOW)]
@@ -1114,14 +1114,18 @@ class Batch(list):
                     methods.append(("small_load", GREEN))
                 for method, color in methods:
                     array = [float(getattr(model, summary_statistic + "_" + method)()) for model in models]
-                    plt.plot(simu_along_param.parameter_range, array, color=color, linewidth=3, label=legend_label[method])
+                    plt.plot(simu_along_param.parameter_range, array, color=color, linewidth=3,
+                             label=legend_label[method])
                     plt.yscale(yscale)
 
         plt.tight_layout()
         plt.legend()
 
-        plt.savefig("%s-batch" % summary_statistic + '.svg', format="svg")
-        plt.savefig("%s-batch" % summary_statistic + '.png', format="png")
+        # plt.savefig("%s-batch" % summary_statistic + '.svg', format="svg")
+        if hotspots_variation:
+            plt.savefig("GammaDistri-%s" % summary_statistic + '.png', format="png")
+        else:
+            plt.savefig("%s" % summary_statistic + '.png', format="png")
         plt.clf()
         plt.close('all')
         print(summary_statistic + ' computed')
@@ -1135,42 +1139,59 @@ class Batch(list):
         pickle.dump(self, open("Batch.p", "wb"))
 
 
-def load_batch(dir_id):
+def load_batch():
     """
     Given a directory ('dir_id') containing the results of a batch simulation, load the pickle file (Batch.p) and save
     the figure again.Could be used if changes have been made to the figure, without running the simulations again.
     :param dir_id: a string.
     :return: None.
     """
-    set_dir("/tmp/" + dir_id)
+    set_dir("")
     simulation_batch = pickle.load(open("Batch.p", "rb"))
-    simulation_batch.save_figures(small_load=False, hotspots_variation=False)
+    simulation_batch.save_figures(small_load=True, hotspots_variation=False)
+    simulation_batch.save_figures(small_load=False, hotspots_variation=True)
     # map(lambda x: x.save_figure(), simulation_batch)
 
 
-def make_batch():
+def make_batch(model, nbr_of_simulations, directory=""):
     """
     Run simulations, then plot and save (in svg format) all the summary statistics (R, D, V or R) as a function of
     parameters of the simulations (effective population size, erosion rate, Prdm9 mutation rate, fitness parameter).
     :return: None.
     """
-    set_dir("/tmp/" + id_generator(8))
-    model = Model(mutation_rate_prdm9=3.0 * 10 ** -6,
-                  mutation_rate_hotspot=3.0 * 10 ** -7,
-                  population_size=10 ** 5,
-                  recombination_rate=1.0 * 10 ** -3,
-                  alpha=0.01,
-                  fitness='polynomial', drift=True, linearized=False)
+    if directory != "":
+        set_dir("/tmp/" + directory)
+    else:
+        set_dir("/tmp/" + id_generator(8))
     batch = Batch()
     for parameter in ["population", "erosion", "mutation", "fitness"]:
         batch.append(SimulationsAlongParameter(model.copy(), parameter=parameter,
-                                               nbr_of_simulations=16, scale=10 ** 2, loops=10))
+                                               nbr_of_simulations=nbr_of_simulations, scale=10 ** 2, loops=10))
     for simulation_along_parameter in batch:
-        simulation_along_parameter.run(nbr_of_cpu=8)
+        simulation_along_parameter.run(nbr_of_cpu=4)
     batch.pickle()
     batch.save_figures(small_load=True, hotspots_variation=False)
 
 
 if __name__ == '__main__':
-    # load_batch("A6C3FD9D")
-    make_batch()
+    load_batch()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-u', '--mutation_rate_prdm9', required=False, type=float, default=1.0,
+                        dest="u", metavar="<Prdm9 mutation rate>", help="The Prdm9 mutation rate")
+    parser.add_argument('-v', '--mutation_rate_hotspot', required=False, type=float, default=1.0,
+                        dest="v", metavar="<Hotspots mutation rate>", help="The Hotspots mutation rate")
+    parser.add_argument('-a', '--alpha', required=False, type=float, default=1.0,
+                        dest="a", metavar="<alpha>", help="The parameter alpha")
+    parser.add_argument('-f', '--fitness', required=False, type=str, default='polynomial',
+                        dest="f", metavar="<fitness>", help="The fitness")
+    parser.add_argument('-n', '--simulations', required=False, type=int, default=8,
+                        dest="n", metavar="<number of simulations>", help="number of simulations")
+    args = parser.parse_args()
+    model_args = Model(mutation_rate_prdm9=args.u * 10 ** -6,
+                       mutation_rate_hotspot=args.v * 10 ** -7,
+                       population_size=10 ** 5,
+                       recombination_rate=1.0 * 10 ** -3,
+                       alpha=args.a,
+                       fitness=args.f, drift=True, linearized=False)
+    directory = "u-{0}_v-{1}_f-{2}_a-{3}_n-{4}".format(args.u, args.v, args.f, args.a, args.n)
+    # make_batch(model_args, args.n, directory)

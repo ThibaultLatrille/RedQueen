@@ -6,12 +6,14 @@
 
 *~
 /tmp
+/qsub
 /Biblio
 *.aux
 *.log
 *.synctex.gz
 *.swp
 /*.pdf
+*.p
 *.out
 *.nav
 *.snm
