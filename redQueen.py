@@ -89,10 +89,10 @@ class Model(object):
         :param mutation_rate_hotspot: 'Float', the mutation rate of hotspots (mutation per base*number of bases).
         :param population_size: 'Float' or 'Integer', the effective population size.
         :param recombination_rate: 'Float', the recombination rate at the hotspots loci.
-        :param fitness: 'String', either 'linear', 'sigmoid', 'polynomial' or 'poisson'.
+        :param fitness: 'String', either 'linear', 'sigmoid', 'power' or 'poisson'.
         :param alpha: 'Float'.
             - 'alpha' is not used if the fitness is 'linear'.
-            - 'alpha' is the exponent of the fitness function if the fitness is 'polynomial' or 'poisson'.
+            - 'alpha' is the exponent of the fitness function if the fitness is 'power' or 'poisson'.
             - 'alpha' is the inflexion point if the fitness is 'sigmoid'.
         :param drift: 'Boolean', True if genetic drift is taken into account.
         :param linearized: 'Boolean', True if the fitness function is linearized.
@@ -116,9 +116,9 @@ class Model(object):
         self.population_size = float(population_size)
 
         # Initialisation of the fitness function
-        fitness_hash = {"linear": 1, "polynomial": 2, "sigmoid": 3, "poisson": 4}
+        fitness_hash = {"linear": 1, "power": 2, "sigmoid": 3, "poisson": 4}
         assert fitness in fitness_hash.keys(), "Parameter 'fitness' must be a string:" \
-                                               "['linear','sigmoid','polynomial', 'poisson']"
+                                               "['linear','sigmoid','power', 'poisson']"
         self.fitness_family = fitness_hash[fitness]
         self.alpha = alpha
         if self.fitness_family == 1:
@@ -232,12 +232,12 @@ class Model(object):
 
     def fitness(self, x):
         """
-        Compute f(x) where f is the fitness function, either 'linear', 'polynomial', 'sigmoid' or 'poisson'.
+        Compute f(x) where f is the fitness function, either 'linear', 'power', 'sigmoid' or 'poisson'.
         :param x: numpy 'Matrix', matrix hotspots activity where x_{i,j}=(L_i+L_j)/2 where L_i is the hotspots
         activity of allele i.
         :return: numpy 'Matrix', f(x)
             - f(x)=x if the fitness is 'linear'.
-            - f(x)=x^alpha if the fitness is 'polynomial'.
+            - f(x)=x^alpha if the fitness is 'power'.
             - f(x)=(1-e^(-alpha*x))/(1-e^(-alpha)) if the fitness is 'poisson'.
             - f(x)=(x^k)/(x^k + alpha^k) if the fitness is 'sigmoid', where k is the 'slope' (sharpness) of the sigmoid.
         """
@@ -253,7 +253,7 @@ class Model(object):
 
     def derivative_log_fitness(self, x):
         """
-        Compute f'(x)/f(x) where f is the fitness function, either 'linear', 'polynomial', 'sigmoid' or 'poisson'.
+        Compute f'(x)/f(x) where f is the fitness function, either 'linear', 'power', 'sigmoid' or 'poisson'.
         :param x: 'Float', usually the mean activity of hotspots (R).
         :return: 'Float', f'(x)/f(x), where f is the fitness function.
         """
@@ -345,7 +345,11 @@ class Model(object):
         :return: 'Float', mean activity of hotspots (R).
         """
         if self.hotspots_variation:
-            return (1 - np.power(self.gamma / (self.gamma + self.eta), self.gamma)) / self.eta
+            if self.gamma == 1:
+                return np.log(1. + self.eta) / self.eta
+            else:
+                return (1 - self.gamma * np.power(self.gamma / (self.gamma + self.eta), self.gamma - 1) / (
+                        self.gamma - 1.)) / self.eta
         else:
             return (1 - np.exp(-self.eta)) / self.eta
 
@@ -381,7 +385,7 @@ class Model(object):
             return float("inf")
         else:
             return self.derivative_log_fitness(x) * (1 - x) * (1 - self.activity_limit(x)) - (
-            2. * x * self.rho / self.mu)
+                2. * x * self.rho / self.mu)
 
     def fitness_small_load(self):
         if self.fitness_family == 4:
@@ -569,7 +573,7 @@ class Model(object):
         if self.fitness_family == 3:
             caption += "Inflexion point of the fitness function PRDM9=%.1e. \n" % self.alpha
         if self.fitness_family == 2:
-            caption += "Exponent of the polynomial fitness function PRDM9=%.1e. \n" % self.alpha
+            caption += "Exponent of the power fitness function PRDM9=%.1e. \n" % self.alpha
         if self.drift:
             caption += "  The simulation take into account DRIFT. \n"
         else:
@@ -981,16 +985,12 @@ class SimulationsAlongParameter(object):
         return "Batch of %s simulations. \n" % self.nbr_of_simulations + self.parameter_name + \
                "is scaled %.1e times.\n" % self.scale + self.model.caption()
 
-    def run(self, nbr_of_cpu=7, directory_id=None):
+    def run(self, nbr_of_cpu=7):
         """
         Run all simulations. Runs in different CPU if nbr_of_cpu is strictly greater than 1.
         :param nbr_of_cpu: 'Integer', the number of CPU
-        :param directory_id: 'String', the relative path to store the files
         :return: self.
         """
-        if directory_id is None:
-            directory_id = id_generator(8)
-        set_dir("/" + directory_id + " " + self.parameter_name)
         if nbr_of_cpu > 1:
             pool = Pool(nbr_of_cpu)
             self.simulations = pool.map(execute, self.simulations)
@@ -998,9 +998,7 @@ class SimulationsAlongParameter(object):
         else:
             map(lambda x: x.run(), self.simulations)
 
-        self.pickle()
-        os.chdir('..')
-        print('Simulation computed')
+        print('Simulations computed')
         return self
 
     def save_figure(self):
@@ -1106,6 +1104,8 @@ class Batch(list):
                 plt.xlabel(parameter_caption[simu_along_param.parameter], fontsize=15)
 
             if hotspots_variation:
+                if summary_statistic == 'mean_activity':
+                    plt.ylabel(r'$\mathrm{Mean\ fraction\ of\ active\ targets\ }(H)$', fontsize=15)
                 for gamma, color in [(0.1, RED), (0.5, YELLOW), (1, LIGHTGREEN), (5, GREEN)]:
                     for model in models:
                         model.gamma = gamma
@@ -1127,11 +1127,11 @@ class Batch(list):
         plt.tight_layout()
         plt.legend()
 
-        plt.savefig("%s-batch" % summary_statistic + '.svg', format="svg")
-        plt.savefig("%s-batch" % summary_statistic + '.png', format="png")
+        plt.savefig("%s" % summary_statistic + '.svg', format="svg")
+        plt.savefig("%s" % summary_statistic + '.png', format="png")
         plt.clf()
         plt.close('all')
-        print(summary_statistic + ' computed')
+        print(summary_statistic + ' drawn')
         return self
 
     def pickle(self):
@@ -1142,58 +1142,69 @@ class Batch(list):
         pickle.dump(self, open("Batch.p", "wb"))
 
 
-def load_batch(dir_id):
-    """
-    Given a directory ('dir_id') containing the results of a batch simulation, load the pickle file (Batch.p) and save
-    the figure again.Could be used if changes have been made to the figure, without running the simulations again.
-    :param dir_id: a string.
-    :return: None.
-    """
-    set_dir("/tmp/" + dir_id)
-    simulation_batch = pickle.load(open("Batch.p", "rb"))
-    simulation_batch.save_figures(small_load=False, hotspots_variation=False)
-    # map(lambda x: x.save_figure(), simulation_batch)
-
-
-def make_batch(model, nbr_of_simulations, directory=""):
-    """
-    Run simulations, then plot and save (in svg format) all the summary statistics (R, D, V or R) as a function of
-    parameters of the simulations (effective population size, erosion rate, Prdm9 mutation rate, fitness parameter).
-    :return: None.
-    """
-    if directory != "":
-        set_dir("/tmp/" + directory)
-    else:
-        set_dir("/tmp/" + id_generator(8))
-    batch = Batch()
-    for parameter in ["population", "erosion", "mutation", "fitness"]:
-        batch.append(SimulationsAlongParameter(model.copy(), parameter=parameter,
-                                               nbr_of_simulations=nbr_of_simulations, scale=10 ** 2, loops=30))
-    for simulation_along_parameter in batch:
-        simulation_along_parameter.run(nbr_of_cpu=8)
-    batch.pickle()
-    batch.save_figures(small_load=True, hotspots_variation=False)
-
-
 if __name__ == '__main__':
-    # load_batch("A6C3FD9D")
     parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--cpu', required=False, type=int, default=4,
+                        dest="c", metavar="<nbr of cpu>",
+                        help="Number of CPU available for parallel computing")
+    parser.add_argument('-t', '--time', required=False, type=int, default=50,
+                        dest="t", metavar="<time of simulation>",
+                        help="The number of steps of simulations (proportional to time)")
+    parser.add_argument('-r', '--range', required=False, type=int, default=4,
+                        dest="r", metavar="<range order of magnitude>",
+                        help="The order of magnitude to span around the focal parameters")
+    parser.add_argument('-s', '--simulations', required=False, type=int, default=32,
+                        dest="s", metavar="<number of simulations>",
+                        help="number of independent simulations to span")
+    parser.add_argument('-n', '--population_size', required=False, type=int, default=10 ** 5,
+                        dest="n", metavar="<population size>",
+                        help="number of simulations")
     parser.add_argument('-u', '--mutation_rate_prdm9', required=False, type=float, default=1.0,
-                        dest="u", metavar="<Prdm9 mutation rate>", help="The Prdm9 mutation rate")
-    parser.add_argument('-v', '--mutation_rate_hotspot', required=False, type=float, default=1.0,
-                        dest="v", metavar="<Hotspots mutation rate>", help="The Hotspots mutation rate")
-    parser.add_argument('-a', '--alpha', required=False, type=float, default=1.0,
-                        dest="a", metavar="<alpha>", help="The parameter alpha")
-    parser.add_argument('-f', '--fitness', required=False, type=str, default='polynomial',
-                        dest="f", metavar="<fitness>", help="The fitness")
-    parser.add_argument('-n', '--simulations', required=False, type=int, default=32,
-                        dest="n", metavar="<number of simulations>", help="number of simulations")
+                        dest="u", metavar="<Prdm9 mutation rate>",
+                        help="The mutation rate of Prdm9 (multiplied by 10e-6)")
+    parser.add_argument('-v', '--mutation_rate_hotspot', required=False, type=float, default=10.0,
+                        dest="v", metavar="<Hotspots mutation rate>",
+                        help="The mutation rate of hotspots (multiplied by 10e-6)")
+    parser.add_argument('-f', '--fitness', required=False, type=str, default='power',
+                        dest="f", metavar="<fitness>",
+                        help="The fitness either 'linear', 'sigmoid', 'power' or 'poisson'")
+    parser.add_argument('-a', '--alpha', required=False, type=float, default=0.1,
+                        dest="a", metavar="<alpha>",
+                        help="The parameter alpha of the fitness\n"
+                             "- is not used if the fitness is 'linear'.\n"
+                             "- is the power exponent if the fitness is 'power'.\n"
+                             "- is the exponential parameter if the fitness is 'poisson'.\n"
+                             "- is the inflexion point if the fitness is 'sigmoid'.")
+    parser.add_argument('-d', '--redraw', required=False, type=bool, default=False,
+                        dest="d", metavar="<redraw figures>",
+                        help="Draw the figures using the file 'Batch.p'")
     args = parser.parse_args()
-    model_args = Model(mutation_rate_prdm9=args.u * 10 ** -6,
-                       mutation_rate_hotspot=args.v * 10 ** -7,
-                       population_size=10 ** 5,
-                       recombination_rate=1.0 * 10 ** -3,
-                       alpha=args.a,
-                       fitness=args.f, drift=True, linearized=False)
-    directory = "u-{0}_v-{1}_f-{2}_a-{3}_n-{4}".format(args.u, args.v, args.f, args.a, args.n)
-    make_batch(model_args, args.n, directory)
+    if args.d:
+        """
+        Load the pickle file (Batch.p) from the current directory and save the figure again.
+        Could be used if changes have been made to the figure, without running the simulations again.
+        """
+        set_dir("")
+        batch = pickle.load(open("Batch.p", "rb"))
+    else:
+        """
+        Run simulations, then plot and save (in svg format) all the summary statistics (R, D, V or R) as a function of
+        parameters of the simulations (effective population size, erosion rate, Prdm9 mutation rate, fitness parameter).
+        """
+        args_model = Model(mutation_rate_prdm9=args.u * 10 ** -6,
+                           mutation_rate_hotspot=args.v * 10 ** -7,
+                           population_size=args.n,
+                           recombination_rate=1.0 * 10 ** -3,
+                           alpha=args.a,
+                           fitness=args.f, drift=True, linearized=False)
+        directory = "{0}_a{1}_u{2}_v{3}_c{4}_s{5}_t{6}".format(args.f, args.a, args.u, args.v, args.c, args.s, args.t)
+        set_dir("/data/" + directory)
+        batch = Batch()
+        for focal_parameter in ["population", "erosion", "mutation", "fitness"]:
+            batch.append(SimulationsAlongParameter(args_model.copy(), parameter=focal_parameter,
+                                                   nbr_of_simulations=args.s, scale=10 ** args.r, loops=args.t))
+        for simulation_along_parameter in batch:
+            simulation_along_parameter.run(nbr_of_cpu=args.c)
+        batch.pickle()
+    batch.save_figures(small_load=True, hotspots_variation=False)
+    batch.save_figures(small_load=True, hotspots_variation=True)
