@@ -791,9 +791,9 @@ class Simulation(object):
         """
         t = 0
         initial_variants = set(self.model.ids)
-        t_0 = time.time()
+        t_b = time.time()
 
-        while len(initial_variants & set(self.model.ids)) > 0 and (time.time() - t_0) < self.wall_time:
+        while len(initial_variants & set(self.model.ids)) > 0 and (time.time() - t_b) < self.wall_time:
             self.model.forward()
             t += 1
 
@@ -807,9 +807,11 @@ class Simulation(object):
         Burn-in phase and then run the self.model instance and record the trace.
         :return: self.
         """
-        self.burn_in()
-
         t_0 = time.time()
+
+        if self.t == 0:
+            self.burn_in()
+
         step_t = 0.
         step = float(self.t_max) / self.nbr_of_steps
         while self.t < self.t_max:
@@ -822,8 +824,7 @@ class Simulation(object):
                 self.trace.store(self.model)
 
             if (time.time() - t_0) > self.wall_time:
-                print(self)
-                print("Stopped at {} percent".format(100 * self.t / self.t_max))
+                print("Stopped at {0:.2f}%".format(100 * self.t / self.t_max))
                 break
 
         print(self)
@@ -1213,13 +1214,22 @@ if __name__ == '__main__':
                            recombination_rate=1.0 * 10 ** -3,
                            alpha=args.a,
                            fitness=args.f, drift=True, linearized=False)
-        directory = "{0}_a{1}_u{2}_v{3}_c{4}_s{5}_t{6}".format(args.f, args.a, args.u, args.v, args.c, args.s, args.t)
+        directory = "{0}_a{1}_u{2}_v{3}_c{4}_s{5}_t{6}_r{7}".format(args.f, args.a, args.u, args.v,
+                                                                    args.c, args.s, args.t, args.r)
         set_dir("/data/" + directory)
-        batch = Batch()
-        for focal_parameter in ["population", "erosion", "mutation", "fitness"]:
-            batch.append(SimulationsAlongParameter(args_model.copy(), parameter=focal_parameter,
-                                                   nbr_of_simulations=args.s, scale=10 ** args.r,
-                                                   loops=args.t, wall_time=wall_time))
+        try:
+            batch = pickle.load(open("Batch.p", "rb"))
+            for SimulationsAlongParameter in batch:
+                SimulationsAlongParameter.wall_time = wall_time
+                for simu in SimulationsAlongParameter.simulations:
+                    simu.wall_time = wall_time
+            print("Computation restarted")
+        except FileNotFoundError:
+            batch = Batch()
+            for focal_parameter in ["population", "erosion", "mutation", "fitness"]:
+                batch.append(SimulationsAlongParameter(args_model.copy(), parameter=focal_parameter,
+                                                       nbr_of_simulations=args.s, scale=10 ** args.r,
+                                                       loops=args.t, wall_time=wall_time))
         for simulation_along_parameter in batch:
             simulation_along_parameter.run(nbr_of_cpu=args.c)
         batch.pickle()
