@@ -1152,7 +1152,9 @@ class Batch(list):
         Save the instance using Pickle in a .p file.
         :return: None.
         """
-        pickle.dump(self, open("Batch.p", "wb"))
+        file = open("Batch.p", 'wb')
+        pickle.dump(self, file)
+        file.close()
 
 
 if __name__ == '__main__':
@@ -1214,15 +1216,13 @@ if __name__ == '__main__':
                            recombination_rate=1.0 * 10 ** -3,
                            alpha=args.a,
                            fitness=args.f, drift=True, linearized=False)
-        directory = "{0}_a{1}_u{2}_v{3}_c{4}_s{5}_t{6}_r{7}".format(args.f, args.a, args.u, args.v,
-                                                                    args.c, args.s, args.t, args.r)
+        directory = "{0}_a{1}_u{2}_v{3}_c{4}_s{5}_t{6}_r{7}_w{8}".format(args.f, args.a, args.u, args.v,
+                                                                         args.c, args.s, args.t, args.r, args.w)
         set_dir("/data/" + directory)
         try:
-            batch = pickle.load(open("Batch.p", "rb"))
-            for SimulationsAlongParameter in batch:
-                SimulationsAlongParameter.wall_time = wall_time
-                for simu in SimulationsAlongParameter.simulations:
-                    simu.wall_time = wall_time
+            f = open("Batch.p", 'rb')
+            batch = pickle.load(f)
+            f.close()
             print("Computation restarted")
         except FileNotFoundError:
             batch = Batch()
