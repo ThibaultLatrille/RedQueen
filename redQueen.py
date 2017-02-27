@@ -1,4 +1,5 @@
 import argparse
+import time
 from multiprocessing import Pool
 import numpy as np
 import copy
@@ -348,8 +349,8 @@ class Model(object):
             if self.gamma == 1:
                 return np.log(1. + self.eta) / self.eta
             else:
-                return (1 - self.gamma * np.power(self.gamma / (self.gamma + self.eta), self.gamma - 1) / (
-                        self.gamma - 1.)) / self.eta
+                return self.gamma * (1 - np.power(self.gamma / (self.gamma + self.eta), self.gamma - 1)) / (self.eta * (
+                        self.gamma - 1.))
         else:
             return (1 - np.exp(-self.eta)) / self.eta
 
@@ -398,7 +399,7 @@ class Model(object):
         Mean-field derivation of the mean activity of hotspots, using the small-load development (low erosion).
         :return: 'Float', mean activity of hotspots (R).
         """
-        return max(0.5, 1 - np.sqrt(self.rho / (self.mu * self.fitness_small_load())))
+        return max(0., 1 - np.sqrt(self.rho / (self.mu * self.fitness_small_load())))
 
     def activity_limit_small_load(self):
         """
@@ -406,7 +407,7 @@ class Model(object):
         small-load development (low erosion).
         :return: 'Float', the activity limit of hotspots (R_{\infty}).
         """
-        return max(0, 1 - 2 * np.sqrt(self.rho / (self.mu * self.fitness_small_load())))
+        return max(0., 1 - 2 * np.sqrt(self.rho / (self.mu * self.fitness_small_load())))
 
     def frequencies_wrt_activity(self, mean_activity, l_limit):
         """
@@ -598,6 +599,9 @@ class Trace(object):
 
         self.ids, self.prdm9_longevities = [], []
 
+    def __len__(self):
+        return len(self.prdm9_frequencies)
+
     def store(self, step):
         """
         Store the Prdm9 frequencies, fitnesses and longevities. Also store the activity of hotspots associated to each
@@ -751,13 +755,15 @@ class Simulation(object):
     Also implements method 'save_figure' to display the result of the simulation.
     """
 
-    def __init__(self, model, loops=10):
+    def __init__(self, model, loops=10, wall_time=float('inf')):
         """
         :param model: 'Model' instance.
         :param loops: Integer, the number of cycle (complete replacement of all Prdm9 alleles) simulated.
         """
         self.t_max = 0
+        self.t = 0
         self.nbr_of_steps = 0.
+        self.wall_time = wall_time
         self.loops = loops
         self.model = model
         self.trace = Trace()
@@ -785,7 +791,9 @@ class Simulation(object):
         """
         t = 0
         initial_variants = set(self.model.ids)
-        while len(initial_variants & set(self.model.ids)) > 0:
+        t_0 = time.time()
+
+        while len(initial_variants & set(self.model.ids)) > 0 and (time.time() - t_0) < self.wall_time:
             self.model.forward()
             t += 1
 
@@ -801,18 +809,22 @@ class Simulation(object):
         """
         self.burn_in()
 
+        t_0 = time.time()
         step_t = 0.
-
         step = float(self.t_max) / self.nbr_of_steps
-        for t in range(self.t_max):
+        while self.t < self.t_max:
             self.model.forward()
-
+            self.t += 1
             step_t += 1
             if step_t > step:
                 step_t -= step
-
-                self.generations.append(t)
+                self.generations.append(self.t)
                 self.trace.store(self.model)
+
+            if (time.time() - t_0) > self.wall_time:
+                print(self)
+                print("Stopped at {} percent".format(100 * self.t / self.t_max))
+                break
 
         print(self)
         return self
@@ -918,6 +930,9 @@ class Simulation(object):
     def pickle(self):
         pickle.dump(self, open(str(self) + ".p", "wb"))
 
+    def computed(self):
+        return 100 * self.t / self.t_max
+
 
 # a more complex simulation object
 # makes a series of simulations for regularly spaced (in log) values of key parameters of the model
@@ -927,9 +942,8 @@ class SimulationsAlongParameter(object):
     of only one parameter, while all the other parameters of the simulations are kept constant.
     """
 
-    def __init__(self, model, parameter="null", nbr_of_simulations=20, scale=10 ** 2, loops=10):
+    def __init__(self, model, parameter="null", nbr_of_simulations=20, scale=10 ** 2, loops=10, wall_time=float('inf')):
         """
-
         :param model: 'Model' instance.
         :param parameter: 'String'.
             - 'population': Vary the population size.
@@ -969,7 +983,7 @@ class SimulationsAlongParameter(object):
             model_copy = self.model.copy()
             setattr(model_copy, self.parameter_name, parameter_focal)
             model_copy.scaling_parameters()
-            self.simulations.append(Simulation(model_copy, loops=self.loops))
+            self.simulations.append(Simulation(model_copy, loops=self.loops, wall_time=wall_time))
 
     def caption(self):
         """
@@ -1027,7 +1041,6 @@ class Batch(list):
         """
         self.save_figure('mean_activity', 'linear', small_load=small_load, hotspots_variation=hotspots_variation)
         self.save_figure('prdm9_diversity', 'log', small_load=small_load, hotspots_variation=hotspots_variation)
-        self.save_figure('landscape_variance', 'log', small_load=small_load, hotspots_variation=hotspots_variation)
         self.save_figure('selective_strength', 'log', small_load=small_load, hotspots_variation=hotspots_variation)
         self.save_figure('turn_over', 'log', small_load=small_load, hotspots_variation=hotspots_variation)
 
@@ -1070,15 +1083,17 @@ class Batch(list):
 
             models = [sim.model for sim in simu_along_param.simulations]
             if summary_statistic == 'turn_over':
-                lag = [sim.generations[sim.trace.dichotomic_search(0.5)] for sim in simu_along_param.simulations]
-                plt.plot(simu_along_param.parameter_range, lag, color=BLUE, label=legend_label["simulation"])
+                if len(min(simu_along_param.simulations, key=lambda s: len(s.trace)).trace) > 0:
+                    lag = [sim.generations[sim.trace.dichotomic_search(0.5)] for sim in simu_along_param.simulations]
+                    plt.plot(simu_along_param.parameter_range, lag, color=BLUE, label=legend_label["simulation"])
             else:
                 series = [getattr(sim.trace, summary_statistic + "_array")() for sim in simu_along_param.simulations]
-                mean = [np.mean(serie) for serie in series]
-                plt.scatter(simu_along_param.parameter_range, mean, c=BLUE, label=legend_label["simulation"])
-                plt.fill_between(simu_along_param.parameter_range,
-                                 [np.percentile(serie, 10) for serie in series],
-                                 [np.percentile(serie, 90) for serie in series], facecolor=BLUE, alpha=0.3)
+                if len(min(series, key=lambda s: len(s))) > 0:
+                    mean = [np.mean(serie) for serie in series]
+                    plt.scatter(simu_along_param.parameter_range, mean, c=BLUE, label=legend_label["simulation"])
+                    plt.fill_between(simu_along_param.parameter_range,
+                                     [np.percentile(serie, 10) for serie in series],
+                                     [np.percentile(serie, 90) for serie in series], facecolor=BLUE, alpha=0.3)
 
             plt.ylabel(y_label, fontsize=15)
             plt.xlim(min(simu_along_param.parameter_range), max(simu_along_param.parameter_range))
@@ -1147,6 +1162,9 @@ if __name__ == '__main__':
     parser.add_argument('-t', '--time', required=False, type=int, default=50,
                         dest="t", metavar="<time of simulation>",
                         help="The number of steps of simulations (proportional to time)")
+    parser.add_argument('-w', '--wall_time', required=False, type=float, default=float("inf"),
+                        dest="w", metavar="<The wall time (in seconds)>",
+                        help="The wall time (in seconds) of the whole computation")
     parser.add_argument('-r', '--range', required=False, type=int, default=4,
                         dest="r", metavar="<range order of magnitude>",
                         help="The order of magnitude to span around the focal parameters")
@@ -1188,6 +1206,7 @@ if __name__ == '__main__':
         Run simulations, then plot and save (in svg format) all the summary statistics (R, D, V or R) as a function of
         parameters of the simulations (effective population size, erosion rate, Prdm9 mutation rate, fitness parameter).
         """
+        wall_time = args.w * args.c * 0.9 / (4 * args.s)
         args_model = Model(mutation_rate_prdm9=args.u * 10 ** -6,
                            mutation_rate_hotspot=args.v * 10 ** -7,
                            population_size=args.n,
@@ -1199,9 +1218,10 @@ if __name__ == '__main__':
         batch = Batch()
         for focal_parameter in ["population", "erosion", "mutation", "fitness"]:
             batch.append(SimulationsAlongParameter(args_model.copy(), parameter=focal_parameter,
-                                                   nbr_of_simulations=args.s, scale=10 ** args.r, loops=args.t))
+                                                   nbr_of_simulations=args.s, scale=10 ** args.r,
+                                                   loops=args.t, wall_time=wall_time))
         for simulation_along_parameter in batch:
             simulation_along_parameter.run(nbr_of_cpu=args.c)
         batch.pickle()
-    batch.save_figures(small_load=True, hotspots_variation=False)
-    batch.save_figures(small_load=True, hotspots_variation=True)
+    batch.save_figures(small_load=False, hotspots_variation=False)
+    batch.save_figures(small_load=False, hotspots_variation=True)
