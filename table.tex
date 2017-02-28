@@ -1,0 +1,38 @@
+\documentclass[USLetter,5pt]{article}
+\usepackage{adjustbox}
+\newcommand{\specialcell}[2][c]{%
+\begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+\begin{document}
+\begin{table}[ht]
+\centering
+\begin{adjustbox}{width = 1\textwidth}
+\small\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\specialcell{Mutation rate of \\ PRDM9 ($u$)} & \specialcell{Erosion rate of \\ targets ($v*g$)} & \specialcell{Fitness \\ parameter ($\alpha$)} & $\epsilon$ & \specialcell{Mean fraction of \\ active targets ($H$)} & \specialcell{Diversity at \\ PRDM9 locus ($D$)} & \specialcell{Scaled selection \\ coefficient ($S$)} & \specialcell{Turn-over \\ time ($T$)}\\
+\hline
+3 \times 10^{-6} & 3 \times 10^{-10} & 1 \times 10^{-4} & 1 \times 10^{-4} & $0.6$ & $9.9$ & $26$ & 6.4 \times 10^{4}\\
+3 \times 10^{-6} & 3 \times 10^{-11} & 1 \times 10^{-4} & 1 \times 10^{-5} & $0.82$ & $8.2$ & $8.6$ & 1.6 \times 10^{5}\\
+3 \times 10^{-7} & 3 \times 10^{-11} & 1 \times 10^{-4} & 1 \times 10^{-4} & $0.6$ & $1$ & $26$ & 6.5 \times 10^{4}\\
+3 \times 10^{-6} & 3 \times 10^{-11} & 1 \times 10^{-5} & 1 \times 10^{-5} & $0.6$ & $9.9$ & $2.6$ & 6.4 \times 10^{5}\\
+\hline
+\end{tabular}
+\end{adjustbox}
+\caption{Power law fitness function}
+\end{table}
+\begin{table}[ht]
+\centering
+\begin{adjustbox}{width = 1\textwidth}
+\small\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\specialcell{Mutation rate of \\ PRDM9 ($u$)} & \specialcell{Erosion rate of \\ targets ($v*g$)} & \specialcell{Fitness \\ parameter ($\beta$)} & $\epsilon$ & \specialcell{Mean fraction of \\ active targets ($H$)} & \specialcell{Diversity at \\ PRDM9 locus ($D$)} & \specialcell{Scaled selection \\ coefficient ($S$)} & \specialcell{Turn-over \\ time ($T$)}\\
+\hline
+1 \times 10^{-5} & 1 \times 10^{-9} & $20$ & 1 \times 10^{-4} & $0.74$ & $14$ & $51$ & 1.3 \times 10^{4}\\
+1 \times 10^{-5} & 1 \times 10^{-10} & $20$ & 1 \times 10^{-5} & $0.79$ & $14$ & $7.1$ & 9.6 \times 10^{4}\\
+1 \times 10^{-6} & 1 \times 10^{-10} & $20$ & 1 \times 10^{-4} & $0.74$ & $1.4$ & $51$ & 1.3 \times 10^{4}\\
+1 \times 10^{-5} & 1 \times 10^{-10} & 1 \times 10^{2} & 1 \times 10^{-5} & $0.5$ & $10$ & $1.6$ & 3.1 \times 10^{5}\\
+\hline
+\end{tabular}
+\end{adjustbox}
+\caption{Exponential fitness function}
+\end{table}
+\end{document}
