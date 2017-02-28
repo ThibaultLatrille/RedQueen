@@ -297,7 +297,7 @@ class Model(object):
         return 4 * self.population_size * (omega_new - omega) / omega
 
     def activity(self, eta):
-        if self.hotspots_variation:
+        if self.hotspots_variation and self.gamma < float("inf"):
             return np.power(self.gamma / (self.gamma + eta), self.gamma + 1)
         else:
             return np.exp(-eta)
@@ -335,7 +335,7 @@ class Model(object):
         :param mean_activity: 'Float', mean activity of hotspots (R).
         :return: 'Float', the activity limit of hotspots (R_{\infty}).
         """
-        if mean_activity == 0.:
+        if mean_activity < 0.:
             return 0.
         else:
             return -1 * mean_activity * np.real(lambertw(-np.exp(- 1. / mean_activity) / mean_activity))
@@ -345,7 +345,7 @@ class Model(object):
         General derivation of the mean activity of hotspots by using the age of the allele.
         :return: 'Float', mean activity of hotspots (R).
         """
-        if self.hotspots_variation:
+        if self.hotspots_variation and self.gamma < float("inf"):
             if self.gamma == 1:
                 return np.log(1. + self.eta) / self.eta
             else:
@@ -399,7 +399,7 @@ class Model(object):
         Mean-field derivation of the mean activity of hotspots, using the small-load development (low erosion).
         :return: 'Float', mean activity of hotspots (R).
         """
-        return max(0., 1 - np.sqrt(self.rho / (self.mu * self.fitness_small_load())))
+        return 1 - np.sqrt(self.rho / (self.mu * self.fitness_small_load()))
 
     def activity_limit_small_load(self):
         """
@@ -407,7 +407,7 @@ class Model(object):
         small-load development (low erosion).
         :return: 'Float', the activity limit of hotspots (R_{\infty}).
         """
-        return max(0., 1 - 2 * np.sqrt(self.rho / (self.mu * self.fitness_small_load())))
+        return 1 - 2 * np.sqrt(self.rho / (self.mu * self.fitness_small_load()))
 
     def frequencies_wrt_activity(self, mean_activity, l_limit):
         """
@@ -1064,83 +1064,113 @@ class Batch(list):
         """
         y_label = {"mean_activity": r'$\mathrm{Mean\ recombination\ activity\ }(R)$',
                    "prdm9_diversity": r'$\mathrm{PRDM9\ diversity\ }(D)$',
-                   "selective_strength": r'$\mathrm{Selective\ strength\ }(S)$',
+                   "selective_strength": r'$\mathrm{Scaled\ selection\ coefficient\ }(S)$',
                    "landscape_variance": r'$\mathrm{Landscape\ variance\ }(V)$',
                    "turn_over": r'$\mathrm{Turn\ over\ time\ } (T)$'}[summary_statistic]
         legend_label = {"simulation": r'$\mathrm{Simulation}$',
-                        "estimation": r'$\mathrm{Mean\ field\ linearized\ } \omega$',
-                        "small_load": r'$\mathrm{Small\ load\ regime}$',
+                        "estimation": r'$\mathrm{Linearized\ mean\ field\ }$',
+                        "small_load": r'$\mathrm{Small\ gap\ regime}$',
                         "general": r'$\mathrm{Mean\ field}$'}
-        parameter_caption = {"fitness": r'$\mathrm{Strength\ of\ selection\ }(\alpha )$',
+        parameter_caption = {"fitness": r'$\mathrm{Fitness\ parameter\ }$',
                              "mutation": r'$\mathrm{Mutation\ rate\ of\ PRDM9\ }(u)$',
-                             "erosion": r'$\mathrm{Mutation\ rate\ of\ the\ hotspots\ }(v)$',
-                             "population": r'$\mathrm{The\ population\ size\ }(N_{e})$',
-                             "recombination": r'$\mathrm{Recombination\ rate\ }(r_{0})$'}
+                             "erosion": r'$\mathrm{Erosion\ rate\ at\ the\ targets\ }(v*r_{0})$',
+                             "population": r'$\mathrm{Effective\ population\ size\ }(N_{e})$',
+                             "recombination": r'$\mathrm{Erosion\ rate\ }(v*r_{0})$'}
         my_dpi = 96
-        plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
-
+        fig = plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
+        i_to_str = {0: "A", 1: "B", 2: "C", 3: "D"}
         for j, simu_along_param in enumerate(self):
-            plt.subplot(2, 2, j + 1)
+            ax = fig.add_subplot(2, 2, j + 1)
+            plt.text(0.05, 0.95, i_to_str[j], fontsize=24, transform=ax.transAxes, fontweight='bold', va='top')
 
-            models = [sim.model for sim in simu_along_param.simulations]
-            if summary_statistic == 'turn_over':
-                if len(min(simu_along_param.simulations, key=lambda s: len(s.trace)).trace) > 0:
-                    lag = [sim.generations[sim.trace.dichotomic_search(0.5)] for sim in simu_along_param.simulations]
-                    plt.plot(simu_along_param.parameter_range, lag, color=BLUE, label=legend_label["simulation"])
-            else:
-                series = [getattr(sim.trace, summary_statistic + "_array")() for sim in simu_along_param.simulations]
-                if len(min(series, key=lambda s: len(s))) > 0:
-                    mean = [np.mean(serie) for serie in series]
-                    plt.scatter(simu_along_param.parameter_range, mean, c=BLUE, label=legend_label["simulation"])
-                    plt.fill_between(simu_along_param.parameter_range,
-                                     [np.percentile(serie, 10) for serie in series],
-                                     [np.percentile(serie, 90) for serie in series], facecolor=BLUE, alpha=0.3)
+            parameter = simu_along_param.parameter
+            simulations = simu_along_param.simulations
+            param_range = simu_along_param.parameter_range
 
-            plt.ylabel(y_label, fontsize=15)
-            plt.xlim(min(simu_along_param.parameter_range), max(simu_along_param.parameter_range))
-            plt.xscale('log')
+            if parameter == 'erosion':
+                param_range = np.array([x * simulations[0].model.recombination_rate for x in param_range])
 
-            if simu_along_param.parameter == "fitness":
+            if parameter == "fitness":
                 if simu_along_param.model.fitness_family == 1:
-                    plt.xlabel(parameter_caption[simu_along_param.parameter] + r'$\mathrm{\ (linear)}$', fontsize=15)
+                    plt.xlabel(r'$\mathrm{Linear fitness\ function}$', fontsize=18)
                 elif simu_along_param.model.fitness_family == 2:
-                    plt.xlabel(parameter_caption[simu_along_param.parameter] + r'$\mathrm{\ (power law)}$', fontsize=15)
+                    plt.xlabel(r'$\mathrm{Power\ law\ fitness\ (parameter\ }\alpha)$', fontsize=18)
                 elif simu_along_param.model.fitness_family == 3:
-                    plt.xlabel(parameter_caption[simu_along_param.parameter] + r'$\mathrm{\ (sigmoid)}$', fontsize=15)
+                    plt.xlabel(r'$\mathrm{Sigmoid\ fitness\ (parameter\ }x)$', fontsize=18)
                     plt.xscale('linear')
                 elif simu_along_param.model.fitness_family == 4:
-                    plt.xlabel(parameter_caption[simu_along_param.parameter] + r'$\mathrm{\ (poisson)}$', fontsize=15)
+                    plt.xlabel(r'$\mathrm{Exponential\ fitness\ (parameter\ }\beta)$', fontsize=18)
+                    simulations = list(reversed(simulations))
+                    param_range = np.array([1/x for x in reversed(param_range)])
             else:
-                plt.xlabel(parameter_caption[simu_along_param.parameter], fontsize=15)
+                plt.xlabel(parameter_caption[parameter], fontsize=18)
 
+            plt.ylabel(y_label, fontsize=18)
+            plt.axvline(np.sqrt(param_range[0] * param_range[-1]), c="#b5b5b5", linewidth=2)
+            plt.xscale('log')
+            models = [sim.model for sim in simulations]
             if hotspots_variation:
+                array = []
                 if summary_statistic == 'mean_activity':
-                    plt.ylabel(r'$\mathrm{Mean\ fraction\ of\ active\ targets\ }(H)$', fontsize=15)
-                for gamma, color in [(0.1, RED), (0.5, YELLOW), (1, LIGHTGREEN), (5, GREEN)]:
+                    plt.ylabel(r'$\mathrm{Mean\ fraction\ of\ active\ targets\ }(H)$', fontsize=18)
+                for gamma, label, color in [(0.5, "0.5", LIGHTGREEN), (1, "1", GREEN),
+                                            (5, "5", YELLOW), (float("inf"), "\\infty", RED)]:
                     for model in models:
                         model.gamma = gamma
                         model.hotspots_variation = True
                     array = [getattr(model, summary_statistic + "_general")() for model in models]
-                    plt.plot(simu_along_param.parameter_range, array, color=color, linewidth=3,
-                             label='$\gamma={0}$'.format(gamma))
+                    plt.plot(param_range, array, color=color, linewidth=3, label='$a={0}$'.format(label))
                     plt.yscale(yscale)
+                if summary_statistic == "mean_activity":
+                    plt.ylim(0, 1)
+                elif summary_statistic == "prdm9_diversity":
+                    plt.ylim(1, max(array) * 10)
+                elif summary_statistic == "selective_strength":
+                    plt.ylim(min(array) / 10, max(array) * 10)
+                elif summary_statistic == "turn_over":
+                    plt.ylim(min(array) / 10, max(array) * 10)
             else:
+                if summary_statistic == 'turn_over':
+                    mask = np.array([len(x.trace) > 10 for x in simulations], dtype=bool)
+                    lag = [sim.generations[sim.trace.dichotomic_search(0.5)] for sim in np.array(simulations)[mask]]
+                    plt.scatter(param_range[mask], lag, c=BLUE, label=legend_label["simulation"], s=45)
+                else:
+                    series = np.array([getattr(sim.trace, summary_statistic + "_array")() for sim in simulations])
+                    mask = np.array([len(x) > 1 for x in series], dtype=bool)
+                    mean = [np.mean(serie) for serie in series[mask]]
+                    plt.scatter(param_range[mask], mean, c=BLUE, label=legend_label["simulation"], s=45)
+                    plt.fill_between(param_range[mask],
+                                     [np.percentile(serie, 10) for serie in series[mask]],
+                                     [np.percentile(serie, 90) for serie in series[mask]], facecolor=BLUE, alpha=0.3)
                 methods = [("general", RED), ("estimation", YELLOW)]
                 if small_load:
                     methods.append(("small_load", GREEN))
                 for method, color in methods:
                     array = [float(getattr(model, summary_statistic + "_" + method)()) for model in models]
-                    plt.plot(simu_along_param.parameter_range, array, color=color, linewidth=3,
+                    plt.plot(param_range, array, color=color, linewidth=3,
                              label=legend_label[method])
                     plt.yscale(yscale)
+                plt.xlim(min(param_range), max(param_range))
+                if summary_statistic == "mean_activity":
+                    plt.ylim(0, 1)
+                elif summary_statistic == "prdm9_diversity":
+                    plt.ylim(1, max([max(x) for x in series[mask]]) * 5)
+                elif summary_statistic == "selective_strength":
+                    plt.ylim(max(0.1, min([min(x) for x in series[mask]])), max([max(x) for x in series[mask]]) * 5)
+                elif summary_statistic == "turn_over":
+                    plt.ylim(min(lag)/5, max(lag) * 5)
+
+        if summary_statistic == "mean_activity" or summary_statistic == "selective_strength":
+            plt.legend(loc=4, fontsize=18)
+        else:
+            plt.legend(loc=1, fontsize=18)
 
         plt.tight_layout()
-        plt.legend()
-
-        # plt.savefig("%s-batch" % summary_statistic + '.svg', format="svg")
         if hotspots_variation:
+            plt.savefig("GammaDistri-%s" % summary_statistic + '.svg', format="svg")
             plt.savefig("GammaDistri-%s" % summary_statistic + '.png', format="png")
         else:
+            plt.savefig("%s" % summary_statistic + '.svg', format="svg")
             plt.savefig("%s" % summary_statistic + '.png', format="png")
         plt.clf()
         plt.close('all')
@@ -1209,7 +1239,7 @@ if __name__ == '__main__':
         Run simulations, then plot and save (in svg format) all the summary statistics (R, D, V or R) as a function of
         parameters of the simulations (effective population size, erosion rate, Prdm9 mutation rate, fitness parameter).
         """
-        wall_time = args.w * args.c * 0.9 / (4 * args.s)
+        wall_time = args.w * args.c * 0.85 / (4 * args.s)
         args_model = Model(mutation_rate_prdm9=args.u * 10 ** -6,
                            mutation_rate_hotspot=args.v * 10 ** -7,
                            population_size=args.n,
@@ -1233,5 +1263,5 @@ if __name__ == '__main__':
         for simulation_along_parameter in batch:
             simulation_along_parameter.run(nbr_of_cpu=args.c)
         batch.pickle()
-    batch.save_figures(small_load=False, hotspots_variation=False)
+    batch.save_figures(small_load=True, hotspots_variation=False)
     batch.save_figures(small_load=False, hotspots_variation=True)
