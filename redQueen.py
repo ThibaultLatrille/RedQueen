@@ -1073,9 +1073,9 @@ class Batch(list):
                         "general": r'$\mathrm{Mean\ field}$'}
         parameter_caption = {"fitness": r'$\mathrm{Fitness\ parameter\ }$',
                              "mutation": r'$\mathrm{Mutation\ rate\ of\ PRDM9\ }(u)$',
-                             "erosion": r'$\mathrm{Erosion\ rate\ at\ the\ targets\ }(v*r_{0})$',
+                             "erosion": r'$\mathrm{Erosion\ rate\ at\ the\ targets\ }(vg)$',
                              "population": r'$\mathrm{Effective\ population\ size\ }(N_{e})$',
-                             "recombination": r'$\mathrm{Erosion\ rate\ }(v*r_{0})$'}
+                             "recombination": r'$\mathrm{Erosion\ rate\ }(vg)$'}
         my_dpi = 96
         fig = plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
         i_to_str = {0: "A", 1: "B", 2: "C", 3: "D"}
