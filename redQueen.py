@@ -1073,9 +1073,9 @@ class Batch(list):
                         "general": r'$\mathrm{Mean\ field}$'}
         parameter_caption = {"fitness": r'$\mathrm{Fitness\ parameter\ }$',
                              "mutation": r'$\mathrm{Mutation\ rate\ of\ PRDM9\ }(u)$',
-                             "erosion": r'$\mathrm{Erosion\ rate\ at\ the\ targets\ }(v*r_{0})$',
+                             "erosion": r'$\mathrm{Erosion\ rate\ at\ the\ targets\ }(v*g)$',
                              "population": r'$\mathrm{Effective\ population\ size\ }(N_{e})$',
-                             "recombination": r'$\mathrm{Erosion\ rate\ }(v*r_{0})$'}
+                             "recombination": r'$\mathrm{Erosion\ rate\ }(v*g)$'}
         my_dpi = 96
         fig = plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
         i_to_str = {0: "A", 1: "B", 2: "C", 3: "D"}
@@ -1150,7 +1150,7 @@ class Batch(list):
                     plt.plot(param_range, array, color=color, linewidth=3,
                              label=legend_label[method])
                     plt.yscale(yscale)
-                plt.xlim(min(param_range), max(param_range))
+                plt.xlim(min(param_range[mask]), max(param_range[mask]))
                 if summary_statistic == "mean_activity":
                     plt.ylim(0, 1)
                 elif summary_statistic == "prdm9_diversity":
@@ -1263,5 +1263,5 @@ if __name__ == '__main__':
         for simulation_along_parameter in batch:
             simulation_along_parameter.run(nbr_of_cpu=args.c)
         batch.pickle()
-    batch.save_figures(small_load=True, hotspots_variation=False)
+    batch.save_figures(small_load=False, hotspots_variation=False)
     batch.save_figures(small_load=False, hotspots_variation=True)
