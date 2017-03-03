@@ -267,9 +267,9 @@ Note that $D$ equals $K$ if all alleles have equal weights and is close to $1$ i
 \end{eqnarray*}
 
 {\bf Turnover time.}
-The turnover time is defined as the decorrelation time of the diversity at the PRDM9 locus. This can be quantitatively assessed using the \emph{cross-homozygosity}, which is defined as the fraction of homozygotes in a population that would be obtained by hybridizing populations at time $t$ and $t+T$ in equal proportions. The cross-homozygosity reduces to the regular (or instant) homozygosity for $T=0$ and drops to 0 for large $T$. The turnover time is defined as the time $T$ for which the cross-heterozygosity is equal to half of the instant homozygosity.
+The turnover time is defined as the decorrelation time of the diversity at the PRDM9 locus. This can be quantitatively assessed using the \emph{cross-homozygosity} (CH), which is defined as the fraction of homozygotes in a population that would be obtained by hybridizing populations at time $t$ and $t+T$ in equal proportions. The cross-homozygosity reduces to the regular (or instant) homozygosity for $T=0$ and drops to 0 for large $T$. The turnover time is defined as the time $T$ for which the cross-heterozygosity is equal to half of the instant homozygosity.
 \begin{eqnarray*}
-    \T = \avg{\dfrac{\sum_{i \in K_{t}} x_{i,t} x_{i,t+T}}{\sum_{i \in K_{t}} x_{i,t} x_{i,t}}  }  &=&  \dfrac{1}{2}.
+   \dfrac{CH_{t=T}}{CH_{t=0}} = \avg{\dfrac{\sum_{i \in K_{t}} x_{i,t} x_{i,t+T}}{\sum_{i \in K_{t}} x_{i,t} x_{i,t}}  }  &=&  \dfrac{1}{2}.
 \end{eqnarray*}
 
 A series of phase diagrams, showing the scaling relations between summary statistics and parameters of the model, were obtained as follows. For each parameter, $64$ independent simulations were run, each time changing the value of only one parameter around its central value. The range around the central value of the parameter is $10^{4}$. The mean and the variance of each summary statistic was calculated for each simulation, and plotted as a function of the parameter.
@@ -755,7 +755,7 @@ D^{-1} = \sum_i x_i^2 = \frac{1}{\rho \tau} \int_0^{\rho \tau} x^*(z) dz
 where we have integrated by parts, using the relation $dx^* / dz = s^*(z)/\rho$.
 Since the turnover time is equal to $T = \tau D$, this can also be rewritten as:
 \begin{eqnarray*}
-T = (\tau \D)^{-1} &=& - \frac{1}{(\rho \tau)^2} \int_0^{\rho \tau} s^*(z) z d z 
+T^{-1} = (\tau \D)^{-1} &=& - \frac{1}{(\rho \tau)^2} \int_0^{\rho \tau} s^*(z) z d z 
 \end{eqnarray*}
 The fitness of an allele of activity $\theta_0 = \theta^*(z_0)$ can be calculated by averaging over all possible diploid backgrounds:
 \begin{eqnarray*}
@@ -840,12 +840,12 @@ s^*(0) &=& \frac{1}{2} \sqrt \frac{\alpha v g}{u}  = \frac{1}{2} \sqrt{\alpha \e
 \end{eqnarray*}
 This can then be used to get an explicit expression for $\rho \tau$:
 \begin{eqnarray*}
-\rho \tau = \frac{v g}{u s} &=& \frac{v g}{u s} \sqrt \frac{4 u}{\alpha v g}  = 2 \sqrt \frac{v g}{u \alpha} 
-= 2 \sqrt{\epsilon}{\alpha} \propto \sqrt{\epsilon}
+\rho \tau = \frac{v g}{u s^*(0)} &=& \frac{v g}{u} \sqrt \frac{4 u}{\alpha v g}  = 2 \sqrt \frac{v g}{u \alpha} 
+= 2 \sqrt{\dfrac{\epsilon}{\alpha}} \propto \sqrt{\epsilon}
 \end{eqnarray*}
 and for $R$:
 \begin{eqnarray*}
-R = \frac{1 - e^{-\rho \tau}}{\rho \tau} &\simeq& 1 - \frac{1}{2} \rho \tau = 1 - \sqrt \frac {v g }{u \alpha} = 1 - \sqrt{\epsilon}{\alpha}
+R = \frac{1 - e^{-\rho \tau}}{\rho \tau} &\simeq& 1 - \frac{1}{2} \rho \tau = 1 - \sqrt \frac {v g }{u \alpha} = 1 - \sqrt{\dfrac{\epsilon}{\alpha}}
 \end{eqnarray*}
 and thus
 \begin{eqnarray*}
@@ -878,7 +878,7 @@ T = D \tau = D \rho \tau / \rho \simeq \frac{24 N_e u}{4 N_e v g} 2 \sqrt \frac{
 
 \begin{tabular}{cccccccc}
 \hline
-\specialcell{$u$} & \specialcell{$g$} & \specialcell{$\alpha$} & $\epsilon$ & \specialcell{$H$} & \specialcell{$D$} & \specialcell{$S_0$} & \specialcell{$T$}\\
+\specialcell{$u$} & \specialcell{$g$} & \specialcell{$\alpha$} & $\epsilon=\dfrac{vg}{u}$ & \specialcell{$H$} & \specialcell{$D$} & \specialcell{$S_0$} & \specialcell{$T$}\\
 \hline
 $3 \times 10^{-6}$ & $3 \times 10^{-3}$ & $1 \times 10^{-4}$ & $1 \times 10^{-4}$ & $0.6$ & $9.9$ & $26$ & $6.4 \times 10^{4}$\\
 $3 \times 10^{-6}$ & $3 \times 10^{-4}$ & $1 \times 10^{-4}$ & $1 \times 10^{-5}$ & $0.82$ & $8.2$ & $8.6$ & $1.6 \times 10^{5}$\\
@@ -938,7 +938,7 @@ Table 1. Summary statistics predicted by the model with variation in hot spot st
 	  \centering
        \includegraphics[width=0.8\textwidth]{Images/fixedpoint.pdf}\\
 \end{figure*}
-\textbf{Figure 6.} Self-consistent solution as a fixed point, in the form $R = g(R)$, for two values of $\epsilon = \sqrt{\dfrac{v g}{\alpha u}}$.
+\textbf{Figure 6.} Self-consistent solution as a fixed point, in the form $R = g(R)$, for two values of $\sqrt{\dfrac{\epsilon}{\alpha}} = \sqrt{\dfrac{v g}{u \alpha}}$.
 
 %\newpage
 
