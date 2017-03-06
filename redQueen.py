@@ -1265,4 +1265,4 @@ if __name__ == '__main__':
         batch.pickle()
     batch.save_figures(small_load=True, hotspots_variation=False)
     batch.save_figures(small_load=False, hotspots_variation=True)
-    print(print("\n".join(["\t".join([str(100*a.t / a.t_max) for a in b.simulations ]) for b in batch])))
+    print("\n".join(["\t".join([str(100*a.t / a.t_max) for a in b.simulations]) for b in batch]))
