@@ -15,9 +15,21 @@
 \usepackage{multicol}
 \usepackage[margin=60pt]{geometry}
 \usepackage{abstract}
+\usepackage{caption}
 
 \usepackage{pgfplots}
 \pgfplotsset{every axis/.append style={line width=1pt}}
+
+\definecolor{RED}{HTML}{EB6231}
+\definecolor{YELLOW}{HTML}{E29D26}
+\definecolor{BLUE}{HTML}{5D80B4}
+\definecolor{LIGHTGREEN}{HTML}{6ABD9B}
+\definecolor{GREEN}{HTML}{8FB03E}
+\definecolor{PURPLE}{HTML}{BE1E2D}
+\definecolor{BROWN}{HTML}{A97C50}
+\definecolor{PINK}{HTML}{DA1C5C}
+
+\newcommand{\R}{\textcolor{GREEN}{R}}
 
 \definecolor{color1}{HTML}{EB6231}
 \definecolor{color2}{HTML}{E29D26}
@@ -163,23 +175,24 @@
 	\centering
 	\begin{tikzpicture}
 	\begin{axis}[
-	ylabel={$g(R)$},
-	xlabel={Relative recombination activity ($R$)},
+	ylabel={$g(\R, \epsilon)$},
+	xlabel={Mean activity ($R$)},
 	domain=0:1,
 	samples=55,
 	minor tick num=5,
 	axis x line=bottom,
 	axis y line=left,
 	]
-	\addplot[color1]{x};
+	\addplot[GREEN]{x};
 	\addplot[color2]{(1-exp(-0.01*2*x/(1-x)))/(0.01*2*x/(1-x))};
 	\addplot[color3]{(1-exp(-0.1*2*x/(1-x)))/(0.1*2*x/(1-x))};;
-	\node at (axis cs:0.3,0.5) [anchor=south west, color1] {$R=R$};
-	\node at (axis cs:0.62,0.84) [anchor=south west, color2] {$\tfrac{\epsilon}{\alpha}=0.01$};
-	\node at (axis cs:0.4,0.73) [anchor=south west, color3] {$\tfrac{\epsilon}{\alpha}=0.1$};
+	\node at (axis cs:0.2,0.5) [anchor=south west, GREEN] {$Id: \R \mapsto \R $};
+	\node at (axis cs:0.62,0.84) [anchor=south west, color2] {$g(\R, 0.01)$};
+	\node at (axis cs:0.4,0.73) [anchor=south west, color3] {$g(\R, 0.1)$};
 	
 	\end{axis}
 	\end{tikzpicture}
-	\caption{Self-consistent solution as a fixed point, in the form $R = g(R) = \dfrac{\alpha}{\epsilon} \dfrac{1-R}{2 R} \left( 1- e^{- \tfrac{\epsilon}{\alpha}\tfrac{2 R}{(1-R)}} \right)$, for two values of $\dfrac{\epsilon}{\alpha} = \dfrac{vg}{\alpha u}$.\label{fig:equation}}
+	\captionsetup{labelformat=empty}
+	\caption[]{Self-consistent solution as a fixed point, in the form $\R = g(\R, \epsilon)$}
 \end{figure*}
 \end{document}

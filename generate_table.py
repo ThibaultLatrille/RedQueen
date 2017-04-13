@@ -6,7 +6,7 @@ def tex_f(f):
         return "$" + "{0:.2g}".format(f) + "$"
     else:
         base, exponent = "{0:.2e}".format(f).split("e")
-        return r"{0} \times 10^{{{1}}}".format("{0:.2g}".format(float(base)), int(exponent))
+        return r"${0} \times 10^{{{1}}}$".format("{0:.2g}".format(float(base)), int(exponent))
 
 parameters = [
     {'n': 10 ** 5, 'u': 3 * 10 ** -6, 'v': 10 ** -7, 'g': 3*10 ** -3, 'f': "power", 'a': 10 ** -4},
