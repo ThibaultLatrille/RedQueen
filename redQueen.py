@@ -1188,7 +1188,7 @@ class Batch(list):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-c', '--cpu', required=False, type=int, default=4,
                         dest="c", metavar="<nbr of cpu>",
                         help="Number of CPU available for parallel computing")
@@ -1198,7 +1198,7 @@ if __name__ == '__main__':
     parser.add_argument('-w', '--wall_time', required=False, type=float, default=float("inf"),
                         dest="w", metavar="<The wall time (in seconds)>",
                         help="The wall time (in seconds) of the whole computation")
-    parser.add_argument('-r', '--range', required=False, type=int, default=4,
+    parser.add_argument('-r', '--range', required=False, type=int, default=2,
                         dest="r", metavar="<range order of magnitude>",
                         help="The order of magnitude to span around the focal parameters")
     parser.add_argument('-s', '--simulations', required=False, type=int, default=32,
