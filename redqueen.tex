@@ -28,8 +28,10 @@
 
 \usepackage{natbib}
 
-%\bibliographystyle{sysbio}
+%\bibliographystyle{mbe}
+%\bibliographystyle{natbib}
 \bibliographystyle{rspublicnat}
+
 
 \urlstyle{tt}
 
@@ -75,7 +77,7 @@
 
 
 \begin{tabular}{p{0.5\linewidth}>{\raggedleft}p{0.5\linewidth}}
-& \vspace{-2.5cm} February 28, 2017 \\
+& \vspace{-2.5cm} March 3, 2017 \\
 \end{tabular}
 
 \noindent
@@ -96,8 +98,8 @@ Thibault Latrille, Laurent Duret, Nicolas Lartillot
 
 \vspace{1cm}
 
-\noindent
-{\bf Keywords:} 
+%\noindent
+%{\bf Keywords:} 
 
 \newpage
 
@@ -107,36 +109,37 @@ Thibault Latrille, Laurent Duret, Nicolas Lartillot
 
 \section*{\sc Abstract}
 
-In humans and many other species, recombination events cluster in narrow hot spots distributed across the genome, whose location is determined by the Zn-finger protein PRDM9. hot spots are not shared between human and chimpanzee, suggesting that hot spots are short-lived. To explain this fast evolutionary dynamics of recombination landscapes, an intra-genomic Red-Queen model, based on the interplay between two antagonistic forces, has been proposed. On the one hand, biased gene conversion, mediated by double-strand breaks, results in a rapid extinction of hot spots in the population. On the other hand, the resulting genome-wide depletion of recombination induces strong positive selection favoring new Prdm9 alleles recognizing new sequence motifs across the genome and restoring normal levels of recombination. Thus far, however, this Red-Queen scenario has not been formalized as a quantitative model.
+In humans and many other species, recombination events cluster in narrow hot spots distributed across the genome, whose location is determined by the Zn-finger protein PRDM9. Hot spots are not shared between closely related species, suggesting that hot spots are short-lived. To explain this fast evolutionary dynamics of recombination landscapes, an intra-genomic Red Queen model, based on the interplay between two antagonistic forces, has been proposed. On the one hand, biased gene conversion, mediated by double-strand breaks, results in a rapid extinction of hot spots in the population. On the other hand, the resulting genome-wide depletion of recombination induces positive selection favoring new Prdm9 alleles recognizing new sequence motifs across the genome and restoring normal levels of recombination. This Red Queen scenario is currently the reference model for explaining the fast turnover of recombination landscapes. Thus far, however, it has not been formalized as a quantitative population-genetic model, fully accounting for the intricate interplay between biased gene conversion, mutation, selection, demography and genetic diversity at the PRDM9 locus.
 
-Here, we propose a population-genetic model of the Red-Queen dynamic of recombination. This model was implemented as a Wright-Fisher simulator, allowing exploration of the behaviour of the model (in terms of the implied mean equilibrium recombination rate, diversity at the PRDM9 locus, or turnover rate) as a function of the parameters (effective population size, mutation rate). In a second step, analytical results, based on self-consistent mean-field approximations, were derived. These analytical results reproduce the scaling relations observed in the simulations, offering key insights about the detailed population-genetic mechanisms of the Red-Queen model. These insights and scaling relations can now be tested against empirical data currently available in mammals.
+Here, we propose a population-genetic model of the Red Queen dynamic of recombination. This model was implemented as a Wright-Fisher simulator, allowing exploration of the behaviour of the model (in terms of the implied mean equilibrium recombination rate, diversity at the PRDM9 locus, or turnover rate) as a function of the parameters (effective population size, mutation and erosion rates). In a second step, analytical results, based on self-consistent mean-field approximations, were derived. These analytical results reproduce the scaling relations observed in the simulations, offering key insights about the detailed population-genetic mechanisms of the Red Queen model. Empirical fit of the model to current data from the mouse and humans suggests both a high mutation rate at PRDM9 and strong biased gene conversion on its targets.
+
 
 \newpage
 
 \section*{Introduction}
 
-In mammals, as in many other species, meiotic recombination events are not uniformly distributed along chromosomes. Instead, they tend to occur within narrow regions, called hot spots, of typical length of 1-2 kb (Jeffreys 2001, Myers, Mancera). About 33 000 hot spots have been identified in humans (ref), and .. in the mouse (ref). Strikingly, hot spots are not conserved between humans and chimps (refs), nor between mouse subspecies (), suggesting that recombination landscapes are highly dynamic, undergoing a rapid turnover within relatively short evolutionary times.
+In mammals, as in many other species, meiotic recombination events are not uniformly distributed along chromosomes. Instead, they tend to occur within narrow regions, called hot spots, of typical length of 1-2 kb \citep{Jeffreys:2001ku,McVean:2004p676,Myers:2005p116,Brunschwig:2012dk}. Between 20,000 and 40,000 hot spots have been identified in humans \citep{McVean:2004p676,Myers:2005p116}, and over 40,000 in the mouse \citep{Brunschwig:2012dk}. Strikingly, hot spots are not conserved between humans and chimps \citep{Ptak:2005ej,Winckler:2005p1068,Auton:2012hh}, nor between mouse subspecies \citep{Smagulova:2016kz}, suggesting that recombination landscapes are highly dynamic, undergoing a rapid turnover within relatively short evolutionary times.
 
-At least in humans and the mouse, the location of hot spots is primarily determined by the Zn-finger protein PRDM9. Upon binding DNA at specific sequence motifs of approximately 10-20 bp through its ZnFinger domain (Baudat et al. 2010, 2013; Myers et al. 2010), PRDM9 catalyzes histone H3 Lys4 trimethylation (H3K4me3) at neighboring nucleosomes through its SET domain. The local changes in chromatin structure then lead to the recruitment of Spo11, triggering the formation of a double strand break (DSB) in the immediate vicinity of the target site. This DSB is repaired, ultimately leading to a crossover (CO) or a non-crossover (NCO) recombination event. In both cases, the DNA sequence around (and including) the binding site of PRDM9 is resected from the chromosome that has undergone the DSB and is repaired by using the homologous chromosome as a template over approximately 300 to 1000 base pairs, a process called gene conversion (Cole, others).
+At least in humans and the mouse, the location of hot spots is primarily determined by the Zn-finger protein PRDM9. Upon binding DNA at specific sequence motifs of approximately 10-20 bp through its ZnFinger domain  \citep{Baudat:2010ii,Myers:2010p921,Parvanov:2010kg}, PRDM9 catalyzes histone H3 Lys4 trimethylation (H3K4me3) at neighboring nucleosomes through its SET domain \citep{Grey:2011ir}. The local changes in chromatin structure then lead to the recruitment of Spo11, triggering the formation of a double strand break (DSB) in the immediate vicinity of the target site. This DSB is repaired, ultimately leading to a crossover (CO) or a non-crossover (NCO) recombination event. In both cases, the DNA sequence around (and including) the binding site of PRDM9 is resected from the chromosome and is repaired using the homologous chromosome as a template, over approximately 300 to 1,000 base pairs -- a process called gene conversion.
 
-When the two chromosomes differ due to the presence of heterozygous sites, an event of gene conversion leads to a loss of information (loss of the allele carried by the broken chromosome). As a result, gene conversion has the following paradoxical consequence: if both paternal and maternal chromosomes carry a functional copy of the PRDM9 binding site, each of them is equally likely to be targeted by PRDM9, to undergo the DSB and thus to be converted by its homologue. If, on the other hand, one of the chromosomes has a version of the binding site that partially or completely inactivates the binding of PRDM9 (cold allele), while the sequence on the other chromosome corresponds to a fully functional (hot) allele, then PRDM9 will preferentially target the chromosome carrying the hot allele -- whose sequence will then be converted into the cold version present on the homologue, thus resulting in the loss of the hot allele. This process of DSB-induced Biased Gene Conversion (biased in favor of cold alleles) will hereafter be referred to as dBGC. At the level of the population, dBGC results in a progressive accumulation of inactive PRDM9 target sites by mutation and preferential transmission of the mutants, leading to an increase in frequency, and the ultimate fixation, of inactive hot spots genome-wide. Hence, through the action of dBGC, recombination hot spots turn out to be self-destructive, a phenomenon referred to as the hot spot paradox (Boulton et al. 1997).
+When the two chromosomes differ due to the presence of heterozygous sites, an event of gene conversion leads to a loss of information (loss of the allele carried by the broken chromosome). As a result, gene conversion has the following paradoxical consequence: if both paternal and maternal chromosomes carry a functional copy of the PRDM9 binding site, each of them is equally likely to be targeted by PRDM9, to undergo the DSB and thus to be converted by its homologue. If, on the other hand, one of the chromosomes has a version of the binding site that partially or completely inactivates the binding of PRDM9 (cold allele), while the sequence on the other chromosome corresponds to a fully functional (hot) allele, then PRDM9 will preferentially target the chromosome carrying the hot allele -- whose sequence will then be erased and converted into the cold version present on the homologue \citep{Jeffreys:2002p941,Jeffreys:2004cv}. This process of DSB-induced Biased Gene Conversion (biased in favor of cold alleles) will hereafter be referred to as dBGC. At the level of the population, dBGC results in a progressive accumulation of inactive PRDM9 target sites, by mutation and preferential transmission of the mutants, leading to an increase in frequency and the ultimate fixation of inactive hot spots genome-wide. Hence, through the action of dBGC, recombination hot spots turn out to be self-destructive, a phenomenon referred to as the hot spot conversion paradox \citep{Boulton:1997p699}.
 
-Population genetic arguments suggest that dBGC might be a sufficient force to lead to the rapid extinction of recombination hot spots over the genome (Coop and Myers 2007, Ubeda and Wilkins 2011, Lesecque...), thus raising the question of how recombination is maintained in the long run. A remarkable observation in this respect is that PRDM9 is the most rapidly evolving gene in primates and rodents, and more generally across metazoans, and is highly polymorphic, specifically in its DNA binding domain (Buard, Ponting 2011). This represents clear evidence that this ZnFn domain is subject to strong mutational and selective pressure, ultimately resulting in the targeting of new hot spots at other locations. Thus, mutation and positive selection at the PRDM9 locus, leading to the recruitment of new hot spots genome wide, would seem to represent a good candidate for the mechanism compensating for the loss of hot spots by dBGC.
+Population genetic arguments suggest that dBGC might be a sufficient force to lead to the rapid extinction of recombination hot spots over the genome \citep{Boulton:1997p699,Jeffreys:2004cv,Coop:2007p343}, thus raising the question of how recombination is maintained in the long run. A remarkable observation in this respect is that PRDM9 is the most rapidly evolving gene in primates and rodents, and more generally across metazoans  \citep{Oliver:2009ca,Kono:2014hy,Buard:2014dy}, suggesting that the ZnFn domain of PRDM9 is subject to strong selective pressure, favoring new alleles targeting new sets of hot spots across the genome \citep{Ponting:2011ed}. Thus, positive selection at the PRDM9 locus would seem to represent a good candidate for the mechanism compensating for the loss of hot spots by dBGC.
 
-Altogether, this interplay between dBGC, leading to the loss of current hot spots, and mutation and positive selection on PRDM9, leading to the recruitment of new hot spots, appears to provide a convincing model for explaining the rapid evolutionary turnover of recombination landscapes and currently represents the dominant hypothesis in the literature (Myers et al. 2010, Ubeda and Wilkins 2011, Lesecque et al. 2014). It is an instance of intra-genomic conflict, where two processes are chasing after one another. As such, it is analogous to Red Queen situations, such as arms races between hosts and pathogens, often encountered in evolutionary ecology.
+Altogether, this interplay between dBGC, leading to the loss of current hot spots, and mutation and positive selection at the PRDM9 locus, leading to the recruitment of new hot spots, appears to provide a convincing model for explaining the rapid evolutionary turnover of recombination landscapes and currently represents the dominant hypothesis in the literature \citep{Myers:2010p921,Ubeda:2011p184,Lesecque:2014gv}. It is an instance of an intra-genomic conflict, where two processes are chasing after one another. As such, it is analogous to Red Queen situations, such as arms races between hosts and pathogens, often encountered in evolutionary ecology.
 %According to this Red Queen model of recombination turnover, PRDM9 would have to evolve constantly to compensate for the loss of its targets caused by dBGC and maintain a sufficient number of recombination hot spots in the genome.
 
-Several observations are consistent with the predictions of the Red Queen model of recombination turnover. First, the analysis of transmission segregation by sperm-typing at a few loci demonstrated that some recombination hot spots are subject to dBGC in humans and mice (Jeffreys and Neumann 2002, 2009; Baker 2015). Second, comparative genome analyses have suggested that PRDM9 target motifs accumulate substitutions at an accelerated rate genome wide (Myers 2010, Lesecque 2014, Baker 2015, Davies). Given that recombination is required for the proper segregation of chromosomes, and that Prdm9 knockout mice are sterile (Brick et al. 2012), it seems plausible that the loss of recombination hot spots might affect fertility, thus inducing positive selection on PRDM9 for eliciting new sequence motifs. 
+Several observations are consistent with the predictions of the Red Queen model of recombination turnover. First, the analysis of transmission segregation by sperm-typing at a few loci demonstrated that some recombination hot spots are subject to dBGC in humans and mice \citep{Jeffreys:2002p941,Jeffreys:2004p548,Jeffreys:2009p314}. Second, comparative genome analyses have suggested that PRDM9 target motifs accumulate substitutions at an accelerated rate genome wide \citep{Myers:2010p921,Lesecque:2014gv,Baker:2015dy,Davies:2016ci}. Given that recombination is required for the proper segregation of chromosomes, and that Prdm9 knockout mice are sterile \citep{Brick:2012dn}, it seems plausible that the loss of recombination hot spots might affect fertility, thus inducing positive selection on PRDM9 for eliciting new sequence motifs. Theoretical models indeed suggest that a Red Queen dynamics could in principle explain the turnover of recombination landscapes in the context of dBGC \citep{Ubeda:2011p184}.
 
-In many respects, however, the Red Queen model is still speculative and needs to be further theoretically investigated and empirically tested. A first specific issue is how exactly positive selection is leveraged onto PRDM9 by hot spot extinction. Second, a more accurate picture of the Red Queen model should really integrate the role of genetic diversity. Thus far, the Red Queen has been stated mostly in terms of a succession -- global hot spot extinction by dBGC followed by allelic replacement at the PRDM9 locus. However, in reality, the PRDM9 locus is known to be highly polymorphic, with many alternative alleles, each targeting a different subset of hot spots. How to explain this genetic diversity, and how the Red Queen model unfolds once this polymorphism is fully accounted for, are still open questions.
+In many respects, however, the Red Queen model is still speculative and needs to be further theoretically investigated and empirically tested. A first specific issue is how exactly positive selection is leveraged onto PRDM9 by hot spot extinction. Second, a more accurate picture of the Red Queen model should really integrate the role of genetic diversity. Thus far, the Red Queen has been stated mostly in terms of a succession -- global hot spot extinction by dBGC followed by allelic replacement at the PRDM9 locus. However, in reality, the PRDM9 locus is known to be highly polymorphic, with many alternative alleles, each targeting a different subset of hot spots \citep{Oliver:2009ca,Kono:2014hy,Buard:2014dy,Baker:2015dy,Davies:2016ci}. How to explain this genetic diversity, and how the Red Queen model unfolds once this polymorphism is fully accounted for, are still open questions.
 
-First, it is not yet totally clear whether the primary driver of the high levels of polymorphism at the PRDM9 locus is selection, or mutation. The Zn Finger domain of PRDM9 has a minisatellite structure, and as a result, the entire domain follows a complex process of point mutation, replication slippage, and concerted evolution by unequal meiotic cross-over (ref, Jeffreys). This appears to result in a particularly high mutation rate (up to $10^{-5}$ per generation), sufficient in itself to promote high levels of standing variation. The role of positive selection on PRDM9, on the other hand, and in particular, whether this selection is diversifying, is currently much less clear.
+First, it is not yet totally clear whether the primary driver of the high levels of polymorphism at the PRDM9 locus is selection, or mutation. The Zn Finger domain of PRDM9 has a minisatellite structure, and as a result, the entire domain follows a complex process of point mutation and concerted evolution by unequal meiotic cross-over. This appears to result in a particularly high mutation rate, up to $10^{-5}$ per generation \citep{Jeffreys:2013dl}, sufficient in itself to promote high levels of standing variation. The role of positive selection on PRDM9, on the other hand, and in particular, whether this selection is diversifying, is currently much less clear.
 
-Second, whatever the primary cause of such high levels of polymorphism, the presence of multiple alleles at the PRDM9 locus in a population is expected to distribute recombination rates more evenly across a larger number of weaker hot spots genome-wide, thereby weakening the effect of dBGC and thus slowing down extinction of old hot spots. Thus, there appear to be non-trivial feedbacks between standing diversity and other aspects of the stationary regime of the Red Queen process. In this context, demography is expected to play an important role, although a non trivial one: on the one hand, the strength of dBGC is directly proportional to the effective population size $N_e$, and thus stronger depletion is a priori expected in larger populations. On the other hand, larger populations can build up higher levels of polymorphism at the PRDM9 locus, thereby weakening the effect of dBGC. In the end, a more accurate description of the Red Queen dynamics should correctly tease out this complex mix of dBGC, selection and loss of PRDM9 alleles, either by random drift or by progressive obsolescence through extinction of their targets. 
+Second, whatever the primary cause of such high levels of polymorphism, the presence of multiple alleles at the PRDM9 locus in a population is expected to distribute recombination rates more evenly across a larger number of weaker hot spots genome-wide, thereby weakening the effect of dBGC and thus slowing down extinction of old hot spots. Thus, there are potentially non-trivial feedbacks between standing diversity and other aspects of the stationary regime of the Red Queen process. In this context, demography is expected to play an important role, although a non trivial one. On the one hand, the strength of dBGC is directly proportional to the effective population size $N_e$, and thus stronger depletion is a priori expected in larger populations. On the other hand, larger populations can build up higher levels of polymorphism at the PRDM9 locus, thereby weakening the effect of dBGC. How these two opposing effects implied by changes in effective population size will modify the equilibrium of the Red Queen is not so clear. In the end, a more accurate description of the Red Queen dynamics should correctly tease out this complex mix of dBGC, selection and loss of PRDM9 alleles, either by random drift or by progressive obsolescence through extinction of their targets. 
 
-A question of particular interest in this context is how the stationary regime of the Red Queen (in terms of the mean levels of depletion of recombination rates, the equilibrium diversity at the PRDM9 locus and the rate of turnover of recombination landscapes) scales with population size and with the parameters of the genetic system (in particular, the mutation rates at the target sites and at the minisatellite locus encoding the Zn-finger domain of PRDM9). Based on current empirical evidence, both dBGC and PRDM9 are likely to be implicated in the evolutionary dynamics of recombination landscapes across placental mammals, with the notable exception of the dog lineage. On a broader scale, PRDM9 is present across the metazoan tree of life, although absent in birds and in some other specific lineages (refs). Across mammals, and even more so across metazoans, both mutation rates and effective population size are likely to vary over several orders of magnitude. Thus, if the Red Queen is to provide a model of the evolutionary dynamics of recombination, not just in humans and in the mouse, but more globally across mammals or metazoans, it is fundamental to better understand how the working regime of this model effectively scales as a function of its parameters, and whether this scaling is such that the Red Queen indeed represents a reasonable model over the empirically relevant range of variation.
+A question of particular interest in this context is how the stationary regime of the Red Queen (in terms of the mean levels of depletion of recombination rates, the equilibrium diversity at the PRDM9 locus and the rate of turnover of recombination landscapes) scales with population size and with the parameters of the genetic system (in particular, the mutation rates at the target sites and at the minisatellite locus encoding the Zn-finger domain of PRDM9). Based on current empirical evidence, both dBGC and PRDM9 are likely to be implicated in the evolutionary dynamics of recombination landscapes across placental mammals, with the notable exception of the dog lineage \citep{Axelsson:2012bz}. On a broader scale, PRDM9 is present across the metazoan tree of life, although absent in birds \citep{Singhal:2015jt} and in some other specific lineages. Across mammals, and even more so across metazoans, both mutation rates and effective population size are likely to vary over several orders of magnitude. Thus, if the Red Queen is to provide a model of the evolutionary dynamics of recombination, not just in humans and in the mouse, but more globally across mammals or metazoans, it is fundamental to better understand how the working regime of this model effectively scales as a function of its parameters, and whether this scaling is such that the Red Queen indeed represents a reasonable model over the empirically relevant range of variation.
 
-With this in mind, here, we introduce a simple population-genetic model of the Red Queen of recombination turnover. The model was first implemented as a simulation program and run over a broad range of conditions, so as to explore its qualitative behavior, as well as its scaling, as a function of the parameters. These simulation experiments were then backed up by analytical and numerical approximations, based on a self-consistent mean-field argument, which are meant to capture the main properties of the stationary regime of the process. Based on this analysis, we provide a general overview of the behavior of the Red Queen model in different parameter regimes. Finally, an empirical calibration of the model against currently available data in the mouse is attempted, which suggests both a high mutation rate at PRDM9 and strong biased gene conversion on its targets.
+With this in mind, here, we introduce a simple population-genetic model of the Red Queen of recombination turnover. The model was first implemented as a simulation program and run over a broad range of conditions, so as to explore its qualitative behavior, as well as its scaling, as a function of the parameters. These simulation experiments were then backed up by analytical and numerical approximations, based on a self-consistent mean-field argument, which are meant to capture the main properties of the stationary regime of the process. Based on this analysis, we provide a general overview of the behavior of the Red Queen model in different parameter regimes. Finally, an empirical calibration of the model against currently available data in the mouse was attempted, which suggests both a high mutation rate at PRDM9 and strong biased gene conversion on its targets.
 
 \section*{Materials and methods}
 
@@ -149,7 +152,8 @@ The locus PRDM9 mutates at constant rate $u$ per generation. Each mutation produ
 
 The rate $u$ should be understood as a functional mutation rate (discounting loss-of-function mutants). At each generation, $K_{t}$ denotes the number of PRDM9 alleles in the population, and $\forall i \in \{ 1, \, \dots, \, K_{t} \}$, $n_{i,t}$ is the number of copies of the $i^{th}$ allele in the population. Consequently, $x_{i,t} = n_{i,t} / 2 \Ne$ is the frequency of allele $i$ at time $t$. As usual, we define the \emph{scaled mutation rate} $\mu = 4 N_e u$.
 
-{\bf Recombination.}  
+{\bf Recombination and erosion of the targets by dBGC.}  
+
 The recombination activity induced by an allele is maximal at the birth of this allele.  As time proceeds forward, however, the targets of the allele are progressively eroded by dBGC. This erosion is modelled implicitly, by tracking over time the fraction of active targets associated with each allele. This fraction is denoted as $\theta_{i,t}$ for allele $i$ at time $t$. In the following, this fraction will be called the \emph{activity} induced by allele $i$. Because of dBGC, this fraction is a decreasing function of time.
 
 We assume an additive model for the genome-wide recombination induced by a given genotype.
@@ -159,18 +163,15 @@ R_{ij} &=& \frac{\theta_{i,t} + \theta_{j,t}}{2}
 \end{eqnarray*}
 Note that this is assumed to be valid also for a homozygous individual (i.e. when $i=j$). Note also that $R_{ij}$ is the relative recombination activity. The absolute recombination activity would be equal to $R_{ij}$ multipled by the total number of targets and the recombination rate induced by each target (which are not explicitly considered).
 
-{\bf Erosion of the targets by dBGC}  
-
 Mechanistically, the strength of dBGC depends on several factors: in particular, the rate at which a target site initiates double strand break (DSB) events and the probability that the site undergoes gene conversion upon initiating a double strand break. Similarly, the recombination (i.e. cross over) rate induced by a given hot spot depends on the rate of DSB initiation and on the probability that this initiation will result in a cross over event, as opposed to a non-cross over or a resolution with the sister chromatid instead of the homologue. Here we assume that all those factors are constant across all hot spots. Thus, in the end, we only need to consider the net rate $g$, per generation, at which a given mutant allele of the target site is converted by its wild-type homologue in an individual heterozygote at that target site and homozygous for the PRDM9 allele recognizing this target site.
 
 Note that $g$ is the conversion rate conditional on the PRDM9 genotype of the individual. On the other hand, at the level of the population, the conversion rate at this site will also depend on the rate at which DSB is initiated at that site, which in turn is proportional to the frequency of the PRDM9 allele in the population. Thus, for allele $i$, segregating at frequency $x_{i,t}$ at time $t$, the conversion strength at a target site of this allele is equal to $g x_{i,t}$.
 
 Since the mutation rate at the target sites $v$ is typically low ($v \sim 10^{-7}$, thus $4 N_e v << 1$), at any given time, most targets associated with a given PRDM9 allele are either fully active, or fully inactive (i.e. a minor fraction of the targets are in a polymorphic state). As a result, the rate at which the activity induced by allele $i$ over the entire genome decays is just the rate of substitution from active to inactive hot-spots at the level of the population. This substitution rate is itself equal to the rate of inactivating mutations per target at the level of the population, $2 N_e v$, multiplied by the fixation probability of the inactive mutant. Under strong dBGC, the fixation probability is equal to $2g x_{i,t}$. Altogether, the activity induced by allele $i$ decays as:
-\begin{eqnarray*}
-\frac{d \theta_{i,j}} {d t} &=& - 2 N_e v \, 2 g x_{i,t} \, \theta_{i,t}
-\\
-&=& -\rho \, x_{i,t} \,  \theta_{i,t},
-\end{eqnarray*}
+\begin{eqnarray}
+\label{erosion}
+\frac{d \theta_{i,t}} {d t} &=& - 2 N_e v \, 2 g x_{i,t} \, \theta_{i,t} = -\rho \, x_{i,t} \,  \theta_{i,t},
+\end{eqnarray}
 where we define the \emph{scaled erosion rate} $\rho = 4 N_e v g$.
 Note that, under the mutation-fixation approximation considered here for the effect of dBGC on the targets, the behavior of the Red Queen process depends on the mutation rate at the targets $v$ and the strength of conversion $g$ only through their product $vg$, which we call the erosion rate.
 
@@ -178,18 +179,20 @@ Note that, under the mutation-fixation approximation considered here for the eff
 \begin{itemize}
 \item
 a power-law function:
-\begin{eqnarray*}
+\begin{eqnarray}
+\label{powerfitness}
 f (R) = R^\alpha,
-\end{eqnarray*}
+\end{eqnarray}
 where $\alpha$ is a parameter of the model. Larger values of $\alpha$ induce a stronger selection against low recombination rates (figure 1)
 \item
 an exponential function:
-\begin{eqnarray*}
+\begin{eqnarray}
+\label{expofitness}
 f (R) = \frac{1 - e^{-\frac{R}{\beta}}}{1 - e^{-\frac{1}{\beta}}}
-\end{eqnarray*}
+\end{eqnarray}
 Here also, large values of $\beta$ induce a stronger selection against low recombination rates (figure 1).
 \end{itemize}
-The fitness functions are normalized so that $f(1) = 1$. Of interest is also the log-fitness function $\ln f$ (figure 1). In the case of the power-law fitness function, $\ln f$ is a straight line, whereas in the case of the exponential model, $\ln f$ is concave, all the more so as $\beta$ is high.
+The fitness functions are normalized so that $f(1) = 1$.
 
 The fitness of an individual with genotype $(i,j)$ is thus:
 \begin{eqnarray*}
@@ -207,6 +210,11 @@ Finally, we define the selection coefficient $s_{i,t}$ associated with allele $i
 \begin{eqnarray*}
 s_{i,t} &=& \frac{w_{i,t} - \bar w}{\bar w}
 \end{eqnarray*}
+In particular, the selection coefficient associated with a new allele entering the population, which will be denoted by $s_0$, is:
+\begin{eqnarray}
+\label{selcoeff}
+s_0 &=& \frac{1 - \bar w}{\bar w}
+\end{eqnarray}
 
 {\bf Overall simulation cycle}. For each new generation, the simulation is decomposed in three steps, performed in the following order:
 \begin{itemize}
@@ -219,11 +227,11 @@ $\Rp _{i,t+1} =  \Rp _{i,t} \operatorname{exp} \left( - \rho x_{i,t} \right)$, f
 Drift and selection: the new generation of $2 \Ne$ haploid copies is drawn from a multinomial distribution. The probability of drawing allele $i$ is equal to it's frequency $x_{i,t}$ multiplied by its relative fitness $w_{i,t} / \bar w$.
 \end{itemize}
 The model was implemented in Python, the code is hosted at \url{https://github.com/ThibaultLatrille/RedQueen}.
-Each simulation starts by a burn-in, and the the data a recorded only when the steady-state is reached. The burn-in phase is finished when all initial alleles in the population are extinct and replaced by new alleles. The number of generations simulated at the steady state is $50$ times the number of generations that were needed to achieve the burn-in. \\
+Each simulation starts by a burn-in, and the data are recorded only once the steady-state is reached. The burn-in phase is finished when all initial alleles in the population are extinct and replaced by new alleles. The number of generations simulated at the steady state is $50$ times the number of generations that were needed to achieve the burn-in. \\
 
 
 {\bf Model with variation in strength across hot spots.}
-The model introduced thus far assumes that all active hot spots associated with a given PRDM9 allele recombine at the same rate. A second model will also be considered in a second step (section...), allowing for variation in the recombination rate across hot spots. This model was not implemented in the simulation program. Instead, it was investigated only by analytical means.
+The model introduced thus far assumes that all active hot spots associated with a given PRDM9 allele recombine at the same rate. A second model will also be considered in a second step, allowing for variation in the recombination rate across hot spots. This model was not implemented in the simulation program. Instead, it was investigated only by analytical means.
 
 Specifically, this second version of the model assumes that recombination rates across hot spots vary according to a gamma distribution of mean 1 (since we consider only relative recombination rates) and shape parameter $a$:
 \begin{eqnarray*}
@@ -237,7 +245,7 @@ while the mean relative recombination rate induced by allele $i$ over the genome
 \begin{eqnarray*}
 R_{i,t} &=&  \frac{b^a}{\Gamma(a)}  \int_0^{+\infty} c \theta_{c,i,t} c^{a-1} e^{-ac} dc.
 \end{eqnarray*}
-In addition, since we assume that conversion strength and recombination rates are proportional, the rate of erosion for the fraction of hot spots recombining at rate $c$ will be decaying at a rate proportional to $c$, i.e.:
+In addition, since we assume that conversion strength and recombination rates are proportional, the rate of erosion for the fraction of hot spots recombining at rate $c$ decays at a rate proportional to $c$, i.e.:
 \begin{eqnarray*}
 \frac{d \theta_{c,i,t}} {d t} &=& - \rho \, x_{i,t} \, c \,  \theta_{c,i,t}.
 \end{eqnarray*}
@@ -258,7 +266,7 @@ An alternative, more relevant, measure of diversity is the inverse of the homozy
 \begin{eqnarray*}
      \D &=& \avg{\Dt} = \avg{\dfrac{1}{\sum_{i \in K_{t}} x_{i,t}^2}} 
 \end{eqnarray*}
-$D^{-1}$ is also known as Simpson's index \cite{Hill1973}.
+%$D^{-1}$ is also known as Simpson's index \citep{Hill1973}.
 Note that $D$ equals $K$ if all alleles have equal weights and is close to $1$ if one allele dominates the population. Thus, $D$ can be seen as the \emph{effective} number of PRDM9 alleles.
 
 {\bf Mean relative recombination rate.} Since the model linking the activity of each allele (the fraction of active targets) with genome-wide recombination is additive, the average relative genome-wide recombination rate at the population level is equal to:
@@ -267,28 +275,27 @@ Note that $D$ equals $K$ if all alleles have equal weights and is close to $1$ i
 \end{eqnarray*}
 
 {\bf Turnover time.}
-The turnover time is defined as the decorrelation time of the diversity at the PRDM9 locus. This can be quantitatively assessed using the \emph{cross-homozygosity}, which is defined as the fraction of homozygotes in a population that would be obtained by hybridizing populations at time $t$ and $t+T$ in equal proportions. The cross-homozygosity reduces to the regular (or instant) homozygosity for $T=0$ and drops to 0 for large $T$. The turnover time is defined as the time $T$ for which the cross-heterozygosity is equal to half of the instant homozygosity.
+The turnover time is defined as the decorrelation time of the diversity at the PRDM9 locus. This can be quantitatively assessed using the \emph{cross-homozygosity}, which is defined as the fraction of homozygotes in a population that would be obtained by hybridizing populations at time $t$ and $t+T$ in equal proportions. The cross-homozygosity reduces to the regular (or instant) homozygosity for $T=0$ and drops to 0 for large $T$. The turnover time is defined as the time $T$ for which the cross-heterozygosity is, on average, equal to half of the instant homozygosity.
 \begin{eqnarray*}
-    \T = \avg{\dfrac{\sum_{i \in K_{t}} x_{i,t} x_{i,t+T}}{\sum_{i \in K_{t}} x_{i,t} x_{i,t}}  }  &=&  \dfrac{1}{2}.
+   \avg{\dfrac{\sum_{i \in K_{t}} x_{i,t} x_{i,t+T}}{\sum_{i \in K_{t}} x_{i,t} x_{i,t}}  }  &=&  \dfrac{1}{2}
 \end{eqnarray*}
 
 A series of phase diagrams, showing the scaling relations between summary statistics and parameters of the model, were obtained as follows. For each parameter, $64$ independent simulations were run, each time changing the value of only one parameter around its central value. The range around the central value of the parameter is $10^{4}$. The mean and the variance of each summary statistic was calculated for each simulation, and plotted as a function of the parameter.
 
-\newpage
 
 \section*{Results}
 
 \subsection*{Simulation results} 
 
-A typical trajectory of the simulation is displayed in figure 1. As time proceeds forward, new PRDM9 alleles, created by mutation, invade the population, increase in frequency, reaching a peak and then decreasing until being lost and replaced by new alleles (top panel). Tracking the activity of each allele through time (bottom panel) shows that new alleles start with maximal recombination activity. Progressively, however, their targets are eroded by dBGC. When the activity induced by an allele goes below the average activity over the population (whose equilibrium value over time, $R$, is shown as a straight line in the bottom panel), this allele starts to be selected against, decreasing in frequency, until being eliminated from the population. Of note, the activity of a dying allele is typically not 0. Instead, it reaches a finite level, whose average value ($R_\infty$) will be considered further below.
+A typical simulation trajectory is displayed in figure 2. As time proceeds forward, new PRDM9 alleles, created by mutation, invade the population, increase in frequency, reaching a peak and then decreasing until being lost and replaced by new alleles (top panel). Tracking the activity of each allele through time (bottom panel) shows that new alleles start with maximal recombination activity. Progressively, however, their targets are eroded by dBGC. When the activity induced by an allele goes below the average activity over the population (whose equilibrium value over time, $R$, is shown as a straight line in the bottom panel), this allele starts to be selected against, decreasing in frequency, until being eliminated from the population. Of note, the activity of a dying allele is typically not 0. Instead, it reaches a finite level, whose average value ($R_\infty$) will be considered further below.
 
-As a way to capture the key features of the Red-Queen dynamics at stationarity, three summary statistics were considered: mean recombination activity, genetic diversity at the PRDM9 locus, and turnover time (i.e. the decorrelation time of genetic composition at the PRDM9 locus). For a given configuration of parameters of the model (effective population size $N_e$, mutation rate at the PRDM9 locus $u$, erosion rate at the targets $vg$, fitness parameter $\alpha$ of $\beta$), these four statistics were averaged over long simulation trajectories. Their scaling behavior as a function of the four main parameters are displayed on figure 2, 3, 4, and 5. Several points are noteworthy.
+As a way to capture the key features of the Red-Queen dynamics at stationarity, three summary statistics were considered: mean recombination activity, genetic diversity at the PRDM9 locus, and turnover time (i.e. the decorrelation time of genetic composition at the PRDM9 locus). For a given configuration of parameters of the model (effective population size $N_e$, mutation rate at the PRDM9 locus $u$, erosion rate at the targets $vg$, fitness parameter $\alpha$ or $\beta$), these three statistics were averaged over long simulation trajectories. Their scaling behavior as a function of the four main parameters are displayed on figure 3, 4, and 5. Several points are noteworthy.
 
-First, the equilibrium recombination rate is suboptimal: $\R < 1$ (figure 2). Equivalently there is a recombination \emph{gap} $1-R$ caused by the Red-Queen. This gap induces a recombination \emph{load}, which can be defined as the relative decrease in fitness between the optimum recombination activity $\R=1$ and the realized recombination activity at equilibrium $\R < 1$. One question of interest, which will be further considered below, is to characterize and quantify this recombination gap. Another important observation is that the equilibrium recombination rate ($\R$) is constant as a function of $\Ne$. It increases with $u$ and $\alpha$ and decreases with $vg$.
+First, the equilibrium recombination rate is suboptimal: $\R < 1$ (figure 3). Equivalently there is a recombination \emph{gap} $1-R$ caused by the Red-Queen. This gap induces a recombination \emph{load}, which can be defined as the relative decrease in fitness between the optimum recombination activity $\R=1$ and the realized recombination activity at equilibrium $\R < 1$. One question of interest, which will be further considered below, is to characterize and quantify this recombination gap. Another important observation is that the equilibrium recombination rate ($\R$) is constant as a function of $\Ne$. It increases with $u$ and $\alpha$ and decreases with $vg$.
 
-Second, plotting PRDM9 diversity ($\D$) as a function of $\Ne$ and $u$ (figure 3) reveals two distinct regimes. The transition between the two regimes appears to essentially depend on the scaled mutation rate ($ \mu = 4 \Ne u$) at the PRDM9 locus. For low scaled mutation rates ($N_e u  << 1$), at any given time, a single PRDM9 allele dominates the population ($D=1$). In this \emph{succession} regime, PRDM9 alleles replace each other through hard sweeps -- which corresponds to the typical verbal description of the Red Queen dynamics. In this regime, increasing $N_e$ merely accelerates the dynamics, without changing anything else to the overall morphology of the process. In particular, at any time, recombination is concentrated on one single set of recombination hot spots (corresponding to the currently dominating PRDM9 allele), and thus the variance of recombination landscapes is maximal.
+Second, plotting PRDM9 diversity ($\D$) as a function of $\Ne$ and $u$ (figure 4) reveals two distinct regimes. The transition between the two regimes appears to essentially depend on the scaled mutation rate ($ \mu = 4 \Ne u$) at the PRDM9 locus. For low scaled mutation rates ($N_e u  << 1$), at any given time, a single PRDM9 allele dominates the population ($D=1$). In this \emph{succession} regime, PRDM9 alleles replace each other through hard sweeps -- which corresponds to the typical verbal description of the Red Queen dynamics. In this regime, increasing $N_e$ merely accelerates the dynamics (turnover time, figure 5), without changing anything else to the overall morphology of the process. In particular, at any time, recombination is concentrated on one single set of recombination hot spots (corresponding to the currently dominating PRDM9 allele), and thus the variance of recombination landscapes is maximal.
 
-On the other hand, when $\Ne u$ is sufficiently high, successive waves of erosion-invasion start to overlap, such that multiple PRDM9 alleles now coexist in the population. In this polymorphic regime, diversity at the PRDM9 locus is roughly proportional to $\Ne u$. As a consequence, in this regime, the consequence of an increase in $N_e$ is not anymore an acceleration of the dynamics, as in the succesion regime. Instead, when $N_e$ increases, PRDM9 diversty increases, such that recombination spreads over a larger number of more weakly-recombining hot-spots, thus resulting in an overall decrease in the variance of recombination landscapes at the level of the population. Conversely, the fact that the recombination hot-spots become weaker exactly compensates for the  increase in the strength of biased-gene conversion caused by the larger effective population size, and thus hot-spot lifetime (turnover time) now remains constant as a function of $\Ne$.
+On the other hand, when $\Ne u$ is sufficiently high, successive waves of erosion-invasion start to overlap, such that multiple PRDM9 alleles now coexist in the population. In this polymorphic regime, diversity at the PRDM9 locus is roughly proportional to $\Ne u$ (figure 4) and does not strongly depend on the erosion rate $vg$ nor on the fitness parameter $\alpha$. In this regime, the consequence of an increase in $N_e$ is not anymore an acceleration of the dynamics, as in the succesion regime. Instead, when $N_e$ increases, PRDM9 diversty increases, such that recombination spreads over a larger number of more weakly-recombining hot-spots, thus resulting in an overall decrease in the variance of recombination landscapes at the level of the population. Conversely, the fact that the recombination hot-spots become weaker exactly compensates for the  increase in the strength of biased-gene conversion caused by the larger effective population size, and thus hot-spot lifetime (turnover time) now remains constant as a function of $\Ne$ (figure 5).
 
 
 \subsection*{Analytical approximations: a linearized mean-field argument} 
@@ -303,21 +310,21 @@ The self-consistent estimate of $\R$ obtained using this approach is implicit: i
 
 \subsubsection*{Analytical approximations in the succession regime} 
 
-In the succession regime, there is essentially one PRDM9 allele at a time, whose frequency is close to 1. As a consequence, the recombination activity associated with this allele decreases at constant rate $\rho = 4 \Ne v g$:
+In the succession regime, there is essentially one PRDM9 allele at a time, whose frequency is close to 1. As a consequence, and from equation \ref{erosion}, the recombination activity associated with this allele decreases at constant rate $\rho = 4 \Ne v g$:
 \begin{eqnarray*} 
    \dfrac{\dd \Rp_{t}}{\dd t}  &=&  - \rho \Rp_{t},
 \end{eqnarray*}
-and $\Rp_{t}$ follows an exponential decrease through time:
+and thus $\Rp_{t}$ follows an exponential decrease through time:
 \begin{eqnarray*} 
    \Rp_{t} &=&  e^{- \rho t}.
 \end{eqnarray*}
 Let us call $\tau$ the mean time between two successive invasions. We now derive two independent relations between $\tau$ and $\R$.
 
-First, we can derive an approximation for the rate of invasion of the population by a new PRDM9 allele using a simple population genetic argument. This rate is equal to the rate of mutation at the PRDM9 locus at the level of the population, $2 N_e u$, multiplied by the probability of invasion, which is itself equal to $ 2 s_0$, where $s_0$ is the selection coefficient experienced by the new allele. This coefficient depends on the current activity of the resident allele, $\theta_t$ (the activity of the invading allele is 1). After linearization, it can be expressed as:
+First, we can derive an approximation for the rate of invasion of the population by a new PRDM9 allele using a simple population genetic argument. This rate is equal to the rate of mutation at the PRDM9 locus at the level of the population, $2 N_e u$, multiplied by the probability of invasion, which is itself equal to $ 2 s_0$, where $s_0$ is the selection coefficient experienced by the new allele (equation \ref{selcoeff}). This coefficient depends on the current activity of the resident allele, $\theta_t$ (the activity of the invading allele is 1). After linearization, it can be expressed as:
 \begin{eqnarray*} 
 s_0 &=& \dfrac{f'(\Rp_{t})}{f(\Rp_{t} )}  \dfrac{(1 - \Rp_{t} )}{2}.
 \end{eqnarray*}
-In principle, this selection coefficient depends on time, through $\theta_t$. However, we can approximate it by a constant coefficient, by just replacing $\theta_t$ by the average activity $\R$ into this equation;
+In principle, this selection coefficient depends on time, through $\theta_t$. However, we can approximate it by a constant coefficient, by just replacing $\theta_t$ by the average activity $\R$ in this equation;
 \begin{eqnarray*} 
 s_0 &\simeq& \dfrac{f'(\R)}{f(\R)}  \dfrac{(1 - \R )}{2}.
 \end{eqnarray*}
@@ -337,7 +344,7 @@ The inverse of $\lambda$ gives an approximation to $\tau$, thus leading to our f
 Second, the mean recombination activity is simply the time average of $\theta_t$ over the time where the allele dominates the population. This time is (on average) equal to $\tau$, thus leading to the following approximation:
 \begin{eqnarray} 
 \label{Rsuccession}
-\R &\simeq& \frac{1}{\tau} \,  \int_0^\tau \, e^{-\rho t} \dd t = \frac{1 - e^{-\rho \tau} }{\rho \tau}.
+\R &\simeq& \frac{1}{\tau} \, \int_0^\tau \theta_t dt = \frac{1}{\tau} \,  \int_0^\tau \, e^{-\rho t} \dd t = \frac{1 - e^{-\rho \tau} }{\rho \tau}.
 \end{eqnarray}
 Noting that the minimum activity of a dying allele, at the time where it is being replaced by a new allele (i.e. at time $\tau$), is equal to:
 \begin{eqnarray} 
@@ -359,9 +366,9 @@ which can be re-expressed more compactly as:
 \label{selfconsistent} 
 R &=& g \left( \R, \dfrac{\rho}{\mu}\right) = g (\R, \epsilon)
 \end{eqnarray}
-For fixed $\dfrac{\rho}{\mu} = \epsilon$, $g$ is a strictly monotonous function (figure 6, in the case of a power-law fitness function), and has thus a unique solution. This solution can be obtained numerically, giving an estimate for $\R$.
+For fixed $\dfrac{\rho}{\mu} = \epsilon$, $g$ is a strictly monotonous function, ranging from 0 to $+\infty$ (figure 6, in the case of a power-law fitness function), and the self-consistent relation thus has a unique solution. This solution can be obtained numerically, giving an estimate for $\R$.
 
-Note that this self-consistent relation on $\R$ implies that $\R$ depends on the parameters of the model only through the compound parameter $\epsilon$, which is itself independent of $N_e$. Thus, the solution $R$ is also independent of the effective population size, as our simulation was suggesting.
+Note that this self-consistent relation on $\R$ implies that $\R$ depends on the parameters of the model only through the compound parameter $\epsilon$ (and the fitness model), thus independent of $N_e$. As a result, the solution $R$ is also independent of the effective population size, as our simulation was suggesting.
 
 Once a numerical estimate of $\R$ is available, all other quantities of interest can be expressed as a function of $R$ and of the parameters of the model. The diversity at the PRDM9 locus $\D$ is simply equal to $1$ since there is only one allele. As for the turnover time $\T$, it is simply equal to the mean time between two successive invasions $\tau$, already given above as a function of $\R$ (equation \ref{tausuccession}). Note that this time is inversely proportional to $N_e$. In other words, in the succession regime, changes in $N_e$ merely change the time scale of the Red Queen dynamics, without any effect on the stationary state.
 
@@ -393,13 +400,13 @@ Under the assumption of many alleles co-segregating in the population, $\Rt=\R$ 
 \end{equation}
 Here, $\R$ is now an external parameter, which will be determined in a second step, using a self-consistent argument.
 
-A numerical solution of this system of equations is shown in figure 7: starting from a low frequency and a maximal activity, a typical allele first increases in frequency. Concomitantly, its activity is progressively eroded, at an increasingly higher rate. When the activity reaches the (now externally given) $\R$, the allele frequency reaches its maximum, after which it starts to decrease, ultimately going to 0. Meanwhile, the activity converges to a strictly positive asymptotically value $\Rmin$.
+A numerical solution of this system of equations, for a given value of $R$, is shown in figure 7: starting from a low frequency and a maximal activity, a typical allele first increases in frequency. Concomitantly, its activity is progressively eroded, at an increasingly higher rate. When the activity reaches the (now externally given) $\R$, the allele frequency reaches its maximum, after which it starts to decrease, ultimately going to 0. Meanwhile, the activity converges to a strictly positive asymptotically value $\Rmin$.
 
-This system of equations is not analytically solvable as a function of $t$.
+This system of equations does not have an analytical solution as a function of $t$.
 On the other hand, $\Rp_{t}$ is monotonous, and $x$ can be analytically expressed as a function of $\Rp_{t}$
-\begin{equation}
+\begin{equation*}
 x(\Rp_{t} ) =\dfrac{f'(\R)}{2 \rho f(\R )} (1- \Rp_{t}  + \R  \operatorname{log}(\Rp_{t} )) + x_{\mathrm{initial}}
-\end{equation}
+\end{equation*}
 %[would be nice to show the graph where we see this function together with the bundle of realized trajectories for a simulation]
 
 Letting $t \to \infty$, $\theta_t$ converges to $\Rmin$ and $x(\theta_t)$ to 0. In addition, since $x_{\mathrm{initial}} = 1 / N_e$ is small, we can let it go to 0, which yields a relation between $\R$ and $\Rmin$:
@@ -410,13 +417,13 @@ Letting $t \to \infty$, $\theta_t$ converges to $\Rmin$ and $x(\theta_t)$ to 0. 
 Note that this is the same equation as in the succession regime.
 
 So far, we have considered $\R$ as an external parameter.
-Now, if all alleles have the same trajectory but different arrival times, they all contribute to $\R$. Using this argument, we can get a self-consistent estimation for  $\R$. This can be done by deriving two independent relations between $\tau$, the time between successive invasions, and $\R$ and the other parameters of the model.
-
-First, using a tiling argument (see figure 8), we note that:
-\begin{eqnarray*}
+Now, if all alleles have the same trajectory but different arrival times, they all contribute to $\R$. Using this argument, we can get a self-consistent estimation for  $\R$. This can be done by deriving two independent relations between $\tau$ and $\R$.
+First, using a tiling principle (see figure 8), we note that:
+\begin{eqnarray}
+\label{tiling}
 \int_0^{+\infty} \, x_t \dd t  &\simeq& \tau \sum_i x_i = \tau.
-\end{eqnarray*}
-Although $x_t$ is not analytically solvable as a function of $t$, the integral can be analytically computed (see appendix 1), leading to the following relation:
+\end{eqnarray}
+Although $x_t$ is not analytically available as a function of $t$, the integral can be analytically computed (see appendix 1), leading to the following relation (appendix 1):
 \begin{eqnarray*}
 \tau &=& \dfrac{1 - \Rmin }{\rho \R } = - \dfrac{\operatorname{log}(\Rmin )}{\rho}.
 \end{eqnarray*}
@@ -424,15 +431,15 @@ Inverting this equation gives:
 \begin{eqnarray*}
 \Rmin &=& \operatorname{e}^{-\rho \tau},
 \end{eqnarray*}
-which is the same expression for $\Rmin$ as that found in the succession regime.
+which is the same expression for $\Rmin$ as that found in the succession regime (equation \ref{Rminsuccession}).
 Replacing $\Rmin$ by this expression in equation \ref{polyRmin} then gives:
 \begin{eqnarray} 
 \label{Rpoly}
 \R &=& \frac{1 - e^{-\rho \tau} }{\rho \tau},
 \end{eqnarray}
-again, as in the succession regime.
+again, as in the succession regime (equation \ref{Rsuccession}).
 
-Second, relying on the population-genetic argument used in the context of the succession regime, we can identify the time between two successive invasions $\tau$ as the inverse of the rate of invasion, which is equal to the mutation rate multipled by $2s_0$, where $s_0$ is the selection coefficient experienced by the newly invading allele, in a background recombination activity equal to $\R$:
+Second, relying on the population-genetic argument used in the context of the succession regime, we can identify the time between two successive invasions $\tau$ as the inverse of the rate of invasion $\lambda$, which is equal to the mutation rate multipled by $2s_0$, where $s_0$ is the selection coefficient experienced by the newly invading allele, in a background recombination activity equal to $\R$:
 \begin{eqnarray} 
 \label{taupoly}
 \tau &=&
@@ -440,13 +447,13 @@ Second, relying on the population-genetic argument used in the context of the su
 \end{eqnarray}
 Although derived using different arguments, these two relations, equations \ref{Rpoly} and \ref{taupoly}, are the same as those obtained under the succession regime (equations \ref{Rsuccession} and \ref{tausuccession}). Combining them together therefore leads to the same self-consistent equation for $\R$ (equation \ref{selfconsistent}), which gives us a numerical estimate of $\R$ also valid in the polymorphic regime.
 
-Using the same tiling argument as above, we can get a numerical estimate of the diversity at the PRDM9 locus $\D$. Specifically:
+Once a numerical estimate of $R$ is available, other summary statistics can be computed as a function of $R$. Thus, using the same tiling argument as above, the diversity at the PRDM9 locus $\D$ can be obtained from:
 \begin{eqnarray*}
 \sum_i x_i^2 &\simeq& \dfrac{1}{\tau}  \, \int_{0}^{\infty } x_{t}^2 \dd  t,
 \end{eqnarray*}
 which is also analytically available, yielding:
 \begin{eqnarray*}
-\D = \left( \sum_i x_i^2 \right)^{-1} &=& \dfrac{4\rho f(\R )}{f'(\R )\left[ 1 + \Rmin  - 2 \R   \right]} 
+\D = \left( \sum_i x_i^2 \right)^{-1} &=& \dfrac{4\rho f(\R )}{f'(\R )\left[ 1 + \Rmin  - 2 \R   \right]}.
 \end{eqnarray*}
 Finally, the turnover time $\T$ can be determined by observing that, if $D$ is to be interpreted as the effective number of alleles at the PRDM9 locus, then the genetic diversity at this locus will be entirely renewed after $D$ successive invasions, each of which takes on average a time $\tau$. Therefore, $T = D \tau$, with $D$ and $\tau$  given above as a function of $R$, $\Rmin$ and the parameters of the model.
 
@@ -454,43 +461,45 @@ Finally, the turnover time $\T$ can be determined by observing that, if $D$ is t
 
 The derivation conducted in the last section relies on a linearization of the fitness function, which allows us to express all quantities of interest as a function of the mean recombination activity $R$, and thus express the self-consistent mean-field argument directly on $R$. However, this linear approximation is not well suited to all fitness models.
 
-An alternative, more general, derivation of the self-consistent mean-field argument can be conducted, which can be used for arbitrary fitness schemes. This derivation can also be generalized to more complex models, in particular, allowing for variation in recombination rates across hot spots (next section). The whole derivation is given in Appendix 1 under the polymorphic regime. Here, we more briefly outline the overall argument.
+An alternative, more general, derivation of the self-consistent mean-field argument can be conducted, which can be used for arbitrary fitness schemes. This derivation can also be generalized to more complex models, in particular, allowing for variation in recombination rates across hot spots (next section). On the other hand, compared to the linearized version, this derivation is analytically less tractable. The whole derivation is given in appendix 2 under the polymorphic regime. Here, we more briefly outline the overall argument.
 
-First, as we have seen in the last section, the activity of the allele decays at a rate proportional to the allele's frequency:
+First, as we have seen in the last section, the activity of the allele decays at a rate proportional to the allele's frequency (equation \ref{erosion}):
 \begin{eqnarray*}
 \frac{d\theta}{dt} &=& - \rho x \theta.
 \end{eqnarray*}
 This equation has general solution:
 \begin{eqnarray}
 \label{intrinsictheta}
-\theta(t) &=& e^{-\rho \int_0^t x(u) du}
-= e^{-\rho \xi(t)}
+\theta_t &=& e^{-\rho \int_0^t x_u du}
+= e^{-\rho \xi_t}
 \end{eqnarray}
 where we define
 \begin{eqnarray*}
-\xi(t) &=& \int_0^t x(u) du.
+\xi_t &=& \int_0^t x_u du.
 \end{eqnarray*}
 The variable $\xi$ can be seen as the \emph{intrinsic age} of the allele. It accounts for the fact that an allele ages more rapidly if it segregates at a higher frequency. 
-What equation \ref{intrinsictheta} tells us is that the activity of the allele at a given time point only depends on the allele's intrinsic age. We can therefore parameterize all quantitites associated with a PRDM9 allele directly as a function of $\xi$, thus dispensing us with the need to solve $x(t)$ as a function of time.
+What equation \ref{intrinsictheta} tells us is that the activity of the allele at a given time point only depends on the allele's intrinsic age. We can therefore parameterize all quantitites associated with a PRDM9 allele directly as a function of $\xi$, thus dispensing us with the need to solve $x_t$ as a function of time.
 
 Instead of the intrinsic age $\xi$, it is in fact more convenient to reparameterize the problem in terms of the dimensionless variable $z = \rho \xi$ (relative  age). Thus, in particular, from equation \ref{intrinsictheta}, we see that the activity of an allele of intrinsic age $\xi$ (of relative age $z = \rho \xi$) is equal to:
 \begin{eqnarray*}
 \label{thetastar}
-\theta^*(z) &=& e^{-z}.
+\theta^*(z) &=& e^{-z}
 \end{eqnarray*}
+where, by convention, we use the star to denote functions that are expressed directly in the $z$-parameterization.
 
-Second, as we have seen in the last section, a tiling argument (figure .) suggests that the mean time between successive invasions is approximately equal to:
+Second, as we have seen in the last section, a tiling principle (figure 8) suggests that the mean time between successive invasions is approximately equal to:
 \begin{eqnarray*}
-\tau &=& \int_0^\infty x(u) du = \xi(\infty),
+\tau &=& \int_0^\infty x_ u = \xi_\infty,
 \end{eqnarray*}
-which reveals that $\tau$ can also be interpreted as the mean intrinsic longevity of PRDM9 alleles. This identity is merely a constraint implied by the stationarity of the process under constant population size. If, over its lifespan, each PRDM9 allele contributes a total population of $2 N_e \xi(\infty)$, then, in order for the total population size to remain constant, new alleles should invade the population once every $\xi(\infty)$ generations on average. Thus, $\xi(\infty) = \tau$ (or equivalently, $z(\infty) = \rho \tau$). In the succession regime, this constraint is trivially fulfilled by each successive allele being at a frequency of 1 during a total time $\tau$. In the polymorphic regime, on the other hand, each allele's contribution is diluted out over a longer time period, overlapping the lifespan of other younger and older alleles. An analogy can be made here with an assembly line, of which we can vary the latency under the constraint of a constant total output.
+which reveals that $\tau$ can also be interpreted as the mean intrinsic longevity of PRDM9 alleles. This identity is merely a constraint implied by the stationarity of the process under constant population size. If, over its lifespan, each PRDM9 allele contributes a total population of $2 N_e \xi_\infty$, then, in order for the total population size to remain constant, new alleles should invade the population once every $\xi_\infty$ generations on average. Thus, $\xi_\infty = \tau$ (or equivalently, $z_\infty = \rho \tau$). In the succession regime, this constraint is trivially fulfilled by each successive allele being at a frequency of 1 during a total time $\tau$. In the polymorphic regime, on the other hand, each allele's contribution is diluted out over a longer time period, overlapping the lifespan of other younger and older alleles. An analogy can be made here with an assembly line, of which we can vary the latency under the constraint of a constant total output.
 
 Another interpretation of the tiling argument is as follows. Suppose we randomly sample an allele at stationarity. Then, the probability that this allele has intrinsic age $\xi$ is uniformly distributed between $0$ and $\tau$. Equivalently, $z$ is uniformly distributed between 0 and $\rho \tau$. As a consequence, we can approximate any average over the population, at stationarity, as an integral over $z$. For instance, the mean recombination activity is equal to:
-\begin{eqnarray*}
-\sum_i x_i \theta_i &\simeq&  \frac{1}{\rho \tau} \int_0^{\rho \tau} \theta^*(z) dz
+\begin{eqnarray}
+\label{Rgeneral}
+R = \sum_i x_i \theta_i &\simeq&  \frac{1}{\rho \tau} \int_0^{\rho \tau} \theta^*(z) dz
 =  \frac{1}{\rho \tau} \int_0^{\rho \tau} e^{-z} dz
 = \frac{1 - e^{-\rho \tau}}{\rho \tau}.
-\end{eqnarray*}
+\end{eqnarray}
 Using this trick, we can find simple integral expressions for all summary statistics that are averages over the population at stationarity. Some of those integrals have an analytical solution (in particular, the mean recombination activity given above), others (such as $D$) can be computed only numerically, at least under arbitrary fitness schemes.
 
 The fitness $w(\theta_0)$ of an allele of a given activity $\theta_0 = e^{-z_0}$ can also be calculated by averaging over all possible diploid backgrounds at stationarity, as an integral over $z$:
@@ -516,23 +525,24 @@ In turn, and as was done in the previous section, we can obtain an independent d
 \tau^{-1} = \lambda &=& 4 N_e u s_0,
 \end{eqnarray}
 or, equivalently,
-\begin{eqnarray*}
+\begin{eqnarray}
 \label{rhotau}
 \rho \tau &=& \frac{4 N_e v g}{4 N_e u s_0} = \frac{v g}{u s_0} = \frac{\epsilon}{s_0}.
-\end{eqnarray*}
+\end{eqnarray}
 Plugging this expression in equation \ref{Hs0} then yields a self-consistent mean-field relation on the selection coefficient $s_0$: 
-\begin{eqnarray*}
-s_0 &=& H(\frac{\epsilon}{s_0}).
-\end{eqnarray*}
+\begin{eqnarray}
+\label{selfconsts0}
+s_0 &=& H \left( \frac{\epsilon}{s_0} \right).
+\end{eqnarray}
 The self-consistent solution to this equation can be found numerically. It can then be plugged into equation \ref{rhotau}, yielding the value of $\rho \tau$. Finallly, all summary statistics of interest, as integrals depending on $\rho \tau$, can now be computed either analytically or numerically, depending on the statistic.
 
 \subsection*{Allowing for variation among hot spots in recombination rate}
 
-Thus far, the model assumes that all active hot spots have the same recombination rate (and thus are subjected to the same conversion strength). In reality, there is a substantial variance across hot spots in their recombination rate. In this section, we explore a generalization of the Red Queen model that relaxes this uniformity assumption. Note that this model was explored only under the mean-field approximation, not backed-up by explicit simulations.
+Thus far, the model assumes that all active hot spots have the same recombination rate (and thus are subjected to the same conversion strength). In reality, there is a substantial variance across hot spots in their recombination rate \citep{Myers:2005p116,Brunschwig:2012dk}. In this section, we explore a generalization of the Red Queen model that relaxes this uniformity assumption. Note that this model was explored only under the mean-field approximation, not backed-up by explicit simulations.
 
 Specifically, we assume that the distribution of relative recombination rates across the hot spots associated with a new born PRDM9 allele is a gamma distribution, of mean 1 and shape parameter $a$ (with smaller value of $a$ inducing  higher variance across hot spots):
 \begin{eqnarray*}
-\phi(c) &=& \frac{b^a}{\Gamma(a)} c^{a-1} e^{-ac}.
+\phi(c) &=& \frac{a^a}{\Gamma(a)} c^{a-1} e^{-ac}.
 \end{eqnarray*}
 Consider a typical PRDM9 allele. For this allele, we define $\theta_c(t)$ as the fraction of hot spots with recombination rate $c$ that are active at time $t$. The rate of erosion for this specific subset of hot spots is given by:
 \begin{eqnarray*}
@@ -554,52 +564,50 @@ The total (relative) recombination activity induced by a PRDM9 allele with intri
 From there, the overall derivation is essentially the same as in the previous section, with the only difference that the integral equations for $w$ and $s_0$ are now computed using the expression for $\theta^*(z)$ given by equation \ref{powertheta}, instead of equation \ref{thetastar}. These expressions are, as before, functions of $\rho \tau = \frac{u g}{v s_0}$, again giving a self-consistent relation on $s_0$ which can be solved numerically.
 
 As before, once the self-consistent solution is found, the summary statistics at the equilibrium set-point can be computed by averaging over $z$. In particular, the mean recombination activity over the population is now:
-\begin{eqnarray*}
+\begin{eqnarray}
+\label{Rgamma}
 R = \frac{1}{\rho \tau} \int_0^{\rho \tau} \theta^*(z) d z &=& \frac{1}{\rho \tau} \left[ 1 - \left( \frac{a}{a + \rho \tau} \right)^a \right]
-\end{eqnarray*}
-In addition to the mean recombination rate $R$, the mean fraction of active targets per allele, which we call $H$, is another statistic of interest (for which direct empirical evidence is available, based on Chip-Seq experiments on hybrids). Thus far, without variance across hot spots in their basal recombination rate, the two statistics $R$ and $H$ were identical. However, this is not anymore the case under the gamma model now considered. The fraction of active targets for an allele of age $z$, $h^*(z)$ is the mean of $\theta_c(z)$ over the gamma distribution:
+\end{eqnarray}
+In addition to the mean recombination rate $R$, the mean fraction of active targets per allele, which we call $H$, is another statistic of interest, for which direct empirical evidence is available \citep{Baker:2015dy,Davies:2016ci}. Thus far, without variance across hot spots in their basal recombination rate, the two statistics $R$ and $H$ were identical. However, this is not anymore the case under the gamma model now considered. The fraction of active targets for an allele of age $z$, $h^*(z)$ is the mean of $\theta_c(z)$ over the gamma distribution:
 \begin{eqnarray*}
 h^*(z) &=& \int \theta^*_c(z) \phi(c) dc = \left( \frac{a}{a + z} \right)^{a}
 \end{eqnarray*}
 and the average over the population is, again, obtained by averaging over $z$ :
 \begin{eqnarray}
+\label{H}
 H = \frac{1}{\rho \tau} \int_0^{\rho \tau} h^*(z) d z
 \end{eqnarray}
 This is equal to:
-\begin{eqnarray}
+\begin{eqnarray*}
 H &=& \frac{1}{\rho \tau} \frac{a}{(a-1)} \left[ 1 -  \left( \frac{a}{a + \rho \tau} \right)^{a-1} \right]
-\end{eqnarray}
+\end{eqnarray*}
 for $a \neq 1$, and to:
-\begin{eqnarray}
+\begin{eqnarray*}
 H &=& \frac{1}{\rho \tau} \ln (1 + \rho \tau)
-\end{eqnarray}
+\end{eqnarray*}
 for $a = 1$.
 
 \subsection*{General scaling behavior}
 
 \subsubsection*{Scaling relations as a function of $N_e$}
 
-Even without any explicit or any numerical solution for $s_0$, the relations derived above for the recombination activity $R$, the mean time between successive invasions $\tau$, the selection coefficient $s_0$ acting on new PRDM9 alleles, the turnover time $T$ and the diversity $D$ at the PRDM9 locus imply the following scaling relations for all of these quantities as a function of $N_e$. First, $s_0$ is the solution of a self-consistent equation that depends only on the rate ratio $\epsilon = \frac{v g}{u}$, and therefore does not depend on $N_e$. The same thing is true more generally for the fitness functions $w$, $\bar w$ and $s_0$, for $\rho \tau$, and thus also for all quantities that depend only on $\rho \tau$: in particular $R$ and $T$. Since $\rho = 4 N_e v g$ itself is directly proportional to $N_e$ and $\rho \tau$ does not depend on $N_e$, $\tau$ is inversely proportional to $N_e$. In turn, since $T = \tau D$ is constant as a function of $N_e$, $D$ is proportional to $N_e$. 
+Even without any explicit or any numerical solution for $s_0$, the relations derived above for the recombination activity $R$, the mean time between successive invasions $\tau$, the selection coefficient $s_0$ acting on new PRDM9 alleles, the turnover time $T$ and the diversity $D$ at the PRDM9 locus imply the following scaling relations for all of these quantities as a function of $N_e$. First, $s_0$ is the solution of a self-consistent equation that depends only on the rate ratio $\epsilon = \frac{v g}{u}$ (equation \ref{selfconsts0}) and therefore does not depend on $N_e$. The same thing is true more generally for $\rho \tau$ (equation \ref{rhotau}), and thus also for all quantities that depend only on $\rho \tau$: in particular $R$ (equation \ref{Rgeneral}) and $T$ (appendix 2). Since $\rho = 4 N_e v g$ itself is directly proportional to $N_e$ and since $\rho \tau$ does not depend on $N_e$, $\tau$ is inversely proportional to $N_e$. In turn, since $T = \tau D$ is constant as a function of $N_e$, $D$ is proportional to $N_e$. 
 
 All of those relations are valid in the polymorphic regime. In the succession regime, the main difference is that $D=1$, by definition. Otherwise, $R$, $\tau$ and $s$ are still constant as a function of $N_e$, and $T$ is now inversely proportional to $N_e$.
 
 \subsubsection*{First-order development in the weak erosion regime ($\epsilon << 1$)}
 
-Throughout the self-consistent derivation presented in the last sections, the compound parameter $\rho \tau$ plays a key role. This parameter can be re-expressed as:
-\begin{eqnarray*}
-\rho \tau = \frac{4 N_e v g}{4 N_e u s_0} = \frac{v g}{u s_0}
-\end{eqnarray*}
-which is the ratio of the two antagonistic forces of the Red Queen process, the rate of erosion of PRDM9 targets by dBGC ($4 N_e v g$) and the rate of invasion by new PRDM9 variants ($4 N_e u s_0$). The equilibrium set-point of the Red Queen process, in terms of the realized value of $\R$, is essentially detemined by the relative magnitude of these two rates. Thus, if $\rho \tau >> 1$, erosion is strong compared to elicitation of new PRDM9 alleles, and $\R$ is expected to be small. Conversely, if $\rho \tau << 1$, $\R$ is close to 1.
+Throughout the self-consistent derivation presented in the last sections, the compound parameter $\epsilon = \frac{vg}{u}$ plays a key role. This parameter captures the relative strength of the two antagonistic forces of the Red Queen process, the rate of erosion of PRDM9 targets by dBGC, proportional to $vg$, and the rate of invasion by new PRDM9 variants, proportional to $u$. The equilibrium set-point of the Red Queen process, in terms of the realized value of $\R$, is essentially detemined by the relative magnitude of these two forces. Thus, if $\epsilon >> 1$, erosion is strong compared to elicitation of new PRDM9 alleles, and $\R$ is expected to be small. Conversely, if $\epsilon << 1$, $\R$ is close to 1.
 
-The case where $\rho \tau << 1$ lends itself to a simple first-order approximation of the self-consistent mean-field solution. This approximation may not be strictly valid in the empirically relevant regimes, where $\rho \tau$ seems instead to be of the order of 1 (see below). Nevertheless, it leads to simple expressions for all summary statistics of interest in the stationary regime, thus giving a very concise (if somewhat idealized) summary of the scaling of the stationary regime of the Red Queen as a function of the parameters of the model.
+The case where $\epsilon << 1$ lends itself to a simple first-order approximation of the self-consistent mean-field solution. This approximation may not be strictly valid in the empirically relevant regimes where depletion levels seem to be substantial (see below). Nevertheless, it leads to simple expressions for all summary statistics of interest in the stationary regime, thus giving a very concise (if somewhat idealized) summary of the scaling of the stationary regime of the Red Queen as a function of the parameters of the model.
 
-The details of this first-order development are given in appendix 3. In the end, all of the scaling relations can be expressed in terms of 2 compound parameters, $\epsilon = \frac{v g}{u}$ and $N_e u$. The weak erosion regime is essentially defined by $\epsilon << 1$. In this regime, the scaling relations are then as follows: in the polymorphic regime, $\rho \tau$, $s$ and $1 - R$ scale as $\sqrt \epsilon$, $T$ as $\frac{1}{\sqrt \epsilon}$, and $D$ as $N_e u$. In the succession regime, the only diffrence is that $D=1$ and that $T$ now scales as  $\frac{1}{N_e u \sqrt{\epsilon}}$.
+The details of this first-order development are given in appendix 3. In the end, all of the scaling relations can be expressed in terms of 2 compound parameters, $\epsilon = \frac{v g}{u}$ and $N_e u$. In this regime, the scaling relations are then as follows: in the polymorphic regime, $\rho \tau$, $s$ and $1 - R$ scale as $\sqrt \epsilon$, $T$ as $\frac{1}{\sqrt \epsilon}$, and $D$ as $N_e u$. In the succession regime, the only diffrence is that $D=1$ and that $T$ now scales as  $\frac{1}{N_e u \sqrt{\epsilon}}$.
 
 \section*{Comparing analytical approximations with simulation results}
 
 The scaling relations predicted by our mean-field approximations, both linearized (green) and generalized (red), as well as the weak erosion approximation (orange), are shown on the top of the simulation results (under the power-law fitness model, with central parameter values $\alpha = 0.01$, $u = 10^{-6}$, $vg = 10^{-9}$ and $N_e = 10^5$), for the mean equilibrium recombination level $R$ (figure 3), the genetic diversity $D$ (figure 4), and the turnover time $T$ (figure 5). In spite of the rather bold approximations that were made, the predictions of both the linearized and the generalized mean-field solutions agree very well with the simulation results. Expectedly, the weak erosion approximation fails when the recombination gap becomes significant (typically, when $1 - R$ is larger than 0.2).
 
-One specific but notable deviation of the mean-field approximations from the simulations results occurs for the predicted equilibrium diversity $D$ in the regime of a high scaled mutation rate, $N_e u >> 1$ (figure 4). A plausible explanation for this discrepancy is that we did not account, in our mean-field development, for the effect of the mutation pressure on the evolution of the frequency of a typical PRDM9 allele. That is, we assume that, in the strong selection limit:
+One specific but notable deviation of the mean-field approximations from the simulations results occurs for the predicted equilibrium diversity $D$ in the regime of a high scaled mutation rate, $N_e u >> 1$ (figure 4C). A plausible explanation for this discrepancy is that we did not account, in our mean-field development, for the effect of the mutation pressure on the evolution of the frequency of a typical PRDM9 allele. That is, we assume that, in the strong selection limit:
 \begin{eqnarray*}
 \frac{dx}{dt} = sx,
 \end{eqnarray*}
@@ -609,21 +617,20 @@ whereas in fact
 \end{eqnarray*}
 This approximation is expected to be invalid whenever $s$ and $u$ are of the same order of magnitude, which happens in the present case for large values of $N_e u$.
 
-The linearized version of the mean-field solution, which relies on a linearization of the fitness function, is expected to be less accurate under fitness functions that are strongly concave. This can indeed be observed under the exponential fitness model and for small values of the fitness parameter $\beta$ (figure 6). In this regime, on the other hand, the generalized mean-field solution is accurate. Of note, under the exponential fitness function, the weak erosion approximation tends to break down for smaller recombination gaps than under the power-law fitness function.
+The linearized version of the mean-field solution is less accurate under the exponential fitness model and for small values of the fitness parameter $\beta$ (figure S1-4), probably because the exponential fitness function shows a stronger concavity at the equilbrium set point. In this regime, on the other hand, the generalized mean-field solution is accurate. Of note, under the exponential fitness function, the weak erosion approximation tends to break down for smaller recombination gaps than under the power-law fitness function.
 
-Finally, a key assumption of the mean-field derivation is that selection on PRDM9 is sufficiently strong so that we can ignore random drift. In the parameter regimes considered thus far, this turns out to be the case: the scaled selection coefficient $4 N_e s_0$ at stationarity is always greater than 10, and usually of the order of 100 (not shown). However, for other parameter regimes (in particular, a smaller $N_e$ or a smaller value for the fitness parameter $\alpha$ under the power law fitness model), selection is not so strong compared to random drift (with a scaled selection coefficient $4N_e s_0$ estimated under the mean-field approximation to be below 10). In this weaker selection regime, both versions of the mean-field approximation start to be substantially less accurate (figure 7,8).
+Finally, a key assumption of the mean-field derivation is that selection on PRDM9 is sufficiently strong so that we can ignore random drift. In the parameter regimes considered thus far, this turns out to be the case: the scaled selection coefficient $4 N_e s_0$ at stationarity is always greater than 10, and usually of the order of 100 (figure S4 under the exponential fitness function). However, for other parameter regimes (in particular, a smaller $N_e$ or a smaller value for the fitness parameter $\alpha$ under the power law fitness model), selection is not so strong compared to random drift (with a scaled selection coefficient $4N_e s_0$ estimated under the mean-field approximation to be below 10). In this weaker selection regime, both versions of the mean-field approximation start to be substantially less accurate (figure S5-8).
 
-In summary, our mean-field derivation, at least in its generalized version, is accurate under all strong-selection regimes (in practice, whenever the self-consistent estimate of the scaled selection coefficient $4 N_e s_0 > 10$). Its linearized form is accurate as long as the log-fitness function is not too concave. And finally, the first-order weak erosion regime approximation ($\epsilon << 1$) is, rather expectedly, valid only for small equilibrium recombination gaps.
+In summary, our mean-field derivation, at least in its generalized version, is accurate under all strong-selection regimes (in practice, whenever the self-consistent estimate of the scaled selection coefficient $4 N_e s_0 > 10$). Its linearized form is accurate as long as the log-fitness function is not too concave. And finally, the first-order weak erosion regime approximation ($\epsilon << 1$) is, rather expectedly, valid only for small equilibrium recombination gaps ($1-R < 0.2$).
 
 \section*{Scaling of the model allowing for variation in hot spot strength}
 
-The model allowing for variation in hot spot strength was explored under the generalized mean-field approximation, for several values of the shape parameter, ranging from low ($a=5$) to high ($a=0.5$) variance across hot spots (figure 9, 10). In the limit $a \to \infty$, this model reduces to the uniform model considered thus far, which is also indicated on the figures for comparison.
+The model allowing for variation in hot spot strength was explored under the generalized mean-field approximation, for several values of the shape parameter, ranging from low ($a=5$) to high ($a=0.5$) variance across hot spots (figure 9,10). In the limit $a \to \infty$, this model reduces to the uniform model considered thus far, which is also indicated on the figures for comparison.
 
 Under a fixed parameter regime, the mean fraction of active targets at equilbrium $H$ (figure 9) tends to increase as the variance increases (i.e. as the shape parameter $a$ decreases). In contrast, the equilbirium recombination rate $R$ (not shown) tends to decrease with decreasing $a$. This opposite behavior of $R$ and $H$, when $a$ varies, is due to the fact that strongest hot spots are the first to be eroded, and thus, the depletion of the genome-wide recombination activity at equilibrium is mostly contributed by the extinction of a relatively minor fraction of very strong hot spots. This effect is stronger for smaller values of the shape parameter $a$.
 
-The equilbrium diversity also tends to decrease under most parameter regimes, except for extremely high conversion rates $vg$ or extremely weak selection regimes (very small $\alpha$). Correlatively, the turnover time (which is directly proportional to diversity), also tends to decrease with increasing variance across hot spots (not shown). Globally, however, the equilibrium regime of the Red Queen process is only moderately dependent on the variation in strength across hot spots (on the exact value of $a$). 
+The equilbrium diversity also tends to decrease with increasing variance (decreasing $a$) under most parameter regimes (figure 10), except for extremely high conversion rates $vg$ or extremely weak selection regimes (very small $\alpha$). Correlatively, the turnover time (which is directly proportional to diversity), also tends to decrease with increasing variance across hot spots (not shown). Globally, however, the equilibrium regime of the Red Queen process is only moderately dependent on the variation in strength across hot spots (on the exact value of $a$). 
 
-\newpage
 
 \section*{Discussion}
 
@@ -631,53 +638,53 @@ In this work, we have presented a combination of simulations and analytical and 
 
 \subsection*{Evolutionary regimes and scaling behavior}
 
-The stationary regime of the Red Queen process can be characterized in terms of the mean recombination activity $R$ (or, alternatively, the mean fraction of non-eroded targets $H$), the genetic diversity at the PRDM9 locus $D$, the characteristic turnover time of recombination landscapes $T$ and the strength of selection acting on new PRDM9 alleles $s_0$. The overall scaling behavior of all of these quantities as a function of the parameters of the model is captured in a particularly compact form (using a first-order approximation as a function of $\epsilon$) in the weak erosion regime. This approximation is less accurate in more intense regimes, although even then, it correctly describes the qualitative behavior of the process.
+The stationary regime of the Red Queen process can be characterized in terms of the mean recombination activity $R$ (or, alternatively, the mean fraction of non-eroded targets $H$), the genetic diversity at the PRDM9 locus $D$, the characteristic turnover time of recombination landscapes $T$ and the strength of selection acting on new PRDM9 alleles $s_0$. The overall scaling behavior of all of these quantities as a function of the parameters of the model is captured in a particularly compact form in the weak erosion regime, using a first-order approximation as a function of $\epsilon$. This approximation is less accurate in more intense regimes, although even then, it correctly describes the qualitative behavior of the process.
 
-First, the mean level of erosion $R$, the strength of selection on new PRDM9 alleles $s_0$ and the turnover time $T$ do not depend on effective population size $N_e$. Both $1-R$ and $s_0$ increase with the erosion rate $vg$ and decrease with the mutation rate $u$ at the PRDM9 locus. Similar observations concerning the role of mutation rates at the targets and at the PRDM9 locus were previously reported based on simulation analyses (Ubeda ..). Here, we give a more quantitative estimate of this scaling, in terms of the coumpound parameter $\epsilon =  \frac{vg}{u}$. Specifically, in the weak erosion regime, $1-R$ and $s_0$ scale as $\sqrt \epsilon$, whereas $T$ scales as $\frac{1}{\sqrt{\epsilon}}$.
+First, the mean level of erosion $R$, the strength of selection on new PRDM9 alleles $s_0$ and the turnover time $T$ do not depend on effective population size $N_e$ (figures 3 and 5). Both $1-R$ and $s_0$ increase with the erosion rate $vg$ and decrease with the mutation rate $u$ at the PRDM9 locus. Similar observations concerning the role of mutation rates at the targets and at the PRDM9 locus were previously reported based on simulation analyses \citep{Ubeda:2011p184}. Here, we give a more quantitative estimate of this scaling, in terms of the coumpound parameter $\epsilon =  \frac{vg}{u}$. Specifically, in the weak erosion regime, $1-R$ and $s_0$ scale as $\sqrt \epsilon$, whereas $T$ scales as $\frac{1}{\sqrt{\epsilon}}$.
 
-Second, in terms of the equilibrium genetic diversity $D$ at the PRDM9 locus, the Red Queen has two distinct regimes. For small $N_e u$, it is characterized by a succession of hard sweeps, such that one single PRDM9 allele dominates the population at any time ($D=1$); for large $N_e u$, polymorphism is maintained at the PRDM9 locus. In the succession regime, the Red Queen accelerates as a function of $N_e$, while in the polymorphic regime, it spreads over an increasing number of segregating PRDM9 alleles (scaling roughly as $N_e u$)  and, correlatively, recombination is distributed over an increasing number of weaker hot spots. 
+Second, in terms of the equilibrium genetic diversity $D$ at the PRDM9 locus, the Red Queen has two distinct regimes (figure 4). For small $N_e u$, it is characterized by a succession of hard sweeps, such that one single PRDM9 allele dominates the population at any time ($D=1$); for large $N_e u$, polymorphism is maintained at the PRDM9 locus. In the succession regime, the Red Queen accelerates as a function of $N_e$, while in the polymorphic regime, it spreads over an increasing number of segregating PRDM9 alleles (scaling roughly as $N_e u$)  and, correlatively, recombination is distributed over an increasing number of weaker hot spots. 
 
 An intuitive interpretation of these scaling properties can be proposed as follows. First, the equilbrium recombination activity is determined by the relative magnitude of the two forces of the Red Queen, erosion and invasion, both of which are proportional to $N_e$. The effective population size cancels out from their ratio, and thus the equilibrium set point does not depend on $N_e$.
 
-Second, the fact that $1-R$ and $s_0$ both scale as the square root of $\epsilon = \frac{vg}{u}$ is because of the feedback between the two arms of the Red Queen. For instance, an increase in $\epsilon$ (e.g. through an increase in the mutation rate at the targets $v$) will result in a stronger erosion by dBGC. However, this increased depletion of recombination will in turn trigger an increase in the strength of positive selection on new PRDM9 alleles (captured by $s_0$), thus partially restoring higher levels of recombination. As a result of this feedback, the response of $\rho \tau = \frac{\epsilon}{s_0}$, and thus of $R$ (which is a decreasing function of $\rho \tau$) to this change in the value of $\epsilon$ is less than linear, being partially absorbed by $s_0$.
+Second, the fact that $1-R$ and $s_0$ both scale as the square root of $\epsilon = \frac{vg}{u}$ is because of the feedback between the two arms of the Red Queen. For instance, an increase in $\epsilon$ (e.g. through an increase in the mutation rate at the targets $v$) will result in a stronger erosion by dBGC. However, this increased depletion of recombination will in turn trigger an increase in the strength of positive selection on new PRDM9 alleles (captured by $s_0$), thus partially restoring higher levels of recombination. As a result of this feedback, the response of $\rho \tau = \frac{\epsilon}{s_0}$ (equation \ref{rhotau}), and thus of $R$ (which is a decreasing function of $\rho \tau$, equations \ref{Rsuccession} and \ref{Rgamma}) to this change in the value of $\epsilon$ is less than linear, being partially absorbed by $s_0$.
 
 Third, in the polymorphic regime, mean recombination activity and PRDM9 diversity are essentially uncoupled -- in the weak erosion limit, the first depends only on $\epsilon$ and the second only on $N_e u$. Intuitively, the mean recombination activity implied by a given value of $\epsilon$ can be equivalently realized, either by few PRDM9 alleles segregating at high frequencies, eroding their targets at a high rate and thus quickly replaced by other alleles, or by many alleles segregating at low frequencies, eroding their targets at a lower rate and replaced less often. The choice between these alternative regimes is essentially determined by the mutational input at the PRDM9 locus, $N_e u$ -- thus, in a sense, neutrally.
 
-This last point is of particular importance concerning the interpretation of the empirically observed patterns of polymorphism and divergence at the PRDM9 locus: positive selection on PRDM9 may easily reach very high levels under reasonable parameter regimes of the Red Queen process, which will easily translate into high ratios of non-synonymous to synonymous rates. Even when very strong, however, this type of positive selection is not diversifying. At least under the assumptions of the models explored here, mutation, not selection, explains the intra-specific genetic diversity of PRDM9.
+This last point is of particular importance concerning the interpretation of the empirically observed patterns of polymorphism and divergence at the PRDM9 locus \citep{Oliver:2009ca,Ponting:2011ed,Buard:2014dy,Kono:2014hy}. Positive selection on PRDM9 may easily reach very high levels under reasonable parameter regimes of the Red Queen process, which will easily translate into high ratios of non-synonymous to synonymous rates. Even when very strong, however, this type of positive selection is not diversifying. At least under the assumptions of the models explored here, mutation, not selection, explains the intra-specific genetic diversity of PRDM9.
 
-These results appear to be relatively general. In particular, the scaling as a function of $N_e$ is essentially valid under arbitrary fitness models, as long as the absolute fitness of a diploid can be expressed as a function of the activities (fraction of active targets) of its two alleles. On the other hand, more complex models could be imagined, for which the results presented here are not valid, in particular, if the fitness of an allele directly depends on population-level quantities, such as the amount of linkage disequilibrium (see below).
+These results appear to be relatively general. In particular, the scaling as a function of $N_e$ and the fact that diversity is essentially determined by the mutational input are essentially valid under arbitrary fitness models, as long as the absolute fitness of a diploid can be expressed as a function of the activities (fraction of active targets) of its two alleles. On the other hand, more complex models could be imagined, for which the results presented here are not valid, in particular, if the fitness of an allele directly depends on population-level quantities, such as the amount of linkage disequilibrium (see below).
 
-Self-consistent mean-field approximations have already been used in the context of other evolutionary problems (e.g.). They could in principle be applied to many other evolutionary Red Queen models, at least if the aim is to characterize the stationary regime. A key argument, repeatedly used throughout our self-consistent mean-field derivation, is the tiling principle (figure). This argument is in fact a specific instance of the ergodicity principle, which states that averages over the population and averages over allelic trajectories have identical expectations at stationarity. The specific form taken here by this principle is a consequence of the strong-selection assumption. However, ergodicity arguments could be used under more general conditions, in combination with diffusion approximations, so as to derive mean-field approximations that would also be valid also in nearly-neutral regimes. Such mathematical developments appear to be relatively complex, although not out of reach.
+Self-consistent mean-field approximations have already been used in the context of other evolutionary problems \citep[e.g. in][]{ODwyer:2014ty}. They could in principle be applied to many other evolutionary Red Queen models, at least if the aim is to characterize the stationary regime. A key argument, repeatedly used throughout our self-consistent mean-field derivation, is the tiling principle (figure 8). This argument is in fact a specific instance of the ergodicity principle, which states that averages over the population and averages over allelic trajectories have identical expectations at stationarity. The specific form taken here by this principle is a consequence of the strong-selection assumption. However, ergodicity arguments could be used under more general conditions, in combination with diffusion approximations, so as to derive mean-field approximations that would also be valid also in nearly-neutral regimes. Such mathematical developments appear to be relatively complex, although not out of reach.
 
 
 \subsection*{Empirical calibration}
 
 The model can be tentatively calibrated against current empirical evidence. This can most easily be done using the mouse as our model species, while keeping an eye on data from humans as an additional check at lower $N_e$. 
 
-The three mouse subspecies, castaneus, domesticus and musculus, have diverged from each other around .. . The effective population size is estimated to be of the order of $N_e = 10^5$ (ranging from $5.10^4$ in musculus up to $5.10^5$ in castaneus, Phifer-rixey et al, 2012). Each subspecies has its own major PRDM9 allele, segregating at a frequency of the order of 30\%, with most other alleles being much rarer (Buard et al, 2010, Kono). PRDM9 heterozygosity is around 0.2 to 0.5, thus suggesting a value of $D$ between 5 and 10 in each subpopulation. 
+The three mouse subspecies, {\it castaneus}, {\it domesticus} and {\it musculus}, have diverged from each other around 1 My ago \citep{Duvaux:2011dr}. The effective population size is estimated to be of the order of $N_e = 10^5$ , ranging from $5.10^4$ in {\it musculus} up to $5.10^5$ in {\it castaneus} \citep{PhiferRixey:2012co}. Each subspecies has its own major PRDM9 allele, segregating at a frequency of the order of 30\%, with most other alleles being much rarer \citep{Buard:2014dy,Kono:2014hy}, thus suggesting a value of $D$ between 5 and 10 in each subpopulation. 
 
-Experiments on hybrids between subspecies show that the major allele of each subspecies has eroded a fraction of its targets of the order of 50\% (40\% in castaneus, Baker et al, see other data from Davies et al). Finally, patterns of non-synonymous versus synonymous variation clearly suggest the presence of strong positive selection acting on the Zn-finger array of PRDM9. The complicated process of concerted evolution acting on this minisatellite makes it difficult to reliably estimate the strength of selection using classical codon models. Nevertheless, the $dN/dS$ is of the order of 10, with most non-synonymous changes specifically concentrated on the 3 key codons determining the DNA binding specificity of Zn-fingers 8-12. These observations suggest a scaled selection coefficient well above 1, $S_0 = 4 N_e s_0 >> 1$, which can be reasonably assumed to be grater than 10.
+Experiments on hybrids between subspecies show that the major allele of each subspecies has eroded a fraction of its targets of the order of 50\% \citep{Baker:2015dy,Davies:2016ci}. Finally, patterns of non-synonymous versus synonymous variation clearly suggest the presence of strong positive selection acting on the Zn-finger array of PRDM9 \citep{Oliver:2009ca,Buard:2014dy}. The complicated process of concerted evolution acting on this minisatellite makes it difficult to reliably estimate the strength of selection using classical codon models. Nevertheless, the $dN/dS$ estimated in rodenst is of the order of 5 to 10, with most non-synonymous changes specifically concentrated on the 3 key codons determining the DNA binding specificity of Zn-fingers 8-12  \citep{Oliver:2009ca}. These observations suggest a scaled selection coefficient well above 1, $S_0 = 4 N_e s_0 >> 1$, which can be reasonably assumed to be grater than 10.
 
-By comparison, in humans, effective population size is classically estimated at $10^4$, although it might have been slighlty larger (of the order of $3.10^4$) in deeper evolutionary times. The PRDM9 locus is slightly less diverse than in the mouse, with the major PRDM9 allele segregating at a frequency of around 50\% in Africans, suggesting a value of $D$ of the order of 3. Positive selection is also detected on PRDM9, with a dN/dS of the order of 10, suggesting a scaled selection coefficient $S_0$ again greater than 10. By extrapolation, this suggests that, in the mouse, the selection coefficient should in fact be of the order of 30 or above.
+By comparison, in humans, effective population size is classically estimated at $10^4$, although it might have been slighlty larger (of the order of $3.10^4$) in deeper evolutionary times. The PRDM9 locus is slightly less diverse than in the mouse, with the major PRDM9 allele segregating at a frequency of around 50\% in Africans, suggesting a value of $D$ of the order of 3. Positive selection is also detected on PRDM9, with a dN/dS of the order of 5 \citep{Oliver:2009ca}, suggesting a scaled selection coefficient $S_0$ again much greater than 1.
 
-Assuming a point mutation rate of $10^{-8}$ per generation and an effective number of 10 inactivating mutations per target, $v$ can be estimated to be of the order of $10^{-7}$. DBS initiation maps inferred by Chip Seq suggest that the distribution of DSB initiation is approximately exponential (i.e. gamma with a shape parameter $a=1$). This leaves us with 3 parameters to estimate, $u$, $g$ and the fitness parameter $\alpha$ under the power-law model, based on three summary statistics ($D \simeq 7$, $S_0 \simeq 30$, and $H \simeq 0.5$).
+Assuming a point mutation rate of $10^{-8}$ per generation and an effective number of 10 inactivating mutations per target, $v$ can be estimated to be of the order of $10^{-7}$. DBS initiation maps inferred by Chip-Seq \citep{Smagulova:2016kz} suggest that the distribution of DSB initiation is approximately exponential (i.e. gamma with a shape parameter $a=1$). This leaves us with 3 parameters to estimate, $u$, $g$ and the fitness parameter $\alpha$ under the power-law model, based on three summary statistics ($D \simeq 7$, $S_0 > 10$, and $H \simeq 0.5$).
 
-An approximate fit of the power-law model was obtained by manually adjusting the three free parameters of the model. In the end, the three summary statistics could be qualitatively reproduced for values of $\alpha = 10^{-4}$, $u=3.10^{-6}$ and $g=3.10^{-3}$ (table 1, first row) -- thus suggesting a high mutation rate $u$ and a strong dBGC. %Under the exponential fitness model, we were not able to find parameter configurations able to reproduce, even qualitatively, the three summary statistics. Specifically, under this model, a level of erosion of the order of 50\% combined a diversity greater than 5 seems to always imply a weak selection regime on PRDM9. 
-This empirical calibration of the model is at best qualitative, and we certaintly did not explore the parameter space sufficiently thoroughly. However, the problem turns out to be rather constrained, such that it seems to inevitably lead to a high mutation rate and a strong dBGC. On the one hand, the presence of polymorphism ($D>1$), which scales as $N_e u$, implies that $u$ should be high. Similarly, the presence of positive selection at the PRDM9 locus ($S_0 = 4 N_e s_0 >> 1$) implies that $s_0$ should not be too small either. Thus, the product $us_0$ is bounded from below. On the other hand, and irrespective of the exact fitness model, the mean level of erosion at equilibrium is a function of the compound parameter $\rho \tau = \frac{v g}{u s_0}$ (equation ..). The significant levels of depletion observed in the mouse, of the order of 50\%, imply that this compound quantity should be of the order of 1 -- or equivalently, $v g \simeq u s_0$. Since the mutation rate at the targets $v$ is small, this then means that the intensity of dBGC, $g$, should be sufficiently high.
+An approximate fit of the power-law model was obtained by manually adjusting the three free parameters of the model. In the end, the three summary statistics could be qualitatively reproduced for values of $\alpha = 10^{-4}$, $u=3.10^{-6}$ and $g=3.10^{-3}$ (table 1, first row) -- thus suggesting a high mutation rate $u$ and a strong dBGC.
+This empirical calibration of the model is at best qualitative. However, the problem turns out to be rather constrained, such that it seems to inevitably lead to a high mutation rate and a strong dBGC. On the one hand, the presence of polymorphism ($D>1$), which scales as $N_e u$, implies that $u$ should be high. Similarly, the presence of positive selection at the PRDM9 locus ($S_0 = 4 N_e s_0 >> 1$) implies that $s_0$ should not be too small either. Thus, the product $us_0$ is bounded from below. On the other hand, and irrespective of the exact fitness model, the mean level of erosion at equilibrium is a function of the compound parameter $\rho \tau = \frac{v g}{u s_0}$ (equation \ref{Rgamma}). The significant levels of depletion observed in the mouse, of the order of 50\%, imply that this compound quantity should be of the order of 1 -- or equivalently, $v g \simeq u s_0$. Since the mutation rate at the targets $v$ is small, this then means that the intensity of dBGC, $g$, should be sufficiently high.
 
 Importantly, those constraints on $g$ and $u$ do not depend on the exact fitness model. Instead, they merely reflect the balance between the rates of erosion ($4N_e v g$) and of invasion ($4 N_e u s_0$) that has to be achieved in order to reach a given equilibrium recombination rate. Conversely, once those constraints are fulfilled by a given combination of values of $g$ and $u$, for a given $s_0$, it still remains to fine tune the parameter of the fitness model so as to find a regime that effectively realizes the desired equilibrium set point -- which gave us $\alpha = 10^{-4}$ in the present case.
 
-This qualitative argument is confirmed by more quantitative estimates (table 1). Thus, allowing for a lower $g$, under otherwise fixed values for $u$ and $\alpha$, would lead to equilbrium levels of erosion that are too low compared to empirically observed levels ($H>80\%$, table 1, second row). Decreasing $g$ could be compensated for by also decreasing $u$ by the same factor, so as to predict levels of depletion of the order of 50\% (third row of table 1). However, this would then lead to insufficient levels of PRDM9 diversity, essentially pushing the process into the succession regime ($D=1$). Alternatively, compensating the decrease in $g$ by a decrease in the value of $\alpha$ would push the Red Queen into the weak selection regime in the mouse (fourth row $S_0 = 2.6$), and, by extrapolation, to an effectively neutral regime ($S_0 << 1$) in species with smaller effective population sizes such as humans.
+This qualitative argument is confirmed by more quantitative estimates (table 1). Thus, allowing for a lower $g$, under otherwise fixed values for $u$ and $\alpha$, would lead to equilbrium levels of erosion that are low compared to empirically observed levels ($H>80\%$, table 1, second row). Decreasing $g$ could be compensated for by also decreasing $u$ by the same factor, so as to predict levels of depletion of the order of 50\% (third row of table 1). However, this would then lead to insufficient levels of PRDM9 diversity, essentially pushing the process into the succession regime ($D=1$). Alternatively, compensating the decrease in $g$ by a decrease in the value of $\alpha$ would push the Red Queen into the weak selection regime in the mouse (fourth row $S_0 = 2.6$), and, by extrapolation, to an effectively neutral regime ($S_0 << 1$) in species with smaller effective population sizes such as humans.
 
-Based on sperm typing experiments, a mutation rate of the order of $10^{-5}$, thus not so far from our own estimate, has been inferred in humans (Jeffreys). Interestingly, this high inferred rate has led to the suggestion that the hot spot parardox could in fact be resolved by a neutral model -- which is essentially what we observe here under a high mutation rate (last row of table 1), when we also allow for a lower rate of erosion (lower $g$) and weaker selection for recombination (lower $\alpha$). However, a neutral or nearly-neutral regime would be in contradiction with phylogenetic analyses suggesting the presence of strong positive selection on PRDM9 (refs).
+Based on sperm typing experiments, a mutation rate of the order of $10^{-5}$, thus not so far from our own estimate, has been inferred in humans \citep{Jeffreys:2013dl}. Interestingly, this high inferred rate has led to the suggestion that the hot spot parardox could in fact be resolved by a neutral model \citep{Jeffreys:2013dl} -- which is essentially what we observe here under a high mutation rate (last row of table 1), when we also allow for a lower rate of erosion (lower $g$) and weaker selection for recombination (lower $\alpha$). However, a neutral or nearly-neutral regime would be in contradiction with phylogenetic analyses suggesting the presence of strong positive selection on PRDM9 \citep{Oliver:2009ca,Buard:2014dy}.
 
-Ot note, the estimate previously reported (Jeffreys) corresponds to the raw mutation rate, i.e. not corrected for the production of non functional or deleterious variants. Here, in contrast, $u$ is the \emph{functional} mutation rate, i.e. the rate at which a functonal allele of PRDM9 leads to a new functional allele with essentially new targets across the genome, which is expected to be substantially lower than the raw mutation rate. The mutation process at the minisatellite locus encoding for the Zn-finger domain of PRDM9 is a complex mix between unequal crossing-overs reshuffling existing Zn-fingers and non-synonymous point mutations at the key positions determining the binding sequence specificity of each of the fingers. The latter component probably plays an important role in the production of new functional variants, and might well be the limiting factor determining the functional mutation rate $u$, thus suggesting a value for $u$ substantially lower than $10^{-5}$.
+Ot note, the estimate previously reported \citep{Jeffreys:2013dl} corresponds to the raw mutation rate, i.e. not corrected for the production of non functional or deleterious variants. Here, in contrast, $u$ is the \emph{functional} mutation rate, i.e. the rate at which a functonal allele of PRDM9 leads to a new functional allele with essentially new targets across the genome, which is expected to be substantially lower than the raw mutation rate. The mutation process at the minisatellite locus encoding for the Zn-finger domain of PRDM9 is a complex mix between unequal crossing-overs reshuffling existing Zn-fingers and non-synonymous point mutations at the key positions determining the binding sequence specificity of each of the fingers. The latter component probably plays an important role in the production of new functional variants, and might well be the limiting factor determining the functional mutation rate $u$, thus suggesting a value for $u$ substantially lower than $10^{-5}$.
 
-Concerning the strength of dBGC, based on a high-resolution genetic map of a fraction of chromosome 1 in the mouse (ref), the mean rate of cross-over across hot-spots can be estimated to be of the order of $10^{-3}$. Assuming a 10:1 ratio for non cross-over versus cross-over events (ref), this gives an estimate for $g$ of the order of $10^{-2}$, thus slightly higher than our estimate. However, this is an upper bound, granting systematic conversion of the target site of PRDM9 upon each DSB initiation and assuming complete inactivation of the target site by single point mutations. In practice, there is indirect evidence that conversion of the target site is not systematic in the mouse, in particular in the case of non crossovers (ref Cole). In addition, mutations are only partially inactivating PRDM9 binding, as indicated by the presence of multiple substitutions at many of the now extinct hot spots (ref). Combined together, these two lines of empirical observations suggest that $g$ might be substantially lower than $10^{-2}$. Finally, the turnover time, and thus the mean residence time of PRDM9 alleles in the population, predicted by our estimate of $g=3.10^{-3}$ is of the order of 60 000 generations (table 1), which is much shorter than the mean time since divergence between mouse subspecies. The patterns of incomplete lineage sorting observed in phylogenetic analyses of PRDM9 variants in the mouse species complex suggest instead a longer typical residence time for PRDM9 alleles in each of the subspecies.
+Concerning the strength of dBGC, based on a high-resolution genetic map of a fraction of chromosome 1 in the mouse \citep{Paigen:2008dg}, the mean rate of cross-over across hot-spots can be estimated to be of the order of $10^{-3}$. Assuming a 10:1 ratio for non cross-over versus cross-over events, this gives an estimate for $g$ of the order of $10^{-2}$, thus slightly higher than our estimate. However, this is an upper bound, granting systematic conversion of the target site of PRDM9 upon each DSB initiation and assuming complete inactivation of the target site by single point mutations. In practice, there is indirect evidence that conversion of the target site is not systematic in the mouse, in particular in the case of non crossovers \citep{Cole:2014cs}. In addition, mutations are only partially inactivating PRDM9 binding, as indicated by the presence of multiple substitutions at many of the now extinct hot spots. Combined together, these two lines of empirical observations suggest that $g$ might be substantially lower than $10^{-2}$. Finally, the turnover time, and thus the mean residence time of PRDM9 alleles in the population, predicted by our estimate of $g=3.10^{-3}$ is of the order of 60 000 generations (table 1), which is much shorter than the mean time since divergence between mouse subspecies. The patterns of incomplete lineage sorting observed in phylogenetic analyses of PRDM9 variants in the mouse species complex suggest instead a longer typical residence time for PRDM9 alleles in each of the subspecies \citep{Buard:2014dy}.
 
 Altogether, the strength of dBGC and the functional mutation rate at the PRDM9 locus are both predicted by our model to be close to their highest possible value compatible with current empirical observations. As of yet, empirical evidence is still relatively inaccurate and is available for only two species, the mouse and humans. A more decisive test of the Red Queen model introduced here will therefore have to await more quantitative empirical information in a broader range of mammalian species. Meanwhile, however, it is not unreasonable to anticipate that our estimates of $u$ and $g$ are perhaps too high.
 
-There are several possible reasons for this potential overestimation. One possibility would be that the levels of depletion of the order of 50\% that we have used to fit the model have been measured specifically for the major PRDM9 alleles, which are precisely those alleles for which erosion is is expected to be as its highest levels. In contrast, the erosion level predicted by the model, through the summary statistic $H$, is supposed to be a weighted average over all segregating alleles, thus potentially less extreme than 50\% in the case of the mouse. Similarly, the raw diversity at the PRDM9 locus is potentially contributed at least in part by functionally equivalent alleles, recognizing similar target sites. In contrast, and like for the mutation rate $u$, the diversity $D$ predicted by our model is supposed to correspond to the functional diversity (i.e. the effective number of functionally distinct alleles) thus potentially lower than the raw diversity. Accounting for these two factors could easily result in lower estimates for both $g$ and $u$.
+There are several possible reasons for this potential overestimation. One possibility would be that the levels of depletion of the order of 50\% that we have used to fit the model have been measured specifically for the major PRDM9 alleles \citep{Baker:2015dy,Davies:2016ci}, which are precisely those alleles for which erosion is is expected to be as its highest levels. In contrast, the erosion level predicted by the model, through the summary statistic $H$, is supposed to be a weighted average over all segregating alleles, thus potentially less extreme than 50\% in the case of the mouse. Similarly, the raw diversity at the PRDM9 locus is potentially contributed at least in part by functionally equivalent alleles, recognizing similar target sites. In contrast, and like for the mutation rate $u$, the diversity $D$ predicted by our model is supposed to correspond to the functional diversity (i.e. the effective number of functionally distinct alleles) thus potentially lower than the raw diversity. Accounting for these two factors could easily result in lower estimates for both $g$ and $u$.
 
 Finally, another possible explanation would be that the fitness model assumed here focusses too exclusively on chromosome segregation, ignoring the other important role of recombination, namely, the dissipation of linkage disequilibrium (LD). More specifically, in our model, the fitness of an allele only depends on the total recombination activity induced by this allele, irrespective of the fine-scale distribution of recombination over the genome. This may be reasonable if the main role of recombination is to promote correct chromosome segregation. However, the fine-scale distribution of recombination across the genome plays an important role in shaping the distribution of LD. In particular, under low PRDM9 diversity, recombination is concentrated on few hot spots that are constantly reused at the level of the population, thus creating large haplotype blocks within which LD tends to accumulate, potentially resulting in a genetic load through background selection or interference between concurrent selective sweeps. In this context, rare PRDM9 alleles could be favored because they break up those large haplotype blocks, thereby contributing to a more efficient dissipation of LD. Unlike what we have considered in our model thus far, this specific form of selection is inherently frequency-dependent and therfore genuinely diversifying. As a result, it would provide a mechanism for explaining high levels of PRDM9 polymorphism without having to invoke very high mutation rates at this locus. In turn, allowing for a lower mutation rate $u$ would then make it possible to accomodate more reasonable values for the strength of dBGC, $g$, while still predicting significant levels of depletion of recombination landscapes.
 
@@ -685,13 +692,59 @@ Finally, another possible explanation would be that the fitness model assumed he
 
 In spite of the remaining uncertainty about the exact value of the mutation rate of the Zn-finger domain of PRDM9, there is no doubt that this rate is one of the highest among all protein coding genes encoded by mammalian genomes. Given the important role played by the mutational input at the PRDM9 locus in the restoration of recombination in the face of ongoing erosion by dBGC, this empirical fact raises the question of why the key trans-acting factor of the Red Queen of recombination turnover happens to have such a high mutation rate in the first place. An interesting possibility would be that PRDM9 has been coopted in this intra-genomic Red Queen precisely for that reason. Altermatively, it is possible to imagine that the detailed genetic structure of the Zn-finger domain has been progressively optimized through a higher-level evolutionary process. These interesting speculations could be further investigated in the context of the present modeling framework.
 
-Finally, another intriguing aspect of PRDM9 is its role in hybrid sterility. PRDM9 was initially discovered in this context. Recent developments have suggested that the hybrid sterility phenotype is directly related to the asymmetry in the patterns of PRDM9 binding along chromosomes of meiotic cells in F1 hybrids. In turn, this asymmetry is a direct consequence of the differential erosion of PRDM9 targets along the two parental chromosomes, itself due to distinct major PRDM9 alleles segregating in the two subpopulations of origin (refs). Altogether, these observations point toward a potentially important role for the Red Queen process of recombination turnover in the creation of genetic barriers between subspecies. The modeling framework introduced here could certainly be extended in a metapopulation context, so as to further investigate those particularly interesting questions.
+Finally, another intriguing aspect of PRDM9 is its role in hybrid sterility (Forejt et al, 1974, Mihola et al, 2009). Recent developments have suggested that the hybrid sterility phenotype is directly related to the asymmetry in the patterns of PRDM9 binding along chromosomes of meiotic cells in F1 hybrids. In turn, this asymmetry is a direct consequence of the differential erosion of PRDM9 targets along the two parental chromosomes, itself due to distinct major PRDM9 alleles segregating in the two subpopulations of origin \citep{Zelazowski:2016ek,Davies:2016ci,Smagulova:2016kz}. Altogether, these observations point toward a potentially important role for the Red Queen process of recombination turnover in the creation of genetic barriers between subspecies. The modeling framework introduced here could certainly be extended in a metapopulation context, so as to further investigate those particularly interesting questions.
 
 \newpage
 
-\section*{Appendix 1. Linearization of the fitness function?}
+\section*{Appendix 1. Linearized mean-field derivation}
 
-\section*{Appendix 2. Generalized mean-field argument}
+We first derive an explicit soluton for $x$ as a function of $\theta$. Starting from the differential equations for $x$ and $\theta$
+\begin{eqnarray*}
+\frac{d x}{d t} &=& \frac{f'(R )}{2 f(R )} \left( \theta  - R \right) x
+\\
+\dfrac{d \theta}{d t} &=& - \rho x \theta
+\end{eqnarray*}
+and combining them gives:
+\begin{eqnarray*}
+\frac{d x}{d \theta} = \frac{dx}{dt} / \frac{d\theta}{dt} 
+&=& \frac{1}{\rho}\frac{f'(R )}{2 f(R )} \left( \frac{R}{\theta}  - 1 \right)
+\end{eqnarray*}
+which has solution
+\begin{eqnarray*}
+x &=& \frac{1}{\rho}\frac{f'(R )}{2 f(R )} \left[ R \ln \theta - \theta \right]_0^{R_\infty}
+\\
+&=& \frac{f'(\R)}{2 \rho f(\R )} (1- \theta + \R  \ln \theta ) + x_{init}
+\end{eqnarray*}
+or, in explicit notation as a function of $t$:
+\begin{eqnarray*}
+x_t &=& \frac{f'(\R)}{2 \rho f(\R )} (1- \theta_t + \R  \ln \theta_t ) + x_{init}
+\end{eqnarray*}
+When $t \to \infty$, $\theta_t$ converges to $R_\infty$ and $x(\theta_t)$ to 0. In addition, since $x_{\mathrm{init}} = 1 / N_e$ is small, we can let it go to 0, which yields a relation between $R$ and $R_\infty$:
+\begin{eqnarray}
+\label{polyRmin2}
+0 &\simeq&  1- R_\infty  + R  \ln (R_\infty) 
+\end{eqnarray}
+
+Second, using the tiling argument:
+\begin{eqnarray*}
+\tau &=& \int_0^{+\infty} x dt
+\\
+&=& \int_1^{R_\infty} x \frac{dt}{d\theta} d \theta
+\\
+&=& \int_1^{R_\infty} x \left(\frac{d\theta}{dt} \right)^{-1} d \theta
+\\
+&=& - \int_1^{R_\infty} x \frac{1}{\rho x \theta} d \theta
+\\
+&=& - \int_1^{R_\infty} \frac{d \theta}{\theta}
+\\
+&=& -\frac{1}{\rho} \ln R_\infty
+\\
+&=& \frac{1 - R_\infty}{\rho R}
+\end{eqnarray*}
+where we have used equation \ref{polyRmin2} for the last step of the derivation.
+%A similar argument can be used for $D$ and $T$
+
+\section*{Appendix 2. Generalized mean-field derivation}
 
 The activity of a PRDM9 allele decays at a rate proportional to the allele's frequency:
 \begin{eqnarray*}
@@ -699,7 +752,7 @@ The activity of a PRDM9 allele decays at a rate proportional to the allele's fre
 \end{eqnarray*}
 This equation has general solution:
 \begin{eqnarray}
-\label{intrinsictheta}
+\label{intrinsictheta2}
 \theta(t) &=& e^{-\rho \int_0^t x(u) du}
 = e^{-\rho \xi(t)} = e^{-z(t)}
 \end{eqnarray}
@@ -870,7 +923,7 @@ T = D \tau = D \rho \tau / \rho \simeq \frac{24 N_e u}{4 N_e v g} 2 \sqrt \frac{
 \end{eqnarray*}
 
 %\bibliographystyle{plain}
-%\bibliography{red-queen}
+\bibliography{all}
 
 \newpage
 
@@ -888,7 +941,7 @@ $3 \times 10^{-6}$ & $3 \times 10^{-4}$ & $1 \times 10^{-5}$ & $1 \times 10^{-5}
 \end{tabular}
 \\
 \\
-Table 1. Summary statistics predicted by the model with variation in hot spot strength, under the generalized mean-field solution, for different combination of parameter values (in all cases, $a=1$, $v=10^{-7}$). $H$: mean fraction of active targets per allele, $D$: PRDM9 diversity, $S_0 = 4 N_e s_0$: scaled selection coefficient, $T$: turnover time.
+Table 1. Summary statistics predicted by the model with variation in hot spot strength, under the generalized mean-field solution, for different combination of parameter values (in all cases, $a=1$, $v=10^{-7}$). $H$: mean fraction of active targets per allele, $D$: PRDM9 diversity, $S_0 = 4 N_e s_0$: scaled selection coefficient associated with a new PRDM9 allele entering the population, $T$: turnover time.
 
 \newpage 
 
@@ -896,72 +949,155 @@ Table 1. Summary statistics predicted by the model with variation in hot spot st
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=0.8\textwidth]{Images/simulated-trajectory.pdf}\\
+       \includegraphics[width=0.4\textwidth]{Latrille2017fig1a}
+       \includegraphics[width=0.4\textwidth]{Latrille2017fig1b}\\
 \end{figure*}
-\textbf{Figure 1.} A typical simulation trajectory of the Red Queen model, with allele frequencies (top) and allele activity (bottom) through time.
+\textbf{Figure 1.} Fitness functions $f(R)$ used in this work. Power-law (left) and exponential (right) models.
 
 \newpage
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=0.8\textwidth]{Images/mean-activity.pdf}\\
+       \includegraphics[width=0.8\textwidth]{Latrille2017fig2}\\
 \end{figure*}
-\textbf{Figure 2.} Mean activity $\R$, as a function of effective population size $N_e$ (top left), mutation rate at the targets $v$ (top right), mutation rate at the PRDM9 locus $u$ (bottom left) and selection strength $\alpha$ (bottom right). Mean-field approximation (orange) and small recombination gap (weak-erosion) approximation (green).
+\textbf{Figure 2.} A typical simulation trajectory of the Red Queen model, with allele frequencies ($x$, top) and allele activity ($\theta$, bottom) through time.
 
 \newpage
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=1.0\textwidth]{Images/prdm9-diversity.pdf}\\
+       \includegraphics[width=1.0\textwidth]{Latrille2017fig3}\\
 \end{figure*}
-\textbf{Figure 3.} Diversity at the PRDM0 locus $\D$, as a function of effective population size $N_e$ (top left), mutation rate at the targets $v$ (top right), mutation rate at the PRDM9 locus $u$ (bottom left) and selection strength $\alpha$ (bottom right). Mean-field approximation (orange) and small recombination gap (weak erosion) approximation (green).
+\textbf{Figure 3.} Mean recombination activity $\R$, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\alpha$ (D) under the power-law fitness model. Mean-field approximations, either linearized (orange) or generalized (red) and weak erosion approximation (green) are shown on the top of the mean and variance over the simulations (blue).
 
 \newpage
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=1.0\textwidth]{Images/landscape-variance.pdf}\\
+       \includegraphics[width=1.0\textwidth]{Latrille2017fig4}\\
 \end{figure*}
-\textbf{Figure 4.} Relative variance of recombination landscapes $\V$, as a function of effective population size $N_e$ (top left), mutation rate at the targets $v$ (top right), mutation rate at the PRDM9 locus $u$ (bottom left) and selection strength $\alpha$ (bottom right). Mean-field approximation (orange) and small recombination gap (weak erosion) approximation (green).
+\textbf{Figure 4.} Genetic diversity at the PRDM9 locus $\D$, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\alpha$ (D) under the power-law fitness model. Mean-field approximations, either linearized (orange) or generalized (red) and weak erosion approximation (green) are shown on the top of the mean and variance over the simulations (blue).
 
 \newpage
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=1.0\textwidth]{Images/turn-over.pdf}\\
+       \includegraphics[width=1.0\textwidth]{Latrille2017fig5}\\
 \end{figure*}
-\textbf{Figure 5.} Turnover time $\T$, as a function of effective population size $N_e$ (top left), mutation rate at the targets $v$ (top right), mutation rate at the PRDM9 locus $u$ (bottom left) and selection strength $\alpha$ (bottom right). Mean-field approximation (orange) and small recombination gap approximation (green).
+\textbf{Figure 5.} Turnover time $\T$, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\alpha$ (D) under the power-law fitness model. Mean-field approximations, either linearized (orange) or generalized (red) and weak erosion approximation (green) are shown on the top of the mean and variance over the simulations (blue).
 
 \newpage
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=0.8\textwidth]{Images/fixedpoint.pdf}\\
+       \includegraphics[width=0.8\textwidth]{Latrille2017fig6}\\
 \end{figure*}
-\textbf{Figure 6.} Self-consistent solution as a fixed point, in the form $R = g(R)$, for two values of $\epsilon = \sqrt{\dfrac{v g}{\alpha u}}$.
-
-%\newpage
-
-%\textbf{Figure 6.} Allele frequency ($x_t$) as a function of activity ($\theta_t$).
+\textbf{Figure 6.} Self-consistent linearized mean-field solution as a fixed point, in the form $R = g(R,\epsilon)$, for two values of $\epsilon = \sqrt{\dfrac{v g}{\alpha u}}$.
 
 \newpage
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=0.8\textwidth]{Images/single-allele.pdf}\\
+       \includegraphics[width=1.0\textwidth]{Latrille2017fig7}\\
 \end{figure*}
 \textbf{Figure 7.} Trajectory of the frequency and the activity of a typical allele through time, under the deterministic and mean-field approximation (see text for details).
 
-%\newpage
+\newpage
 
-%\textbf{Figure 6.} Allele frequency ($x_t$) as a function of activity ($\theta_t$).
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=1.0\textwidth]{Latrille2017fig8}\\
+\end{figure*}
+\textbf{Figure 8.} A tiling principle. On the left, an idealized realization of the Red Queen dynamic is depicted, in which new alleles invade the population at regular time intervals, all equal to $\tau$, and have the same allele frequency trajectory (such as depicted in figure 7). Taking the sum of allele frequencies at any given time (vertical bar), which by definition is equal to 1, is then equivalent to summing the values taken by the frequency of one specific allele at regular time intervals (right). Multiplying this sum by $\tau$ amounts to approximating the integral $\int x_t d_t$ by the histogram shown on the right panel. Thus, $\int x_t dt \simeq \tau \sum x_i = \tau$. This argument can more generally be used to approximate any sum of the form $\sum x_i \phi(x_i, \theta_i)$ by the corresponding integral $\frac{1}{\tau} \int x_t \phi \left(  x_t, \theta_t \right) dt$.
+
 
 \newpage
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=0.8\textwidth]{Images/tilling-argument.pdf}\\
+       \includegraphics[width=1.0\textwidth]{Latrille2017fig9}\\
 \end{figure*}
-\textbf{Figure 8.} A tiling principle. On the left, an idealized realization of the Red Queen dynamic is depicted, in which new alleles invade the population at regular time intervals, all equal to $\tau$, and have the same allele frequency trajectory (such as depicted in figure 6). Taking the sum of allele frequencies at any given time (vertical bar), which by definition is equal to 1, is then equivalent to summing the values taken by the frequency of one specific allele at regular time intervals (right). Multiplying this sum by $\tau$ amounts to approximating the integral $\int x_t d_t$ by the histogram shown on the right panel. Thus, $\int x_t dt \simeq \tau \sum x_i = \tau$. This argument can more generally be used to approximate sums of the form $\sum x_i^k \theta_i^l$ by the corresponding integrals, $\frac{1}{\tau} \left( \int x_t^k \theta_t^l dt \right)$, all of which are analytically available.
+\textbf{Figure 9.} Mean recombination activity $\R$, calculated under the generalized mean-field approximation, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\alpha$ (D) under the power-law fitness model and with variance in hot spot strength, with shape parameter $a=0.5$, $1$, $5$ and $+\infty$.
+
+\newpage
+
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=1.0\textwidth]{Latrille2017fig10}\\
+\end{figure*}
+\textbf{Figure 10.} Genetic diversity at the PRDM9 locus $\D$, calculated under the generalized mean-field approximation, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\alpha$ (D) under the power-law fitness model and with variance in hot spot strength, with shape parameter $a=0.5$, $1$, $5$ and $+\infty$.
+
+
+
+\newpage
+
+
+\section*{Supplementary figures}
+
+
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=1.0\textwidth]{Latrille2017figS1}\\
+\end{figure*}
+\textbf{Figure S1.} Mean fraction of active targets $H$, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\beta$ (D) under the exponential fitness model. Mean-field approximations, either linearized (orange) or generalized (red) and weak erosion approximation (green) are shown on the top of the mean and variance over the simulations (blue).
+
+\newpage
+
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=1.0\textwidth]{Latrille2017figS2}\\
+\end{figure*}
+\textbf{Figure S2.} Genetic diversity at the PRDM9 locus $\D$, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\beta$ (D) under the exponential fitness model. Mean-field approximations, either linearized (orange) or generalized (red) and weak erosion approximation (green) are shown on the top of the mean and variance over the simulations (blue).
+
+\newpage
+
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=1.0\textwidth]{Latrille2017figS3}\\
+\end{figure*}
+\textbf{Figure S3.} Scaled selection coefficient $S=4 N_e s_0$ associated with a new PRDM9 allele entering the population, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\beta$ (D) under the exponential fitness model. Mean-field approximations, either linearized (orange) or generalized (red) and weak erosion approximation (green) are shown on the top of the mean and variance over the simulations (blue).
+
+\newpage
+
+
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=1.0\textwidth]{Latrille2017figS4}\\
+\end{figure*}
+\textbf{Figure S4.} Turnover time $\T$, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\beta$ (D) under the exponential fitness model. Mean-field approximations, either linearized (orange) or generalized (red) and weak erosion approximation (green) are shown on the top of the mean and variance over the simulations (blue).
+
+\newpage
+
+
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=1.0\textwidth]{Latrille2017figS5}\\
+\end{figure*}
+\textbf{Figure S5.} Mean recombination activity $\R$, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\alpha$ (D) under the power-law fitness model, under weak selection. Mean-field approximations, either linearized (orange) or generalized (red) are shown on the top of the mean and variance over the simulations (blue).
+
+\newpage
+
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=1.0\textwidth]{Latrille2017figS6}\\
+\end{figure*}
+\textbf{Figure S6.} Scaled selection coefficient $S = 4 N_e s_0$ associated with a new PRDM9 allele entering the population, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\alpha$ (D) under the power-law fitness model, under weak selection. Mean-field approximations, either linearized (orange) or generalized (red) are shown on the top of the mean and variance over the simulations (blue).
+
+\newpage
+
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=1.0\textwidth]{Latrille2017figS7}\\
+\end{figure*}
+\textbf{Figure S7.} Scaled selection coefficient $S = 4 N_e s_0$ associated with a new PRDM9 allele entering the population, calculated under the generalized mean-field approximation, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\alpha$ (D) under the power-law fitness model and with variance in hot spot strength, with shape parameter $a=0.5$, $1$, $5$ and $+\infty$.
+
+
+\newpage
+
+\begin{figure*}[!ht]
+	  \centering
+       \includegraphics[width=1.0\textwidth]{Latrille2017figS8}\\
+\end{figure*}
+\textbf{Figure S8.} Turnover time $\T$, calculated under the generalized mean-field approximation, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\alpha$ (D) under the power-law fitness model and with variance in hot spot strength, with shape parameter $a=0.5$, $1$, $5$ and $+\infty$.
 
 \end{document}
