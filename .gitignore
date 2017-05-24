@@ -19,6 +19,8 @@
 *.nav
 *.snm
 *.toc
+*.soc
+*.loc
 *.dvi
 *.bbl
 *.blg
