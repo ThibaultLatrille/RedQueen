@@ -1,0 +1,47 @@
+\documentclass{article}
+\usepackage[active,pdftex,tightpage]{preview}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amssymb,amsfonts,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{lmodern}
+
+\usepackage{pgfplots}
+\pgfplotsset{every axis/.append style={line width=1pt}}
+
+\PreviewEnvironment{tikzpicture}
+
+\definecolor{color1}{HTML}{EB6231}
+\definecolor{color2}{HTML}{E29D26}
+\definecolor{color3}{HTML}{5D80B4}
+\definecolor{color4}{HTML}{6ABD9B}
+\definecolor{color4}{HTML}{8FB03E}
+
+\begin{document}
+
+\begin{figure*}[hbt!]
+ 	\begin{tikzpicture}
+ 	\begin{axis}[
+ 	ylabel={$f(R)= \tfrac{1 - e^{-R/ \beta}}{1 - e^{-1/ \beta}}$},
+ 	xlabel={Relative recombination activity ($R$)},
+ 	domain=0:1,
+ 	samples=101,
+ 	minor tick num=2,
+ 	axis x line=bottom,
+ 	axis y line=left,
+ 	]
+ 	\addplot[color1]{(1-exp(-x/0.01))/(1-exp(-1/0.01))};
+ 	\addplot[color2]{(1-exp(-x/0.1))/(1-exp(-1/0.1))};
+ 	\addplot[color3]{(1-exp(-x/1))/(1-exp(-1/1))};
+ 	\addplot[color4]{(1-exp(-x/10))/(1-exp(-1/10))};
+  	\node at (axis cs:0.02,0.90) [anchor=south west, color1] {$\beta=0.01$};
+  	\node at (axis cs:0.14,0.70) [anchor=south west, color2] {$\beta=0.1$};
+  	\node at (axis cs:0.3,0.56) [anchor=south west, color3] {$\beta=1$};
+  	\node at (axis cs:0.43,0.35) [anchor=south west, color4] {$\beta=10$};
+  	
+ 	\end{axis}
+ 	\end{tikzpicture}
+\end{figure*}
+\end{document}

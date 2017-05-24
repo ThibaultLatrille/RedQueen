@@ -1,0 +1,46 @@
+\documentclass{article}
+\usepackage[active,pdftex,tightpage]{preview}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amssymb,amsfonts,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{lmodern}
+
+\usepackage{pgfplots}
+\pgfplotsset{every axis/.append style={line width=1pt}}
+
+\PreviewEnvironment{tikzpicture}
+
+\definecolor{color1}{HTML}{EB6231}
+\definecolor{color2}{HTML}{E29D26}
+\definecolor{color3}{HTML}{5D80B4}
+\definecolor{color4}{HTML}{6ABD9B}
+\definecolor{color4}{HTML}{8FB03E}
+
+\begin{document}
+
+\begin{figure*}[hbt!]
+	\centering
+	\begin{tikzpicture}
+	\begin{axis}[
+	ylabel={$g(R, \epsilon / \alpha )$},
+	xlabel={Mean activity ($R$)},
+	domain=0:1,
+	samples=55,
+	minor tick num=5,
+	axis x line=bottom,
+	axis y line=left,
+	]
+	\addplot[color4]{x};
+	\addplot[color2]{(1-exp(-0.01*2*x/(1-x)))/(0.01*2*x/(1-x))};
+	\addplot[color3]{(1-exp(-0.1*2*x/(1-x)))/(0.1*2*x/(1-x))};;
+	\node at (axis cs:0.2,0.5) [anchor=south west, color4] {$Id: R \mapsto R $};
+	\node at (axis cs:0.62,0.84) [anchor=south west, color2] {$g(R, 0.01)$};
+	\node at (axis cs:0.4,0.73) [anchor=south west, color3] {$g(R, 0.1)$};
+	
+	\end{axis}
+	\end{tikzpicture}
+\end{figure*}
+\end{document}

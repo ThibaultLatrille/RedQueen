@@ -14,12 +14,8 @@
 \usepackage{graphicx}
 \usepackage{caption2}
 \usepackage{url}
-
-
 \usepackage{pgf}
 \usepackage{tikz}
-
-
 \usepackage{adjustbox}
 \newcommand{\specialcell}[2][c]{%
 \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
@@ -27,6 +23,8 @@
 \newcommand\bbone{\ensuremath{\mathbbm{1}}} 
 
 \usepackage{natbib}
+\usepackage{changes}
+% \usepackage[final]{changes}
 
 %\bibliographystyle{mbe}
 %\bibliographystyle{natbib}
@@ -34,22 +32,17 @@
 
 
 \urlstyle{tt}
-
-
 \renewcommand\captionmargin{0cm}
 \renewcommand{\captionlabelfont}{\bf}
 \renewcommand{\captionlabeldelim}{}
 \captionstyle{centerlast}
-
 
 \newcommand{\rep}[3][1]
 {
 \psfrag{#2}[c][c][#1]{#3}
 }
 
-
 \renewcommand{\baselinestretch}{2}
-
 
 \begin{document}
 
@@ -113,6 +106,7 @@ In humans and many other species, recombination events cluster in narrow hot spo
 
 Here, we propose a population-genetic model of the Red Queen dynamic of recombination. This model was implemented as a Wright-Fisher simulator, allowing exploration of the behaviour of the model (in terms of the implied mean equilibrium recombination rate, diversity at the PRDM9 locus, or turnover rate) as a function of the parameters (effective population size, mutation and erosion rates). In a second step, analytical results, based on self-consistent mean-field approximations, were derived. These analytical results reproduce the scaling relations observed in the simulations, offering key insights about the detailed population-genetic mechanisms of the Red Queen model. Empirical fit of the model to current data from the mouse and humans suggests both a high mutation rate at PRDM9 and strong biased gene conversion on its targets.
 
+\listofchanges
 
 \newpage
 
@@ -949,8 +943,8 @@ Table 1. Summary statistics predicted by the model with variation in hot spot st
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=0.4\textwidth]{Latrille2017fig1a}
-       \includegraphics[width=0.4\textwidth]{Latrille2017fig1b}\\
+       \includegraphics[width=0.4\textwidth]{Figures/Latrille2017fig1a}
+       \includegraphics[width=0.4\textwidth]{Figures/Latrille2017fig1b}\\
 \end{figure*}
 \textbf{Figure 1.} Fitness functions $f(R)$ used in this work. Power-law (left) and exponential (right) models.
 
@@ -958,7 +952,7 @@ Table 1. Summary statistics predicted by the model with variation in hot spot st
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=0.8\textwidth]{Latrille2017fig2}\\
+       \includegraphics[width=0.8\textwidth]{Figures/Latrille2017fig2}\\
 \end{figure*}
 \textbf{Figure 2.} A typical simulation trajectory of the Red Queen model, with allele frequencies ($x$, top) and allele activity ($\theta$, bottom) through time.
 
@@ -966,7 +960,7 @@ Table 1. Summary statistics predicted by the model with variation in hot spot st
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=1.0\textwidth]{Latrille2017fig3}\\
+       \includegraphics[width=1.0\textwidth]{Figures/Latrille2017fig3}\\
 \end{figure*}
 \textbf{Figure 3.} Mean recombination activity $\R$, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\alpha$ (D) under the power-law fitness model. Mean-field approximations, either linearized (orange) or generalized (red) and weak erosion approximation (green) are shown on the top of the mean and variance over the simulations (blue).
 
@@ -974,7 +968,7 @@ Table 1. Summary statistics predicted by the model with variation in hot spot st
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=1.0\textwidth]{Latrille2017fig4}\\
+       \includegraphics[width=1.0\textwidth]{Figures/Latrille2017fig4}\\
 \end{figure*}
 \textbf{Figure 4.} Genetic diversity at the PRDM9 locus $\D$, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\alpha$ (D) under the power-law fitness model. Mean-field approximations, either linearized (orange) or generalized (red) and weak erosion approximation (green) are shown on the top of the mean and variance over the simulations (blue).
 
@@ -982,7 +976,7 @@ Table 1. Summary statistics predicted by the model with variation in hot spot st
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=1.0\textwidth]{Latrille2017fig5}\\
+       \includegraphics[width=1.0\textwidth]{Figures/Latrille2017fig5}\\
 \end{figure*}
 \textbf{Figure 5.} Turnover time $\T$, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\alpha$ (D) under the power-law fitness model. Mean-field approximations, either linearized (orange) or generalized (red) and weak erosion approximation (green) are shown on the top of the mean and variance over the simulations (blue).
 
@@ -990,15 +984,16 @@ Table 1. Summary statistics predicted by the model with variation in hot spot st
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=0.8\textwidth]{Latrille2017fig6}\\
+       \includegraphics[width=0.8\textwidth]{Figures/Latrille2017fig6}\\
 \end{figure*}
-\textbf{Figure 6.} Self-consistent linearized mean-field solution as a fixed point, in the form $R = g(R,\epsilon)$, for two values of $\epsilon = \sqrt{\dfrac{v g}{\alpha u}}$.
+\textbf{Figure 6.} 
+\replaced{Self-consistent linearized mean-field solution as a fixed point, in the form $R = g(R,\epsilon / \alpha)$, for two values of $\epsilon / \alpha = \frac{v g}{\alpha u}$. The fitness function considered is power-law, thus $g(\R, \epsilon / \alpha)  =  \frac{\alpha(1 - \R)}{2 \epsilon } \left(1 - e^{- \frac{2 \epsilon}{\alpha(1 - \R)}}\right) $. As $\epsilon / \alpha$ decreases, $\R$ increases.}{Self-consistent linearized mean-field solution as a fixed point, in the form $R = g(R,\epsilon)$, for two values of $\epsilon = \sqrt{\dfrac{v g}{\alpha u}}$.}
 
 \newpage
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=1.0\textwidth]{Latrille2017fig7}\\
+       \includegraphics[width=1.0\textwidth]{Figures/Latrille2017fig7}\\
 \end{figure*}
 \textbf{Figure 7.} Trajectory of the frequency and the activity of a typical allele through time, under the deterministic and mean-field approximation (see text for details).
 
@@ -1006,7 +1001,7 @@ Table 1. Summary statistics predicted by the model with variation in hot spot st
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=1.0\textwidth]{Latrille2017fig8}\\
+       \includegraphics[width=1.0\textwidth]{Figures/Latrille2017fig8}\\
 \end{figure*}
 \textbf{Figure 8.} A tiling principle. On the left, an idealized realization of the Red Queen dynamic is depicted, in which new alleles invade the population at regular time intervals, all equal to $\tau$, and have the same allele frequency trajectory (such as depicted in figure 7). Taking the sum of allele frequencies at any given time (vertical bar), which by definition is equal to 1, is then equivalent to summing the values taken by the frequency of one specific allele at regular time intervals (right). Multiplying this sum by $\tau$ amounts to approximating the integral $\int x_t d_t$ by the histogram shown on the right panel. Thus, $\int x_t dt \simeq \tau \sum x_i = \tau$. This argument can more generally be used to approximate any sum of the form $\sum x_i \phi(x_i, \theta_i)$ by the corresponding integral $\frac{1}{\tau} \int x_t \phi \left(  x_t, \theta_t \right) dt$.
 
@@ -1015,7 +1010,7 @@ Table 1. Summary statistics predicted by the model with variation in hot spot st
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=1.0\textwidth]{Latrille2017fig9}\\
+       \includegraphics[width=1.0\textwidth]{Figures/Latrille2017fig9}\\
 \end{figure*}
 \textbf{Figure 9.} Mean recombination activity $\R$, calculated under the generalized mean-field approximation, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\alpha$ (D) under the power-law fitness model and with variance in hot spot strength, with shape parameter $a=0.5$, $1$, $5$ and $+\infty$.
 
@@ -1023,7 +1018,7 @@ Table 1. Summary statistics predicted by the model with variation in hot spot st
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=1.0\textwidth]{Latrille2017fig10}\\
+       \includegraphics[width=1.0\textwidth]{Figures/Latrille2017fig10}\\
 \end{figure*}
 \textbf{Figure 10.} Genetic diversity at the PRDM9 locus $\D$, calculated under the generalized mean-field approximation, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\alpha$ (D) under the power-law fitness model and with variance in hot spot strength, with shape parameter $a=0.5$, $1$, $5$ and $+\infty$.
 
@@ -1037,7 +1032,7 @@ Table 1. Summary statistics predicted by the model with variation in hot spot st
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=1.0\textwidth]{Latrille2017figS1}\\
+       \includegraphics[width=1.0\textwidth]{Figures/Latrille2017figS1}\\
 \end{figure*}
 \textbf{Figure S1.} Mean fraction of active targets $H$, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\beta$ (D) under the exponential fitness model. Mean-field approximations, either linearized (orange) or generalized (red) and weak erosion approximation (green) are shown on the top of the mean and variance over the simulations (blue).
 
@@ -1045,7 +1040,7 @@ Table 1. Summary statistics predicted by the model with variation in hot spot st
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=1.0\textwidth]{Latrille2017figS2}\\
+       \includegraphics[width=1.0\textwidth]{Figures/Latrille2017figS2}\\
 \end{figure*}
 \textbf{Figure S2.} Genetic diversity at the PRDM9 locus $\D$, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\beta$ (D) under the exponential fitness model. Mean-field approximations, either linearized (orange) or generalized (red) and weak erosion approximation (green) are shown on the top of the mean and variance over the simulations (blue).
 
@@ -1053,7 +1048,7 @@ Table 1. Summary statistics predicted by the model with variation in hot spot st
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=1.0\textwidth]{Latrille2017figS3}\\
+       \includegraphics[width=1.0\textwidth]{Figures/Latrille2017figS3}\\
 \end{figure*}
 \textbf{Figure S3.} Scaled selection coefficient $S=4 N_e s_0$ associated with a new PRDM9 allele entering the population, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\beta$ (D) under the exponential fitness model. Mean-field approximations, either linearized (orange) or generalized (red) and weak erosion approximation (green) are shown on the top of the mean and variance over the simulations (blue).
 
@@ -1062,7 +1057,7 @@ Table 1. Summary statistics predicted by the model with variation in hot spot st
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=1.0\textwidth]{Latrille2017figS4}\\
+       \includegraphics[width=1.0\textwidth]{Figures/Latrille2017figS4}\\
 \end{figure*}
 \textbf{Figure S4.} Turnover time $\T$, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\beta$ (D) under the exponential fitness model. Mean-field approximations, either linearized (orange) or generalized (red) and weak erosion approximation (green) are shown on the top of the mean and variance over the simulations (blue).
 
@@ -1071,7 +1066,7 @@ Table 1. Summary statistics predicted by the model with variation in hot spot st
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=1.0\textwidth]{Latrille2017figS5}\\
+       \includegraphics[width=1.0\textwidth]{Figures/Latrille2017figS5}\\
 \end{figure*}
 \textbf{Figure S5.} Mean recombination activity $\R$, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\alpha$ (D) under the power-law fitness model, under weak selection. Mean-field approximations, either linearized (orange) or generalized (red) are shown on the top of the mean and variance over the simulations (blue).
 
@@ -1079,7 +1074,7 @@ Table 1. Summary statistics predicted by the model with variation in hot spot st
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=1.0\textwidth]{Latrille2017figS6}\\
+       \includegraphics[width=1.0\textwidth]{Figures/Latrille2017figS6}\\
 \end{figure*}
 \textbf{Figure S6.} Scaled selection coefficient $S = 4 N_e s_0$ associated with a new PRDM9 allele entering the population, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\alpha$ (D) under the power-law fitness model, under weak selection. Mean-field approximations, either linearized (orange) or generalized (red) are shown on the top of the mean and variance over the simulations (blue).
 
@@ -1087,7 +1082,7 @@ Table 1. Summary statistics predicted by the model with variation in hot spot st
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=1.0\textwidth]{Latrille2017figS7}\\
+       \includegraphics[width=1.0\textwidth]{Figures/Latrille2017figS7}\\
 \end{figure*}
 \textbf{Figure S7.} Scaled selection coefficient $S = 4 N_e s_0$ associated with a new PRDM9 allele entering the population, calculated under the generalized mean-field approximation, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\alpha$ (D) under the power-law fitness model and with variance in hot spot strength, with shape parameter $a=0.5$, $1$, $5$ and $+\infty$.
 
@@ -1096,7 +1091,7 @@ Table 1. Summary statistics predicted by the model with variation in hot spot st
 
 \begin{figure*}[!ht]
 	  \centering
-       \includegraphics[width=1.0\textwidth]{Latrille2017figS8}\\
+       \includegraphics[width=1.0\textwidth]{Figures/Latrille2017figS8}\\
 \end{figure*}
 \textbf{Figure S8.} Turnover time $\T$, calculated under the generalized mean-field approximation, as a function of effective population size $N_e$ (A), erosion rate $vg$ (B), mutation rate at the PRDM9 locus $u$ (C) and the fitness parameter $\alpha$ (D) under the power-law fitness model and with variance in hot spot strength, with shape parameter $a=0.5$, $1$, $5$ and $+\infty$.
 
