@@ -1069,7 +1069,7 @@ class Batch(list):
                    "turn_over": r'$\mathrm{Turn\ over\ time\ } (T)$'}[summary_statistic]
         legend_label = {"simulation": r'$\mathrm{Simulation}$',
                         "estimation": r'$\mathrm{Linearized\ mean\ field\ }$',
-                        "small_load": r'$\mathrm{Small\ gap\ regime}$',
+                        "small_load": r'$\mathrm{Weak\ erosion\ regime}$',
                         "general": r'$\mathrm{Mean\ field}$'}
         parameter_caption = {"fitness": r'$\mathrm{Fitness\ parameter\ }$',
                              "mutation": r'$\mathrm{Mutation\ rate\ of\ PRDM9\ }(u)$',
