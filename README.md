@@ -60,7 +60,7 @@ optional arguments:
                         32)
   - -n <population size>, --population_size <population size>
   
-                        number of simulations (default: 100000)
+                        Effective population size (default: 100000)
   - -u <Prdm9 mutation rate>, --mutation_rate_prdm9 <Prdm9 mutation rate>
   
                         The mutation rate of Prdm9 (multiplied by 10e-6)

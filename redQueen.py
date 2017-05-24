@@ -1206,7 +1206,7 @@ if __name__ == '__main__':
                         help="number of independent simulations to span")
     parser.add_argument('-n', '--population_size', required=False, type=int, default=10 ** 5,
                         dest="n", metavar="<population size>",
-                        help="number of simulations")
+                        help="The effective population size (Ne)")
     parser.add_argument('-u', '--mutation_rate_prdm9', required=False, type=float, default=1.0,
                         dest="u", metavar="<Prdm9 mutation rate>",
                         help="The mutation rate of Prdm9 (multiplied by 10e-6)")
