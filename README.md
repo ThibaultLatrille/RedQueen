@@ -1,30 +1,7 @@
-### The Red-Queen model of recombination hot-spot evolution: a theoretical investigation.
-
-**Thibault Latrille, Laurent Duret, Nicolas Lartillot**
-
-In humans and many other species, recombination events cluster in narrow hot spots distributed
-across the genome, whose location is determined by the Zn-finger protein PRDM9. Hot spots are
-not shared between closely related species, suggesting that hot spots are short-lived. To explain
-this fast evolutionary dynamics of recombination landscapes, an intra-genomic Red Queen model,
-based on the interplay between two antagonistic forces, has been proposed. On the one hand, biased
-gene conversion, mediated by double-strand breaks, results in a rapid extinction of hot spots in
-the population. On the other hand, the resulting genome-wide depletion of recombination induces
-positive selection favoring new Prdm9 alleles recognizing new sequence motifs across the genome
-and restoring normal levels of recombination. This Red Queen scenario is currently the reference
-model for explaining the fast turnover of recombination landscapes. Thus far, however, it has
-not been formalized as a quantitative population-genetic model, fully accounting for the intricate
-interplay between biased gene conversion, mutation, selection, demography and genetic diversity
-at the PRDM9 locus.
-
-Here, we propose a population-genetic model of the Red Queen dynamic of recombination. This
-model was implemented as a Wright-Fisher simulator, allowing exploration of the behaviour of the
-model (in terms of the implied mean equilibrium recombination rate, diversity at the PRDM9 locus,
-or turnover rate) as a function of the parameters (effective population size, mutation and erosion
-rates). In a second step, analytical results, based on self-consistent mean-field approximations,
-were derived. These analytical results reproduce the scaling relations observed in the simulations,
-offering key insights about the detailed population-genetic mechanisms of the Red Queen model.
-Empirical fit of the model to current data from the mouse and humans suggests both a high
-mutation rate at PRDM9 and strong biased gene conversion on its targets.
+**The Red-Queen model of recombination hot-spot evolution: a theoretical investigation,**\
+_Thibault Latrille, Laurent Duret, Nicolas Lartillot_,\
+Phil. Trans. R. Soc. B,\
+http://doi.org/10.1098/rstb.2016.0463
 
 #### Code to reproduce the figures showed in the manuscript
 Requirements:
